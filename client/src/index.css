@@ -1,0 +1,406 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #004f90; /* SDLC Brand Blue */
+  --color-primary-dark: #001c3a;
+  --color-primary-light: #1e67b2;
+  
+  --color-accent: #F7931A; /* Accent Orange */
+  --color-accent-dark: #7a3e00;
+  --color-accent-light: #ffb781;
+  
+  --color-charcoal: #F1F5F9; 
+  --color-charcoal-light: #F8FAFC; 
+  --color-charcoal-surface: #FFFFFF; 
+  
+  --color-success: #059669; 
+  --color-danger: #DC2626; 
+  --color-softgrey: #475569; 
+
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+
+  /* Stitch Custom Theme Colors */
+  --color-surface-container-high: #e7e8ef;
+  --color-on-primary-fixed-variant: #004784;
+  --color-on-error: #ffffff;
+  --color-on-secondary-fixed-variant: #414750;
+  --color-primary-container: #1e67b2;
+  --color-on-primary: #ffffff;
+  --color-tertiary: #7a3e00;
+  --color-secondary-container: #dde3ee;
+  --color-surface-container-highest: #e1e2e9;
+  --color-secondary-fixed-dim: #c1c7d1;
+  --color-inverse-on-surface: #eff0f7;
+  --color-secondary-fixed: #dde3ee;
+  --color-on-primary-fixed: #001c3a;
+  --color-on-primary-container: #d7e5ff;
+  --color-on-tertiary-fixed: #2f1400;
+  --color-on-error-container: #93000a;
+  --color-on-secondary-fixed: #161c24;
+  --color-surface-dim: #d8dae0;
+  --color-on-secondary-container: #5e656e;
+  --color-surface-bright: #f9f9ff;
+  --color-surface: #f9f9ff;
+  --color-primary-fixed: #d4e3ff;
+  --color-surface-variant: #e1e2e9;
+  --color-surface-tint: #0f5faa;
+  --color-outline: #727782;
+  --color-tertiary-container: #9d5200;
+  --color-error-container: #ffdad6;
+  --color-on-secondary: #ffffff;
+  --color-outline-variant: #c1c6d3;
+  --color-secondary: #585f68;
+  --color-tertiary-fixed-dim: #ffb781;
+  --color-on-surface: #191c21;
+  --color-inverse-primary: #a4c8ff;
+  --color-inverse-surface: #2e3036;
+  --color-background: #f9f9ff;
+  --color-surface-container-low: #f2f3fa;
+  --color-on-surface-variant: #414751;
+  --color-tertiary-fixed: #ffdcc4;
+  --color-on-background: #191c21;
+  --color-on-tertiary: #ffffff;
+  --color-error: #ba1a1a;
+  --color-primary-fixed-dim: #a4c8ff;
+  --color-on-tertiary-fixed-variant: #6f3800;
+  --color-surface-container: #ecedf4;
+  --color-accent-orange: #F7931A;
+  --color-surface-container-lowest: #ffffff;
+
+  /* Stitch Custom Spacings */
+  --spacing-stitch-lg: 40px;
+  --spacing-stitch-base: 8px;
+  --spacing-stitch-xs: 4px;
+  --spacing-stitch-sm: 12px;
+  --spacing-stitch-xl: 64px;
+  --spacing-stitch-margin-mobile: 16px;
+  --spacing-stitch-margin-desktop: 64px;
+  --spacing-stitch-md: 20px;
+  --spacing-stitch-gutter: 24px;
+
+  /* Stitch Custom Fonts & Font Sizes */
+  --font-display-lg: "Outfit", sans-serif;
+  --font-headline-sm: "Outfit", sans-serif;
+  --font-headline-md: "Outfit", sans-serif;
+  --font-body-md: "Plus Jakarta Sans", sans-serif;
+  --font-label-md: "Plus Jakarta Sans", sans-serif;
+  --font-poppins: "Outfit", sans-serif;
+
+  --font-size-display-lg: 48px;
+  --font-size-display-lg-mobile: 32px;
+  --font-size-headline-md: 32px;
+  --font-size-headline-sm: 24px;
+  --font-size-body-md: 16px;
+  --font-size-body-lg: 18px;
+  --font-size-label-md: 14px;
+}
+
+/* Base resets for a clean light academic theme */
+* {
+  caret-color: transparent !important;
+}
+
+input, textarea, [contenteditable="true"] {
+  caret-color: auto !important;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 92px; /* Prevent sticky header overlap */
+}
+
+body {
+  background-color: #F1F5F9;
+  color: #1E293B; /* Slate-800 */
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Force body text and headers to be deep slate */
+h1, h2, h3, h4, h5, h6 {
+  color: #0F172A; /* slate-900 */
+}
+
+p, span.text-softgrey {
+  color: #475569; /* slate-600 */
+}
+
+/* Force dark slate text inside cards to ensure maximum light-mode contrast */
+.bg-charcoal-surface h1, 
+.bg-charcoal-surface h2, 
+.bg-charcoal-surface h3, 
+.bg-charcoal-surface h4, 
+.bg-charcoal-surface p,
+.bg-charcoal-surface span:not(.bg-primary\/20, .bg-success\/15, .bg-danger\/15, .text-success, .text-danger, .text-accent),
+.bg-charcoal-light h1,
+.bg-charcoal-light h2,
+.bg-charcoal-light h3,
+.bg-charcoal-light h4,
+.bg-charcoal-light p,
+.bg-charcoal-light span:not(.bg-primary\/20, .bg-success\/15, .bg-danger\/15, .text-success, .text-danger, .text-accent) {
+  color: #1E293B; 
+}
+
+/* Make inputs readable in light mode */
+input, textarea, select {
+  color: #0F172A !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important; /* slate-300 */
+}
+
+input::placeholder, textarea::placeholder {
+  color: #94A3B8 !important; /* slate-400 */
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #3B82F6 !important; /* blue-500 focus */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Nav Link adjustments */
+nav span.text-transparent {
+  background-image: linear-gradient(to right, #1E3A8A, #059669) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+nav p.text-accent {
+  color: #D97706 !important;
+}
+
+nav div.bg-primary {
+  background-color: #1E3A8A !important;
+}
+
+nav button.gold-shimmer-hover {
+  background-image: linear-gradient(to right, #1E3A8A, #172554) !important;
+  color: #FFFFFF !important;
+}
+
+nav button.gold-shimmer-hover:hover {
+  background-image: linear-gradient(to right, #D97706, #B45309) !important;
+  color: #FFFFFF !important;
+}
+
+/* Stats Cards overrides */
+.group h3.text-white {
+  color: #0F172A !important;
+}
+
+/* Sidebar fixes */
+aside {
+  background-color: #FFFFFF !important;
+  border-right: 1px solid #E2E8F0 !important;
+}
+
+aside p.text-center {
+  color: #64748B !important;
+}
+
+aside a {
+  color: #475569 !important;
+}
+
+aside a.active {
+  background-color: rgba(30, 58, 138, 0.1) !important;
+  color: #1E3A8A !important;
+  border-color: #1E3A8A !important;
+}
+
+/* Card glass effect in light mode */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 58, 138, 0.15) !important;
+}
+
+/* Custom premium scrollbar for Light Academic theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #1E3A8A, #059669);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #172554;
+}
+
+/* Gold border glow - adjust for light mode */
+.gold-border-highlight {
+  border: 1px solid rgba(217, 119, 6, 0.2) !important;
+  transition: all 0.3s ease;
+}
+
+.gold-border-highlight:hover {
+  border-color: rgba(217, 119, 6, 0.6) !important;
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1) !important;
+}
+
+/* Emerald border glow - adjust for light mode */
+.emerald-border-highlight {
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  transition: all 0.3s ease;
+}
+
+.emerald-border-highlight:hover {
+  border-color: rgba(16, 185, 129, 0.6) !important;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Overriding white text inside table rows */
+table tr td, table tr th {
+  color: #334155 !important; /* slate-700 */
+}
+
+table tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+/* Question active states overrides */
+button.border-accent {
+  background-color: rgba(30, 58, 138, 0.08) !important;
+  border-color: #1E3A8A !important;
+  color: #1E3A8A !important;
+}
+
+button.border-accent span.bg-accent {
+  background-color: #1E3A8A !important;
+  color: #FFFFFF !important;
+}
+
+button.border-accent svg.text-accent {
+  color: #1E3A8A !important;
+}
+
+/* Option choices unselected borders */
+button.border-accent\/10 {
+  border-color: #E2E8F0 !important;
+}
+
+/* Navigator grid box style adjustments */
+.grid button {
+  background-color: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #475569;
+}
+
+/* Timer styles */
+.timer-danger-pulse {
+  background-color: rgba(220, 38, 38, 0.1) !important;
+  border-color: #DC2626 !important;
+  color: #DC2626 !important;
+}
+
+/* Primary buttons hover overrides */
+button.bg-gradient-to-r.from-primary {
+  background-image: linear-gradient(to right, #1E3A8A, #172554) !important;
+  color: #FFFFFF !important;
+}
+
+button.bg-gradient-to-r.from-primary:hover {
+  background-image: linear-gradient(to right, #3B82F6, #1D4ED8) !important;
+}
+
+button.bg-gradient-to-r.from-accent {
+  background-image: linear-gradient(to right, #D97706, #B45309) !important;
+  color: #FFFFFF !important;
+}
+
+button.bg-gradient-to-r.from-accent:hover {
+  background-image: linear-gradient(to right, #FBBF24, #F59E0B) !important;
+}
+
+/* Check circle styling inside results */
+span.bg-success\/15, span.bg-success\/10 {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+  color: #059669 !important;
+  border-color: rgba(5, 150, 105, 0.3) !important;
+}
+
+span.bg-danger\/15, span.bg-danger\/10 {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+  color: #DC2626 !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+/* Scorecard circle inner background */
+circle.stroke-charcoal-light {
+  stroke: #E2E8F0 !important;
+}
+
+/* Result reviews elements */
+.border-success\/30 {
+  border-color: rgba(5, 150, 105, 0.3) !important;
+}
+
+.border-danger\/30 {
+  border-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+.bg-success\/15 {
+  background-color: rgba(5, 150, 105, 0.1) !important;
+  color: #059669 !important;
+}
+
+.bg-danger\/15 {
+  background-color: rgba(220, 38, 38, 0.1) !important;
+  color: #DC2626 !important;
+}
+
+/* Draggable list grip vertical adjustments */
+.cursor-grab {
+  color: #94A3B8 !important;
+}
+
+.cursor-grab:hover {
+  color: #1E3A8A !important;
+}
+
+/* Stat card icons and backgrounds */
+.bg-charcoal-surface .shrink-0 {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Custom Stitch Utility Styles */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+.grid-texture {
+  background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+.orange-underline {
+  background: linear-gradient(to right, #F7931A, #F7931A);
+  background-repeat: no-repeat;
+  background-size: 100% 0.15em;
+  background-position: 0 95%;
+}
+.animate-float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+.nav-scrolled {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+  border-bottom: 1px solid #e1e2e9 !important;
+}
