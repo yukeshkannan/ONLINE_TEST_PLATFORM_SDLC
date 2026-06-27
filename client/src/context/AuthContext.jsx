@@ -9,6 +9,27 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const checkLocalFallback = () => {
+      const savedToken = localStorage.getItem('auth_token');
+      const savedUser = localStorage.getItem('auth_user');
+      if (savedToken && savedUser) {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          setAccessToken(savedToken);
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+          return true;
+        } catch (e) {
+          console.error('Failed to parse saved user:', e);
+        }
+      }
+      setUser(null);
+      setIsAuthenticated(false);
+      setAccessToken('');
+      localStorage.removeItem('auth_user');
+      return false;
+    };
+
     const restoreSession = async () => {
       const isSessionActive = sessionStorage.getItem('app_session_active');
       sessionStorage.setItem('app_session_active', 'true');
@@ -18,14 +39,13 @@ export const AuthProvider = ({ children }) => {
         if (data && data.accessToken) {
           setAccessToken(data.accessToken);
           setUser(data.user);
+          localStorage.setItem('auth_user', JSON.stringify(data.user));
           setIsAuthenticated(true);
         } else {
-          setUser(null);
-          setIsAuthenticated(false);
+          checkLocalFallback();
         }
       } catch (error) {
-        setUser(null);
-        setIsAuthenticated(false);
+        checkLocalFallback();
       } finally {
         setLoading(false);
       }
@@ -37,6 +57,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       setAccessToken('');
+      localStorage.removeItem('auth_user');
     };
 
     window.addEventListener('auth-expired', handleAuthExpired);
@@ -51,11 +72,13 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.post('/auth/admin/login', { email, password, rememberMe });
       setAccessToken(data.accessToken);
       setUser(data.user);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
       setIsAuthenticated(true);
       return data.user;
     } catch (error) {
       setIsAuthenticated(false);
       setUser(null);
+      localStorage.removeItem('auth_user');
       throw error.response?.data?.message || 'Admin login failed';
     } finally {
       setLoading(false);
@@ -68,11 +91,13 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.post('/auth/student/login', { email, password, rememberMe });
       setAccessToken(data.accessToken);
       setUser(data.user);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
       setIsAuthenticated(true);
       return data.user;
     } catch (error) {
       setIsAuthenticated(false);
       setUser(null);
+      localStorage.removeItem('auth_user');
       throw error.response?.data?.message || 'Student login failed';
     } finally {
       setLoading(false);
@@ -88,6 +113,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setAccessToken('');
       setUser(null);
+      localStorage.removeItem('auth_user');
       setIsAuthenticated(false);
       setLoading(false);
     }
@@ -117,4 +143,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

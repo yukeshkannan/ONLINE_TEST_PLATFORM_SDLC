@@ -5,10 +5,15 @@ const api = axios.create({
   withCredentials: true
 });
 
-let accessToken = '';
+let accessToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') || '' : '';
 
 export const setAccessToken = (token) => {
-  accessToken = token;
+  accessToken = token || '';
+  if (token) {
+    localStorage.setItem('auth_token', token);
+  } else {
+    localStorage.removeItem('auth_token');
+  }
 };
 
 export const getAccessToken = () => accessToken;
