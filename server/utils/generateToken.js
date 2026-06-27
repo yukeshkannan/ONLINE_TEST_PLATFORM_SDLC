@@ -16,10 +16,11 @@ export const sendTokens = (res, user, rememberMe = false) => {
   );
 
   // Configure cookie options
+  const isProduction = process.env.NODE_ENV === 'production';
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax'
   };
 
   if (rememberMe) {
@@ -44,10 +45,11 @@ export const sendTokens = (res, user, rememberMe = false) => {
 };
 
 export const clearTokens = (res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('refreshToken', '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     expires: new Date(0)
   });
 };
