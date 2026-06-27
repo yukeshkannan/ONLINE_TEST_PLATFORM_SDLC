@@ -5,6 +5,7 @@ import { Toaster, ToastBar, toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import LandingPage from './pages/LandingPage.jsx';
 import StudentPortal from './pages/StudentPortal.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import ContactPage from './pages/ContactPage.jsx';
@@ -99,13 +100,14 @@ const AnimatedRoutes = () => {
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          {/* Student Portal Shell: Handles student login & quiz layouts */}
-          <Route path="/" element={<StudentPortal />} />
+          {/* Main Landing & Information Pages */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
-          {/* Student Login credentials */}
+          {/* Student Portal & Login */}
           <Route path="/login" element={<StudentLoginWrapper />} />
+          <Route path="/student/dashboard" element={<StudentPortal />} />
 
           {/* Admin Portal Credentials */}
           <Route path="/admin/login" element={<AdminLogin />} />

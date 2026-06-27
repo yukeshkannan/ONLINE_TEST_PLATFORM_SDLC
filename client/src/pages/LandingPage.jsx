@@ -52,7 +52,7 @@ const LandingPage = ({ onEnterPortal }) => {
 
   const handleStartExam = () => {
     if (isAuthenticated && user?.role === 'student') {
-      onEnterPortal();
+      navigate('/student/dashboard');
     } else {
       navigate('/login');
     }

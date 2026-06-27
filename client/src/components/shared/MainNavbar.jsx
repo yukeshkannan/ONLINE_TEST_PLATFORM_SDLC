@@ -25,11 +25,7 @@ const MainNavbar = ({ onEnterPortal }) => {
 
   const handleStartExam = () => {
     if (isAuthenticated && user?.role === 'student') {
-      if (onEnterPortal) {
-        onEnterPortal();
-      } else {
-        navigate('/');
-      }
+      navigate('/student/dashboard');
     } else {
       navigate('/login');
     }

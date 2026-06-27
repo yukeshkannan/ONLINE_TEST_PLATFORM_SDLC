@@ -24,7 +24,7 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
     try {
       await loginStudent(email.trim(), password, rememberMe);
       toast.success('Successfully signed in!');
-      navigate('/');
+      navigate('/student/dashboard');
     } catch (err) {
       toast.error(err || 'Failed to authenticate. Please check your credentials.');
     } finally {

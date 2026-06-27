@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import Navbar from '../components/shared/Navbar.jsx';
-import LandingPage from './LandingPage.jsx';
 import TestList from '../components/student/TestList.jsx';
 import TestEngine from '../components/student/TestEngine.jsx';
 import ResultScreen from '../components/student/ResultScreen.jsx';
@@ -12,19 +11,9 @@ const StudentPortal = () => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  const [showPortal, setShowPortal] = useState(false);
   const [activeScreen, setActiveScreen] = useState('dashboard');
   const [selectedTest, setSelectedTest] = useState(null);
   const [activeResultId, setActiveResultId] = useState('');
-
-  useEffect(() => {
-    if (isAuthenticated && user?.role === 'student') {
-      setShowPortal(true);
-    } else {
-      setShowPortal(false);
-      setActiveScreen('dashboard');
-    }
-  }, [isAuthenticated, user]);
 
   if (loading) {
     return (
@@ -35,18 +24,8 @@ const StudentPortal = () => {
     );
   }
 
-  if (!showPortal) {
-    return (
-      <LandingPage
-        onEnterPortal={() => {
-          if (isAuthenticated && user?.role === 'student') {
-            setShowPortal(true);
-          } else {
-            navigate('/login');
-          }
-        }}
-      />
-    );
+  if (!isAuthenticated || user?.role !== 'student') {
+    return <Navigate to="/login" replace />;
   }
 
   const handleStartTest = (testObj) => {
@@ -109,4 +88,3 @@ const StudentPortal = () => {
 };
 
 export default StudentPortal;
-
