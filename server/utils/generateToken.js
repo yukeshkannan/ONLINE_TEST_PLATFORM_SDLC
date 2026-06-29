@@ -16,7 +16,7 @@ export const sendTokens = (res, user, rememberMe = false) => {
   );
 
   // Configure cookie options
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER || process.env.COOKIE_SECURE === 'true';
   const cookieOptions = {
     httpOnly: true,
     secure: isProduction,
@@ -45,7 +45,7 @@ export const sendTokens = (res, user, rememberMe = false) => {
 };
 
 export const clearTokens = (res) => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER || process.env.COOKIE_SECURE === 'true';
   res.cookie('refreshToken', '', {
     httpOnly: true,
     secure: isProduction,

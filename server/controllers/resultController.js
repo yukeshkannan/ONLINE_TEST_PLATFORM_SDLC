@@ -163,14 +163,18 @@ export const getResultById = async (req, res, next) => {
 export const resetStudentAttempt = async (req, res, next) => {
   const { studentId, testId } = req.params;
 
-  console.log('RESET ATTEMPT PARAMS:', { studentId, testId });
-
   try {
-    const studentObjectId = new mongoose.Types.ObjectId(studentId);
-    const testObjectId = new mongoose.Types.ObjectId(testId);
+    const studentQuery = mongoose.Types.ObjectId.isValid(studentId)
+      ? { $in: [studentId, new mongoose.Types.ObjectId(studentId)] }
+      : studentId;
+    const testQuery = mongoose.Types.ObjectId.isValid(testId)
+      ? { $in: [testId, new mongoose.Types.ObjectId(testId)] }
+      : testId;
 
-    const deletedResult = await Result.findOneAndDelete({ studentId: studentObjectId, testId: testObjectId });
-    const deletedViolation = await ViolationLog.findOneAndDelete({ studentId: studentObjectId, testId: testObjectId });
+    const filter = { studentId: studentQuery, testId: testQuery };
+
+    const deletedResult = await Result.findOneAndDelete(filter);
+    const deletedViolation = await ViolationLog.findOneAndDelete(filter);
 
     if (!deletedResult && !deletedViolation) {
       return res.status(404).json({ message: 'No result or violation log found for this student and test.' });

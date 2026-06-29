@@ -40,23 +40,47 @@ const ProctoringLogs = () => {
     return () => clearInterval(interval);
   }, [fetchLogs]);
 
-  const handleResetAccess = (studentId, studentName, testId, testTitle) => {
-    if (!studentId || !testId) return;
-    setResetTarget({ studentId, studentName, testId, testTitle });
+  const handleResetAccess = (log) => {
+    const studentId = typeof log.studentId === 'object' ? log.studentId?._id : log.studentId;
+    const testId = typeof log.testId === 'object' ? log.testId?._id : log.testId;
+    const studentName = log.studentId?.name || 'Student';
+    const testTitle = log.testId?.title || 'Assessment';
+    const violationId = log._id;
+
+    if (!studentId && !violationId) {
+      toast.error('Cannot identify student or violation record ID.');
+      return;
+    }
+    setResetTarget({ studentId, studentName, testId, testTitle, violationId });
   };
 
   const confirmResetAccess = async () => {
     if (!resetTarget) return;
-    const { studentId, studentName, testId, testTitle } = resetTarget;
+    const { studentId, studentName, testId, testTitle, violationId } = resetTarget;
     setResetTarget(null);
 
     const loadToastId = toast.loading(`Resetting exam clearance for ${studentName}...`);
-    try {
-      await api.delete(`/results/student/${studentId}/test/${testId}`);
-      toast.success(`Exam access successfully reset! ${studentName} can now re-take "${testTitle}".`, { id: loadToastId });
-      fetchLogs(); // Reload live violations grid!
-    } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to reset exam access for ${studentName}.`, { id: loadToastId });
+    let cleared = false;
+
+    if (studentId && testId) {
+      try {
+        await api.delete(`/results/student/${studentId}/test/${testId}`);
+        cleared = true;
+      } catch (err) {}
+    }
+
+    if (violationId) {
+      try {
+        await api.delete(`/violations/${violationId}`);
+        cleared = true;
+      } catch (err) {}
+    }
+
+    if (cleared) {
+      toast.success(`Exam access & violation log cleared for ${studentName}!`, { id: loadToastId });
+      fetchLogs();
+    } else {
+      toast.error(`Record not found or already cleared for ${studentName}.`, { id: loadToastId });
     }
   };
 
@@ -329,7 +353,7 @@ const ProctoringLogs = () => {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleResetAccess(log.studentId?._id, log.studentId?.name, log.testId?._id, log.testId?.title);
+                                      handleResetAccess(log);
                                     }}
                                     className="flex items-center justify-center gap-2 text-xs text-red-600 hover:text-white bg-white hover:bg-red-600 border border-red-200 hover:border-red-600 px-4.5 py-2.5 rounded-xl transition-all font-extrabold shadow-sm cursor-pointer"
                                   >

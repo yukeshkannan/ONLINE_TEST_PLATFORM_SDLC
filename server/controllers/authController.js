@@ -61,7 +61,7 @@ export const refreshToken = async (req, res, next) => {
   const token = req.cookies.refreshToken;
 
   if (!token) {
-    return res.status(200).json({ authenticated: false, message: 'No refresh token provided' });
+    return res.status(401).json({ authenticated: false, message: 'No refresh token provided' });
   }
 
   try {
@@ -71,7 +71,7 @@ export const refreshToken = async (req, res, next) => {
     const { freshSession } = req.body;
     if (freshSession && !decoded.rememberMe) {
       clearTokens(res);
-      return res.status(200).json({ authenticated: false, message: 'Session expired (Remember Me was not checked)' });
+      return res.status(401).json({ authenticated: false, message: 'Session expired (Remember Me was not checked)' });
     }
     
     let user;
@@ -83,7 +83,7 @@ export const refreshToken = async (req, res, next) => {
     }
 
     if (!user) {
-      return res.status(200).json({ authenticated: false, message: 'User not found' });
+      return res.status(401).json({ authenticated: false, message: 'User not found' });
     }
 
     const { accessToken, user: userPayload } = sendTokens(res, user, decoded.rememberMe);
@@ -91,7 +91,7 @@ export const refreshToken = async (req, res, next) => {
   } catch (error) {
     // If token verification fails (e.g. expired or tampered), clear cookie
     clearTokens(res);
-    return res.status(200).json({ authenticated: false, message: 'Refresh token expired or invalid' });
+    return res.status(401).json({ authenticated: false, message: 'Refresh token expired or invalid' });
   }
 };
 

@@ -93,3 +93,15 @@ export const getViolationsByTest = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteViolationLog = async (req, res, next) => {
+  try {
+    const deleted = await ViolationLog.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Violation record not found.' });
+    }
+    res.status(200).json({ message: 'Violation record deleted successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/shared/Sidebar.jsx';
 import Dashboard from '../components/admin/Dashboard.jsx';
 import CreateTest from '../components/admin/CreateTest.jsx';
@@ -74,6 +74,7 @@ const parseTextToQuestions = (text) => {
 const AdminDashboard = ({ tab }) => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [activeTab, setActiveTab] = useState(tab || 'dashboard');
   const [tests, setTests] = useState([]);
@@ -281,6 +282,17 @@ const AdminDashboard = ({ tab }) => {
       fetchTestsList();
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    const tId = searchParams.get('testId');
+    const subTab = searchParams.get('subTab');
+    if (subTab) setActiveTab(subTab);
+    if (tId && !selectedTest && isAuthenticated) {
+      api.get(`/tests/${tId}`)
+        .then(({ data }) => setSelectedTest(data))
+        .catch(() => {});
+    }
+  }, [searchParams, isAuthenticated]);
 
   const handleDuplicate = async (testId) => {
     const loader = toast.loading('Duplicating assessment paper...');
@@ -559,6 +571,7 @@ const AdminDashboard = ({ tab }) => {
                                   onClick={() => {
                                     setSelectedTest(test);
                                     setActiveTab('questions');
+                                    setSearchParams({ subTab: 'questions', testId: test._id });
                                   }}
                                   title="Manage Exam Questions"
                                   className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors border border-transparent hover:border-emerald-100 cursor-pointer"
@@ -571,6 +584,7 @@ const AdminDashboard = ({ tab }) => {
                                   onClick={() => {
                                     setSelectedTest(test);
                                     setActiveTab('results');
+                                    setSearchParams({ subTab: 'results', testId: test._id });
                                   }}
                                   title="Review Submission Analytics"
                                   className="p-2.5 text-slate-400 hover:text-blue-650 hover:bg-blue-50 rounded-full transition-colors border border-transparent hover:border-blue-100 cursor-pointer"
@@ -583,6 +597,7 @@ const AdminDashboard = ({ tab }) => {
                                   onClick={() => {
                                     setSelectedTest(test);
                                     setActiveTab('edit');
+                                    setSearchParams({ subTab: 'edit', testId: test._id });
                                   }}
                                   title="Modify Details"
                                   className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors border border-transparent hover:border-slate-200 cursor-pointer"
@@ -623,10 +638,14 @@ const AdminDashboard = ({ tab }) => {
             <CreateTest
               testToEdit={null}
               onSave={() => {
+                setSearchParams({});
                 setActiveTab('tests');
                 fetchTestsList();
               }}
-              onCancel={() => setActiveTab('tests')}
+              onCancel={() => {
+                setSearchParams({});
+                setActiveTab('tests');
+              }}
             />
           )}
 
@@ -634,10 +653,14 @@ const AdminDashboard = ({ tab }) => {
             <CreateTest
               testToEdit={selectedTest}
               onSave={() => {
+                setSearchParams({});
                 setActiveTab('tests');
                 fetchTestsList();
               }}
-              onCancel={() => setActiveTab('tests')}
+              onCancel={() => {
+                setSearchParams({});
+                setActiveTab('tests');
+              }}
             />
           )}
 
@@ -646,6 +669,7 @@ const AdminDashboard = ({ tab }) => {
               test={selectedTest}
               onFinished={() => {
                 setSelectedTest(null);
+                setSearchParams({});
                 setActiveTab('tests');
                 fetchTestsList();
               }}
@@ -657,6 +681,7 @@ const AdminDashboard = ({ tab }) => {
               test={selectedTest}
               onBack={() => {
                 setSelectedTest(null);
+                setSearchParams({});
                 setActiveTab('tests');
                 fetchTestsList();
               }}

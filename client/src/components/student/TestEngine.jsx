@@ -126,6 +126,8 @@ const TestEngine = ({ test, onFinish }) => {
       const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
       setIsFullscreen(isFull);
 
+      if (submitLock.current) return;
+
       if (isFull) {
         hasStartedExam.current = true;
       } else if (hasStartedExam.current) {
@@ -158,6 +160,7 @@ const TestEngine = ({ test, onFinish }) => {
 
   useEffect(() => {
     const handleVisibilityChange = () => {
+      if (submitLock.current) return;
       if (document.hidden) {
         setTabSwitches(prev => prev + 1);
       }
@@ -170,7 +173,7 @@ const TestEngine = ({ test, onFinish }) => {
   }, []);
 
   useEffect(() => {
-    if (tabSwitches === 0) return;
+    if (tabSwitches === 0 || submitLock.current) return;
 
     const isAutoSubmit = tabSwitches >= 3;
 
