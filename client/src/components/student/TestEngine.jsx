@@ -21,6 +21,7 @@ const TestEngine = ({ test, onFinish }) => {
   
   const submitLock = useRef(false);
   const hasStartedExam = useRef(false);
+  const isAttemptingPageExit = useRef(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -174,17 +175,26 @@ const TestEngine = ({ test, onFinish }) => {
       if (isFull) {
         hasStartedExam.current = true;
       } else if (hasStartedExam.current) {
-        toast.error('VIOLATION: Fullscreen exited! Automatic exam submission triggered.', { duration: 6000 });
-
-        api.post('/violations/log', {
-          testId: test._id,
-          violationType: 'fullscreen_exit',
-          autoSubmitted: true
-        }).catch(() => {});
-
+        // Delay check to see if this fullscreen exit was caused by a page reload/exit prompt
         setTimeout(() => {
-          autoSubmitRef.current(true);
-        }, 500);
+          if (submitLock.current) return;
+          if (isAttemptingPageExit.current) {
+            console.log('Fullscreen exit ignored because page reload/unload confirmation is active.');
+            return;
+          }
+
+          toast.error('VIOLATION: Fullscreen exited! Automatic exam submission triggered.', { duration: 6000 });
+
+          api.post('/violations/log', {
+            testId: test._id,
+            violationType: 'fullscreen_exit',
+            autoSubmitted: true
+          }).catch(() => {});
+
+          setTimeout(() => {
+            autoSubmitRef.current(true);
+          }, 500);
+        }, 300);
       }
     };
 
@@ -218,6 +228,13 @@ const TestEngine = ({ test, onFinish }) => {
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (!submitLock.current) {
+        isAttemptingPageExit.current = true;
+        
+        // Reset the flag after a short delay in case the user cancels and stays on the page
+        setTimeout(() => {
+          isAttemptingPageExit.current = false;
+        }, 3000);
+
         e.preventDefault();
         e.returnValue = 'You are in the middle of an exam. Leaving will result in data loss or automatic submission!';
         return e.returnValue;
