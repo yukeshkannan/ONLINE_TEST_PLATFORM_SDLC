@@ -1,9 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export const useTest = (questions = []) => {
+export const useTest = (questions = [], testId = null) => {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [flagged, setFlagged] = useState({});
+  
+  // Initialize answers from localStorage if present
+  const [answers, setAnswers] = useState(() => {
+    if (testId) {
+      const saved = localStorage.getItem(`assessment_answers_${testId}`);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing saved answers', e);
+        }
+      }
+    }
+    return {};
+  });
+
+  // Initialize flagged status from localStorage if present
+  const [flagged, setFlagged] = useState(() => {
+    if (testId) {
+      const saved = localStorage.getItem(`assessment_flagged_${testId}`);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing flagged questions', e);
+        }
+      }
+    }
+    return {};
+  });
+
+  // Sync answers to localStorage
+  useEffect(() => {
+    if (testId) {
+      localStorage.setItem(`assessment_answers_${testId}`, JSON.stringify(answers));
+    }
+  }, [answers, testId]);
+
+  // Sync flagged status to localStorage
+  useEffect(() => {
+    if (testId) {
+      localStorage.setItem(`assessment_flagged_${testId}`, JSON.stringify(flagged));
+    }
+  }, [flagged, testId]);
 
   const selectOption = (questionId, optionLabel) => {
     setAnswers((prev) => ({

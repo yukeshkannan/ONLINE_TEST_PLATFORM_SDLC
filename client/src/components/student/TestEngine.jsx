@@ -26,7 +26,45 @@ const TestEngine = ({ test, onFinish }) => {
     const fetchQuestions = async () => {
       try {
         const { data } = await api.get(`/tests/${test._id}/questions`);
-        setQuestions(data);
+        
+        let shuffled = [...data];
+        const savedOrderKey = `assessment_order_${test._id}`;
+        const savedOrder = localStorage.getItem(savedOrderKey);
+        
+        if (savedOrder) {
+          try {
+            const orderIds = JSON.parse(savedOrder);
+            // Re-order data based on saved orderIds array
+            const ordered = [];
+            orderIds.forEach(id => {
+              const q = data.find(item => item._id === id);
+              if (q) ordered.push(q);
+            });
+            // Append any new questions that might have been added
+            data.forEach(item => {
+              if (!orderIds.includes(item._id)) {
+                ordered.push(item);
+              }
+            });
+            shuffled = ordered;
+          } catch (e) {
+            console.error('Error restoring question order', e);
+          }
+        } else {
+          // Shuffle questions to prevent candidate collusion (randomized sequence per student)
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          // Save shuffled order of question IDs
+          try {
+            localStorage.setItem(savedOrderKey, JSON.stringify(shuffled.map(q => q._id)));
+          } catch (e) {
+            console.error('Error saving question order', e);
+          }
+        }
+        
+        setQuestions(shuffled);
       } catch (err) {
         toast.error(err.response?.data?.message || 'Failed to download exam questions.');
         onFinish();
@@ -48,7 +86,7 @@ const TestEngine = ({ test, onFinish }) => {
     navigateTo,
     getSubmissionPayload,
     timeTaken
-  } = useTest(questions);
+  } = useTest(questions, test._id);
 
   const handleSubmit = async (isAuto = false) => {
     if (submitLock.current) return;
@@ -74,6 +112,11 @@ const TestEngine = ({ test, onFinish }) => {
 
       toast.success('Exam submitted and graded successfully!', { id: 'submit-exam' });
       
+      // Clean up localStorage items upon successful submission
+      localStorage.removeItem(`assessment_answers_${test._id}`);
+      localStorage.removeItem(`assessment_flagged_${test._id}`);
+      localStorage.removeItem(`assessment_order_${test._id}`);
+
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
@@ -169,6 +212,20 @@ const TestEngine = ({ test, onFinish }) => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (!submitLock.current) {
+        e.preventDefault();
+        e.returnValue = 'You are in the middle of an exam. Leaving will result in data loss or automatic submission!';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
