@@ -4,7 +4,8 @@ const questionSchema = new mongoose.Schema({
   testId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Test',
-    required: true
+    required: true,
+    index: true
   },
   questionText: {
     type: String,
