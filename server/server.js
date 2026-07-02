@@ -18,6 +18,19 @@ import errorHandler from './middleware/errorHandler.js';
 
 dotenv.config();
 
+// Global Uncaught Exception & Promise Rejection Handlers (Prevents backend freeze)
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! Shutting down gracefully...', err.name, err.message);
+  if (err.stack) console.error(err.stack);
+  process.exit(1); // Process managers like Render/Railway/PM2 will automatically reboot the server
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION! Shutting down gracefully...', err.name, err.message);
+  if (err.stack) console.error(err.stack);
+  process.exit(1);
+});
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -62,12 +75,42 @@ app.use(errorHandler);
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/mcq-test-platform';
 
-mongoose.connect(MONGODB_URI)
+// Mongoose Connection Event Monitoring for robustness
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB connection lost! Attempting reconnect...');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected successfully!');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB database connection error:', err);
+});
+
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 5000 // Stop waiting for DB after 5 seconds to allow instant restart retry
+})
   .then(() => {
     console.log('Connected to MongoDB database');
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });
+
+    // Graceful Shutdown on termination signal (SIGTERM/SIGINT) from Render/Railway/PM2
+    const shutdown = (signal) => {
+      console.log(`${signal} received. Shutting down gracefully...`);
+      server.close(() => {
+        console.log('HTTP server closed.');
+        mongoose.connection.close(false).then(() => {
+          console.log('MongoDB connection closed.');
+          process.exit(0);
+        });
+      });
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
   })
   .catch((err) => {
     console.error('Failed to connect to MongoDB:', err.message);
