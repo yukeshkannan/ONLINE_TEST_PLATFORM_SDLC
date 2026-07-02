@@ -31,3 +31,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+
+# Stress testing local tools
+server/loadTest.js
+
