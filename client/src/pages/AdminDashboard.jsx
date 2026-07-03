@@ -11,6 +11,7 @@ import UserList from '../components/admin/UserList.jsx';
 import ProctoringLogs from '../components/admin/ProctoringLogs.jsx';
 import api from '../utils/api.js';
 import { parsePdfToText } from '../utils/pdfParser.js';
+import { calculateAcademicYear } from '../utils/academicYearHelper.js';
 import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -909,7 +910,11 @@ const AdminDashboard = ({ tab }) => {
                       type="text"
                       placeholder="e.g. 2023-2027"
                       value={bulkBatch}
-                      onChange={(e) => setBulkBatch(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setBulkBatch(val);
+                        setBulkYear(calculateAcademicYear(val));
+                      }}
                       className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-semibold shadow-sm"
                     />
                   </div>

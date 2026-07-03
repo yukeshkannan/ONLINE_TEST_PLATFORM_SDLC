@@ -6,6 +6,7 @@ import Result from '../models/Result.js';
 import ViolationLog from '../models/ViolationLog.js';
 import { sendTokens, clearTokens } from '../utils/generateToken.js';
 import { sendCredentialsEmail, sendOTPEmail } from '../utils/emailSender.js';
+import { calculateAcademicYear } from '../utils/academicYearHelper.js';
 
 export const adminLogin = async (req, res, next) => {
   const { email, password, rememberMe } = req.body;
@@ -111,10 +112,10 @@ export const getAllStudents = async (req, res, next) => {
 };
 
 export const createStudent = async (req, res, next) => {
-  const { name, rollNumber, email, department, batch, year } = req.body;
+  const { name, rollNumber, email, department, batch } = req.body;
 
   try {
-    if (!name || !rollNumber || !email || !department || !batch || !year) {
+    if (!name || !rollNumber || !email || !department || !batch) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -142,7 +143,7 @@ export const createStudent = async (req, res, next) => {
       email: email.toLowerCase(),
       department,
       batch,
-      year,
+      year: calculateAcademicYear(batch),
       password: hashedPassword
     });
 
@@ -172,8 +173,8 @@ export const bulkCreateStudents = async (req, res, next) => {
     }
 
     for (let i = 0; i < studentsArray.length; i++) {
-      const { name, rollNumber, email, department, batch, year } = studentsArray[i];
-      if (!name || !rollNumber || !email || !department || !batch || !year) {
+      const { name, rollNumber, email, department, batch } = studentsArray[i];
+      if (!name || !rollNumber || !email || !department || !batch) {
         return res.status(400).json({ message: `Student record at index ${i + 1} is missing required fields.` });
       }
     }
@@ -208,7 +209,7 @@ export const bulkCreateStudents = async (req, res, next) => {
         email,
         department: item.department.trim(),
         batch: item.batch.trim(),
-        year: item.year.trim(),
+        year: calculateAcademicYear(item.batch.trim()),
         password: hashedPassword
       });
 
@@ -251,10 +252,10 @@ export const deleteStudent = async (req, res, next) => {
 };
 
 export const updateStudent = async (req, res, next) => {
-  const { name, rollNumber, email, department, batch, year } = req.body;
+  const { name, rollNumber, email, department, batch } = req.body;
 
   try {
-    if (!name || !rollNumber || !email || !department || !batch || !year) {
+    if (!name || !rollNumber || !email || !department || !batch) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -282,7 +283,7 @@ export const updateStudent = async (req, res, next) => {
     student.email = email.trim().toLowerCase();
     student.department = department;
     student.batch = batch.trim();
-    student.year = year;
+    student.year = calculateAcademicYear(batch.trim());
 
     // If roll number changes, re-hash default password
     if (student.rollNumber !== rollNumber.trim().toUpperCase()) {

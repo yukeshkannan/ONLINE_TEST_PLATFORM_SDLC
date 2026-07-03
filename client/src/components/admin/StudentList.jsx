@@ -3,6 +3,7 @@ import { Search, Download, ChevronLeft, ChevronRight, X, UserPlus, Check, Trash2
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
+import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
 
 const StudentList = () => {
   const adminPortalContext = 'college';
@@ -174,7 +175,7 @@ const StudentList = () => {
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
       const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'Computer Science';
       const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : '2023-2027';
-      const year = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '3rd Year';
+      const year = calculateAcademicYear(batch);
 
       if (name && rollNumber && email) {
         parsed.push({
@@ -273,6 +274,9 @@ const StudentList = () => {
   const handlePreviewChange = (index, field, value) => {
     const updated = [...parsedStudents];
     updated[index][field] = value;
+    if (field === 'batch') {
+      updated[index]['year'] = calculateAcademicYear(value);
+    }
     setParsedStudents(updated);
   };
 
@@ -747,7 +751,14 @@ const StudentList = () => {
                       type="text"
                       placeholder="Enter batch (e.g. 2023-2027)"
                       value={formData.batch}
-                      onChange={(e) => setFormData({ ...formData, batch: e.target.value })}
+                      onChange={(e) => {
+                        const newBatch = e.target.value;
+                        setFormData({ 
+                          ...formData, 
+                          batch: newBatch,
+                          year: calculateAcademicYear(newBatch)
+                        });
+                      }}
                       className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
                     />
                   </div>
@@ -932,7 +943,14 @@ const StudentList = () => {
                       type="text"
                       placeholder="Enter batch (e.g. 2023-2027)"
                       value={editFormData.batch}
-                      onChange={(e) => setEditFormData({ ...editFormData, batch: e.target.value })}
+                      onChange={(e) => {
+                        const newBatch = e.target.value;
+                        setEditFormData({ 
+                          ...editFormData, 
+                          batch: newBatch,
+                          year: calculateAcademicYear(newBatch)
+                        });
+                      }}
                       className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
                     />
                   </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { parsePdfToText } from '../../utils/pdfParser.js';
+import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
 import { FileText, Save, X, Plus, Trash2, Calendar, Clock, BookOpen, AlertCircle, ArrowLeft, Upload, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -674,7 +675,11 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                   type="text"
                   placeholder="e.g. 2023-2027"
                   value={targetBatch}
-                  onChange={(e) => setTargetBatch(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTargetBatch(val);
+                    setTargetYear(calculateAcademicYear(val));
+                  }}
                   className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
                 />
               </div>

@@ -15,6 +15,8 @@ import violationRoutes from './routes/violation.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 
 import errorHandler from './middleware/errorHandler.js';
+import Student from './models/Student.js';
+import { calculateAcademicYear } from './utils/academicYearHelper.js';
 
 dotenv.config();
 
@@ -93,6 +95,32 @@ mongoose.connect(MONGODB_URI, {
 })
   .then(() => {
     console.log('Connected to MongoDB database');
+
+    // Run startup migration to calculate and update academic year for all existing students
+    const updateAllStudentsAcademicYears = async () => {
+      try {
+        const students = await Student.find({});
+        let updatedCount = 0;
+        for (const student of students) {
+          if (!student.batch) continue;
+          const currentCalculatedYear = calculateAcademicYear(student.batch);
+          if (student.year !== currentCalculatedYear) {
+            student.year = currentCalculatedYear;
+            await student.save();
+            updatedCount++;
+          }
+        }
+        if (updatedCount > 0) {
+          console.log(`[Migration] Successfully updated academic year for ${updatedCount} students.`);
+        } else {
+          console.log('[Migration] All student academic years are up to date.');
+        }
+      } catch (error) {
+        console.error('[Migration] Error updating students academic years on startup:', error);
+      }
+    };
+    updateAllStudentsAcademicYears();
+
     const server = app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });
