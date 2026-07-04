@@ -10,6 +10,7 @@ const StudentList = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deptFilter, setDeptFilter] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -97,16 +98,18 @@ const StudentList = () => {
     fetchStudents();
   }, []);
 
-  // Reset page to 1 if search term changes
+  // Reset page to 1 if search term or department filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, deptFilter]);
 
-  // Filter students based on search term (strictly checking name and roll number only as requested)
-  const filteredStudents = students.filter(student =>
-    (student.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (student.rollNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter students based on search term and department filter (strictly checking name and roll number only as requested)
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = (student.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.rollNumber || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDept = deptFilter === 'All' || student.department === deptFilter;
+    return matchesSearch && matchesDept;
+  });
 
   const totalItems = filteredStudents.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
@@ -430,10 +433,15 @@ const StudentList = () => {
   // Execution handler for confirmed Export CSV download
   const confirmExportCSV = () => {
     setShowExportConfirm(false);
+    const targetStudents = filteredStudents;
+    if (targetStudents.length === 0) {
+      toast.error('No student records to export matching current filters.');
+      return;
+    }
     const headers = ['Student Name', 'Roll Number', 'Department', 'Batch', 'Year'];
     const csvRows = [
       headers.join(','),
-      ...students.map(s => [
+      ...targetStudents.map(s => [
         `"${s.name}"`,
         `"${s.rollNumber}"`,
         `"${s.department}"`,
@@ -510,6 +518,25 @@ const StudentList = () => {
           </div>
 
           <div className="flex items-center space-x-3 w-full sm:w-auto shrink-0 justify-end">
+            <div className="relative">
+              <select
+                value={deptFilter}
+                onChange={(e) => setDeptFilter(e.target.value)}
+                className="border border-slate-200 text-slate-650 pl-5 pr-10 py-4.5 rounded-xl text-base font-semibold bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-sm focus:outline-none focus:border-[#004f90] appearance-none"
+              >
+                <option value="All">All Departments</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Mechanical">Mechanical</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+              </div>
+            </div>
+
             <button 
               onClick={handleExportCSV}
               className="border border-slate-200 text-slate-650 px-6 py-4.5 rounded-xl text-base font-semibold flex items-center justify-center gap-2.5 hover:bg-slate-50 transition-all cursor-pointer shadow-sm"
