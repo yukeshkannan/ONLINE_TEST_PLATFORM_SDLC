@@ -154,6 +154,17 @@ const StudentList = () => {
 
   const parseCsvToStudents = (text) => {
     if (!text) return [];
+
+    const normalizeYear = (val) => {
+      if (!val) return '1st Year';
+      const s = val.toString().trim().toLowerCase();
+      if (s.includes('1') || s.includes('first') || s === 'i') return '1st Year';
+      if (s.includes('2') || s.includes('second') || s === 'ii') return '2nd Year';
+      if (s.includes('3') || s.includes('third') || s === 'iii') return '3rd Year';
+      if (s.includes('4') || s.includes('fourth') || s === 'iv') return '4th Year';
+      return '1st Year';
+    };
+
     const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
     if (lines.length <= 1) return [];
 
@@ -164,7 +175,7 @@ const StudentList = () => {
     const emailIdx = header.findIndex(h => h.includes('email') || h.includes('mail'));
     const deptIdx = header.findIndex(h => h.includes('dept') || h.includes('department'));
     const batchIdx = header.findIndex(h => h.includes('batch'));
-    const yearIdx = header.findIndex(h => h.includes('year'));
+    const yearIdx = header.findIndex(h => h.includes('year') || h === 'yr' || h === 'class');
 
     for (let i = 1; i < lines.length; i++) {
       const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(item => item.trim().replace(/^"|"$/g, ''));
@@ -175,7 +186,8 @@ const StudentList = () => {
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
       const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'Computer Science';
       const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : '2023-2027';
-      const year = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : calculateAcademicYear(batch);
+      const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
+      const year = rawYear ? normalizeYear(rawYear) : calculateAcademicYear(batch);
 
       if (name && rollNumber && email) {
         parsed.push({
