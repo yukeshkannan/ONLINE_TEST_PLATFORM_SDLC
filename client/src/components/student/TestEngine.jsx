@@ -545,9 +545,9 @@ const TestEngine = ({ test, onFinish }) => {
             
             <div className="text-center space-y-3">
               <AlertTriangle className="h-12 w-12 text-accent mx-auto" />
-              <h4 className="text-lg font-bold text-white">Submit Examination?</h4>
+              <h4 className="text-lg font-bold text-slate-800">Submit Examination?</h4>
               <p className="text-xs text-softgrey leading-relaxed">
-                You have answered <span className="text-white font-bold">{Object.values(answers).filter(Boolean).length}</span> out of <span className="text-white font-bold">{questions.length}</span> questions. Once submitted, you cannot modify your answers.
+                You have answered <span className="text-[#004f90] font-black text-sm">{Object.values(answers).filter(Boolean).length}</span> out of <span className="text-[#004f90] font-black text-sm">{questions.length}</span> questions. Once submitted, you cannot modify your answers.
               </p>
             </div>
 

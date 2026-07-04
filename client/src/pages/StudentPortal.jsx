@@ -100,28 +100,28 @@ const StudentPortal = () => {
     >
       {activeScreen !== 'test' && <Navbar />}
 
-      <div className="flex-1 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        {activeScreen === 'dashboard' && (
-          <TestList
-            onStartTest={handleStartTest}
-            onViewResult={handleViewResult}
-          />
-        )}
+      {activeScreen === 'test' && selectedTest ? (
+        <TestEngine
+          test={selectedTest}
+          onFinish={handleFinishTest}
+        />
+      ) : (
+        <div className="flex-1 px-4 md:px-8 max-w-7xl mx-auto w-full">
+          {activeScreen === 'dashboard' && (
+            <TestList
+              onStartTest={handleStartTest}
+              onViewResult={handleViewResult}
+            />
+          )}
 
-        {activeScreen === 'test' && selectedTest && (
-          <TestEngine
-            test={selectedTest}
-            onFinish={handleFinishTest}
-          />
-        )}
-
-        {activeScreen === 'result' && activeResultId && (
-          <ResultScreen
-            resultId={activeResultId}
-            onBack={handleBackToDashboard}
-          />
-        )}
-      </div>
+          {activeScreen === 'result' && activeResultId && (
+            <ResultScreen
+              resultId={activeResultId}
+              onBack={handleBackToDashboard}
+            />
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };
