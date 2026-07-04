@@ -101,7 +101,7 @@ const Dashboard = () => {
         attempt.score,
         attempt.totalMarks,
         attempt.passed ? 'Yes' : 'No',
-        `"${new Date(attempt.submittedAt).toLocaleDateString()}"`
+        `"${new Date(attempt.submittedAt).toLocaleString()}"`
       ].join(','))
     ];
 
