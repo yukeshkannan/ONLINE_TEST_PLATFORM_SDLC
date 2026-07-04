@@ -104,7 +104,8 @@ export const logout = (req, res) => {
 export const getAllStudents = async (req, res, next) => {
   try {
     const students = await Student.find({}, '-password')
-      .sort({ rollNumber: 1 });
+      .sort({ name: 1 })
+      .collation({ locale: 'en', strength: 2 });
     res.status(200).json(students);
   } catch (error) {
     next(error);
