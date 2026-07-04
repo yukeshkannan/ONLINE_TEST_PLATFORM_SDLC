@@ -96,7 +96,9 @@ mongoose.connect(MONGODB_URI, {
   .then(() => {
     console.log('Connected to MongoDB database');
 
-    // Run startup migration to calculate and update academic year for all existing students
+    // Startup migration commented out to prevent overwriting manual student academic year edits.
+    // Batch and Year are now decoupled and editable independently.
+    /*
     const updateAllStudentsAcademicYears = async () => {
       try {
         const students = await Student.find({});
@@ -120,6 +122,7 @@ mongoose.connect(MONGODB_URI, {
       }
     };
     updateAllStudentsAcademicYears();
+    */
 
     const server = app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);

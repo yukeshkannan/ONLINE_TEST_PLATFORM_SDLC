@@ -112,7 +112,7 @@ export const getAllStudents = async (req, res, next) => {
 };
 
 export const createStudent = async (req, res, next) => {
-  const { name, rollNumber, email, department, batch } = req.body;
+  const { name, rollNumber, email, department, batch, year } = req.body;
 
   try {
     if (!name || !rollNumber || !email || !department || !batch) {
@@ -143,7 +143,7 @@ export const createStudent = async (req, res, next) => {
       email: email.toLowerCase(),
       department,
       batch,
-      year: calculateAcademicYear(batch),
+      year: year || calculateAcademicYear(batch),
       password: hashedPassword
     });
 
@@ -209,7 +209,7 @@ export const bulkCreateStudents = async (req, res, next) => {
         email,
         department: item.department.trim(),
         batch: item.batch.trim(),
-        year: calculateAcademicYear(item.batch.trim()),
+        year: item.year ? item.year.trim() : calculateAcademicYear(item.batch.trim()),
         password: hashedPassword
       });
 
@@ -252,7 +252,7 @@ export const deleteStudent = async (req, res, next) => {
 };
 
 export const updateStudent = async (req, res, next) => {
-  const { name, rollNumber, email, department, batch } = req.body;
+  const { name, rollNumber, email, department, batch, year } = req.body;
 
   try {
     if (!name || !rollNumber || !email || !department || !batch) {
@@ -283,7 +283,7 @@ export const updateStudent = async (req, res, next) => {
     student.email = email.trim().toLowerCase();
     student.department = department;
     student.batch = batch.trim();
-    student.year = calculateAcademicYear(batch.trim());
+    student.year = year ? year.trim() : student.year;
 
     // If roll number changes, re-hash default password
     if (student.rollNumber !== rollNumber.trim().toUpperCase()) {

@@ -175,7 +175,7 @@ const StudentList = () => {
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
       const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'Computer Science';
       const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : '2023-2027';
-      const year = calculateAcademicYear(batch);
+      const year = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : calculateAcademicYear(batch);
 
       if (name && rollNumber && email) {
         parsed.push({
