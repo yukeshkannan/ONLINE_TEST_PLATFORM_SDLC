@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { parsePdfToText } from '../../utils/pdfParser.js';
-import { HelpCircle, Plus, Upload, Trash2, Edit2, GripVertical, CheckCircle2, Save, X, Eye, RefreshCw, ArrowLeft } from 'lucide-react';
+import { HelpCircle, Plus, Upload, Trash2, Edit2, GripVertical, CheckCircle2, Save, X, Eye, RefreshCw, ArrowLeft, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -80,6 +80,10 @@ const AddQuestions = ({ test, onFinished }) => {
   const [notepadText, setNotepadText] = useState('');
   const [parsedQuestions, setParsedQuestions] = useState([]);
 
+  // Delete Confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -88,16 +92,16 @@ const AddQuestions = ({ test, onFinished }) => {
     const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
     
     if (!isTxt && !isPdf) {
-      return toast.error('Please upload a valid plain text (.txt) or PDF (.pdf) file.');
+      return toast.error('Please upload a valid plain text (.txt) or PDF (.pdf) document.');
     }
 
-    const loader = toast.loading('Reading file...');
+    const loader = toast.loading('Reading document file...');
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
         let text = '';
         if (isPdf) {
-          toast.loading('Parsing PDF text content...', { id: loader });
+          toast.loading('Parsing document text content...', { id: loader });
           text = await parsePdfToText(event.target.result);
         } else {
           text = event.target.result;
@@ -106,14 +110,14 @@ const AddQuestions = ({ test, onFinished }) => {
         setNotepadText(text);
         const parsed = parseTextToQuestions(text);
         setParsedQuestions(parsed);
-        toast.success(`Successfully parsed ${parsed.length} questions from file.`, { id: loader });
+        toast.success(`Successfully extracted ${parsed.length} questions from document.`, { id: loader });
       } catch (err) {
         console.error(err);
-        toast.error(err.message || 'Failed to parse file.', { id: loader });
+        toast.error(err.message || 'Unable to parse document content.', { id: loader });
       }
     };
     reader.onerror = () => {
-      toast.error('Failed to read file.', { id: loader });
+      toast.error('Unable to read document file.', { id: loader });
     };
 
     if (isPdf) {
@@ -145,21 +149,21 @@ const AddQuestions = ({ test, onFinished }) => {
 
   const handleImportSubmit = async () => {
     if (parsedQuestions.length === 0) {
-      return toast.error('No questions parsed to import.');
+      return toast.error('No valid questions found to import.');
     }
 
     for (let i = 0; i < parsedQuestions.length; i++) {
       const q = parsedQuestions[i];
       if (!q.questionText.trim()) {
-        return toast.error(`Question #${i + 1} statement cannot be empty.`);
+        return toast.error(`Question #${i + 1} text cannot be empty.`);
       }
       if (!q.options[0].text.trim() || !q.options[1].text.trim()) {
-        return toast.error(`Question #${i + 1} must have at least Option A and Option B.`);
+        return toast.error(`Question #${i + 1} must contain at least Option A and Option B.`);
       }
       // Ensure that selected correct answer is not an empty option
       const correctOpt = q.options.find(o => o.label === q.correctAnswer);
       if (!correctOpt || !correctOpt.text.trim()) {
-        return toast.error(`Question #${i + 1} has correct answer set to '${q.correctAnswer}', but that option has no text.`);
+        return toast.error(`Question #${i + 1} has option '${q.correctAnswer}' marked as correct, but option text is empty.`);
       }
     }
 
@@ -174,10 +178,10 @@ const AddQuestions = ({ test, onFinished }) => {
       };
     });
 
-    const loader = toast.loading('Importing questions...');
+    const loader = toast.loading('Importing questions into question bank...');
     try {
       await api.post('/questions/add', finalPayload);
-      toast.success('Questions imported successfully!', { id: loader });
+      toast.success('Questions imported successfully.', { id: loader });
       setNotepadText('');
       setParsedQuestions([]);
       setShowBulkModal(false);
@@ -204,7 +208,7 @@ const AddQuestions = ({ test, onFinished }) => {
       const { data } = await api.get(`/tests/${test._id}/questions`);
       setQuestions(data.sort((a, b) => a.order - b.order));
     } catch (err) {
-      toast.error('Failed to download question list.');
+      toast.error('Unable to download question list.');
     } finally {
       setLoading(false);
     }
@@ -259,15 +263,15 @@ const AddQuestions = ({ test, onFinished }) => {
     try {
       if (editingQuestionId) {
         await api.put(`/questions/${editingQuestionId}`, payload);
-        toast.success('Question updated successfully!', { id: loader });
+        toast.success('Question updated successfully.', { id: loader });
       } else {
         await api.post('/questions/add', payload);
-        toast.success('Question added successfully!', { id: loader });
+        toast.success('Question added successfully.', { id: loader });
       }
       resetForm();
       fetchQuestions();
     } catch (err) {
-      let errMsg = 'Error occurred.';
+      let errMsg = 'An error occurred while saving question.';
       if (err.response?.data) {
         if (err.response.data.errors && Array.isArray(err.response.data.errors)) {
           errMsg = `Save failed: ${err.response.data.errors.join(', ')}`;
@@ -294,16 +298,25 @@ const AddQuestions = ({ test, onFinished }) => {
     setMarks(q.marks || 1);
   };
 
-  const handleDeleteClick = async (qId) => {
-    if (!window.confirm('Delete this question permanently?')) return;
+  const handleDeleteClick = (qId) => {
+    setQuestionToDelete(qId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteQuestion = async () => {
+    if (!questionToDelete) return;
+    const qId = questionToDelete;
+    setShowDeleteConfirm(false);
     
     const loader = toast.loading('Deleting question...');
     try {
       await api.delete(`/questions/${qId}`);
-      toast.success('Question deleted.', { id: loader });
+      toast.success('Question deleted successfully.', { id: loader });
       fetchQuestions();
     } catch (err) {
-      toast.error('Deletion failed.', { id: loader });
+      toast.error('Failed to delete question.', { id: loader });
+    } finally {
+      setQuestionToDelete(null);
     }
   };
 
@@ -826,6 +839,52 @@ D) Fourth option
 
             </div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Question Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteConfirm(false)}
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-[6px] z-[2000] cursor-pointer"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+              className="fixed inset-0 m-auto max-w-[420px] h-fit bg-white/95 backdrop-blur-[12px] rounded-3xl p-7 shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-100/80 flex flex-col items-center text-center space-y-5 z-[2100]"
+            >
+              <div className="h-14 w-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center border border-red-100 shrink-0">
+                <AlertTriangle className="h-7 w-7 text-red-500" />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xl font-bold text-slate-900 font-sans tracking-tight">Delete Question?</h4>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed px-2">
+                  Are you sure you want to delete this question? This action cannot be undone and will permanently remove it from this assessment paper.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 w-full pt-1">
+                <button
+                  onClick={confirmDeleteQuestion}
+                  className="flex-1 bg-red-600 hover:bg-red-750 text-white font-semibold py-3 px-5 rounded-xl text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  Delete Question
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 border border-slate-200 text-slate-600 font-semibold py-3 px-5 rounded-xl text-sm hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

@@ -328,7 +328,7 @@ const StudentList = () => {
       });
       fetchStudents();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to register student.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to register candidate profile.', { id: loader });
     }
   };
 
@@ -342,13 +342,13 @@ const StudentList = () => {
     const { id } = studentToDelete;
     setShowDeleteConfirm(false);
     
-    const loader = toast.loading('Deleting student...');
+    const loader = toast.loading('Deleting candidate account...');
     try {
       await api.delete(`/auth/students/${id}`);
-      toast.success('Student deleted successfully.', { id: loader });
+      toast.success('Candidate profile deleted successfully.', { id: loader });
       fetchStudents();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete student.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to delete candidate profile.', { id: loader });
     } finally {
       setStudentToDelete(null);
     }
@@ -364,13 +364,13 @@ const StudentList = () => {
     const { _id, email } = studentForCredentials;
     setShowSendConfirm(false);
 
-    const loader = toast.loading(`Sending credentials to ${email}...`);
+    const loader = toast.loading(`Dispatching login credentials to ${email}...`);
     setSendingEmail(true);
     try {
       await api.post(`/auth/students/${_id}/send-credentials`);
-      toast.success('Credentials emailed successfully.', { id: loader });
+      toast.success('Login credentials emailed successfully.', { id: loader });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to email credentials.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to email login credentials.', { id: loader });
     } finally {
       setStudentForCredentials(null);
       setSendingEmail(false);
@@ -384,18 +384,18 @@ const StudentList = () => {
   const confirmSendAllCredentials = async () => {
     setShowSendAllConfirm(false);
 
-    const loader = toast.loading('Sending credentials to all students...');
+    const loader = toast.loading('Dispatching credentials to all candidates...');
     setSendingEmail(true);
     try {
       const { data } = await api.post('/auth/students/send-credentials/all');
       toast.success(
-        `Emails completed. Sent: ${data.successCount}${
+        `Email dispatch completed. Sent: ${data.successCount}${
           data.failureCount > 0 ? `, Failed: ${data.failureCount}` : ''
         }`,
         { id: loader }
       );
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to email credentials to all.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to dispatch credentials.', { id: loader });
     } finally {
       setSendingEmail(false);
     }
@@ -424,7 +424,7 @@ const StudentList = () => {
   // Click handler for Export CSV
   const handleExportCSV = () => {
     if (students.length === 0) {
-      toast.error('No student data available to export.');
+      toast.error('No candidate data available to export.');
       return;
     }
     setShowExportConfirm(true);
@@ -435,7 +435,7 @@ const StudentList = () => {
     setShowExportConfirm(false);
     const targetStudents = filteredStudents;
     if (targetStudents.length === 0) {
-      toast.error('No student records to export matching current filters.');
+      toast.error('No candidate records matching current filters to export.');
       return;
     }
     const headers = ['Student Name', 'Roll Number', 'Department', 'Batch', 'Year'];

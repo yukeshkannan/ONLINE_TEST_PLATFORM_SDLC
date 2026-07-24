@@ -104,16 +104,16 @@ const AdminDashboard = ({ tab }) => {
     const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
     
     if (!isTxt && !isPdf) {
-      return toast.error('Please upload a valid plain text (.txt) or PDF (.pdf) file.');
+      return toast.error('Please upload a valid plain text (.txt) or PDF (.pdf) document.');
     }
 
-    const loader = toast.loading('Reading file...');
+    const loader = toast.loading('Reading document file...');
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
         let text = '';
         if (isPdf) {
-          toast.loading('Parsing PDF text content...', { id: loader });
+          toast.loading('Parsing document text content...', { id: loader });
           text = await parsePdfToText(event.target.result);
         } else {
           text = event.target.result;
@@ -122,14 +122,14 @@ const AdminDashboard = ({ tab }) => {
         setBulkNotepadText(text);
         const parsed = parseTextToQuestions(text);
         setParsedBulkQuestions(parsed);
-        toast.success(`Successfully parsed ${parsed.length} questions from file.`, { id: loader });
+        toast.success(`Successfully extracted ${parsed.length} questions from document.`, { id: loader });
       } catch (err) {
         console.error(err);
-        toast.error(err.message || 'Failed to parse file.', { id: loader });
+        toast.error(err.message || 'Unable to parse document content.', { id: loader });
       }
     };
     reader.onerror = () => {
-      toast.error('Failed to read file.', { id: loader });
+      toast.error('Unable to read document file.', { id: loader });
     };
 
     if (isPdf) {
@@ -163,24 +163,24 @@ const AdminDashboard = ({ tab }) => {
     e.preventDefault();
 
     if (!bulkTitle.trim() || !bulkSubject.trim() || !bulkDuration || !bulkBatch.trim()) {
-      return toast.error('Please fill out all required fields.');
+      return toast.error('Please fill in all required assessment details.');
     }
 
     if (parsedBulkQuestions.length === 0) {
-      return toast.error('No questions parsed to import.');
+      return toast.error('No valid questions found to import.');
     }
 
     for (let i = 0; i < parsedBulkQuestions.length; i++) {
       const q = parsedBulkQuestions[i];
       if (!q.questionText.trim()) {
-        return toast.error(`Question #${i + 1} statement cannot be empty.`);
+        return toast.error(`Question #${i + 1} text cannot be empty.`);
       }
       if (!q.options[0].text.trim() || !q.options[1].text.trim()) {
-        return toast.error(`Question #${i + 1} must have at least Option A and Option B.`);
+        return toast.error(`Question #${i + 1} must contain at least Option A and Option B.`);
       }
       const correctOpt = q.options.find(o => o.label === q.correctAnswer);
       if (!correctOpt || !correctOpt.text.trim()) {
-        return toast.error(`Question #${i + 1} has correct answer set to '${q.correctAnswer}', but that option has no text.`);
+        return toast.error(`Question #${i + 1} has option '${q.correctAnswer}' marked as correct, but option text is empty.`);
       }
     }
 
@@ -228,14 +228,14 @@ const AdminDashboard = ({ tab }) => {
       showResultsToStudents: true
     };
 
-    const loader = toast.loading('Creating test and uploading questions...');
+    const loader = toast.loading('Creating assessment paper and uploading questions...');
     try {
       const { data } = await api.post('/tests/create', testPayload);
       const testId = data._id;
 
       await api.post(`/questions/sync/${testId}`, questionsPayload);
 
-      toast.success('Bulk Test & Questions created successfully!', { id: loader });
+      toast.success('Assessment and question bank created successfully.', { id: loader });
       
       setBulkTitle('');
       setBulkSubject('');
@@ -250,7 +250,7 @@ const AdminDashboard = ({ tab }) => {
       fetchTestsList();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to bulk publish test.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to create bulk assessment.', { id: loader });
     }
   };
 
@@ -272,7 +272,7 @@ const AdminDashboard = ({ tab }) => {
       const { data } = await api.get('/tests');
       setTests(data);
     } catch (err) {
-      toast.error('Failed to update exam registries.');
+      toast.error('Unable to update assessment registries.');
     } finally {
       setLoadingTests(false);
     }
@@ -299,10 +299,10 @@ const AdminDashboard = ({ tab }) => {
     const loader = toast.loading('Duplicating assessment paper...');
     try {
       await api.post(`/tests/${testId}/duplicate`);
-      toast.success('Cloned successfully! New draft added.', { id: loader });
+      toast.success('Assessment paper duplicated successfully as a draft.', { id: loader });
       fetchTestsList();
     } catch (err) {
-      toast.error('Cloning failed.', { id: loader });
+      toast.error('Failed to duplicate assessment paper.', { id: loader });
     }
   };
 
@@ -319,13 +319,13 @@ const AdminDashboard = ({ tab }) => {
     const testId = testToDelete._id;
     setShowDeleteConfirm(false);
     
-    const loader = toast.loading('Deleting exam sheet...');
+    const loader = toast.loading('Deleting assessment paper...');
     try {
       await api.delete(`/tests/${testId}`);
-      toast.success('Test wiped successfully.', { id: loader });
+      toast.success('Assessment paper deleted successfully.', { id: loader });
       fetchTestsList();
     } catch (err) {
-      toast.error('Failed to delete test.', { id: loader });
+      toast.error('Failed to delete assessment paper.', { id: loader });
     } finally {
       setTestToDelete(null);
     }

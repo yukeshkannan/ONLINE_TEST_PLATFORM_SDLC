@@ -67,7 +67,7 @@ const TestEngine = ({ test, onFinish }) => {
         
         setQuestions(shuffled);
       } catch (err) {
-        toast.error(err.response?.data?.message || 'Failed to download exam questions.');
+        toast.error(err.response?.data?.message || 'Unable to download assessment questions. Please contact administrator.');
         onFinish();
       } finally {
         setLoading(false);
@@ -98,7 +98,7 @@ const TestEngine = ({ test, onFinish }) => {
 
     submitLock.current = true;
     setSubmitting(true);
-    toast.loading(isAuto ? 'Time up! Auto-submitting...' : 'Submitting your exam sheets...', { id: 'submit-exam' });
+    toast.loading(isAuto ? 'Time limit reached. Submitting examination automatically...' : 'Submitting examination responses securely...', { id: 'submit-exam' });
     
     try {
       const payload = getSubmissionPayload();
@@ -111,7 +111,7 @@ const TestEngine = ({ test, onFinish }) => {
         timeTaken: secondsSpent
       });
 
-      toast.success('Exam submitted and graded successfully!', { id: 'submit-exam' });
+      toast.success('Assessment submitted and evaluated successfully.', { id: 'submit-exam' });
       
       // Clean up localStorage items upon successful submission
       localStorage.removeItem(`assessment_answers_${test._id}`);
@@ -125,7 +125,7 @@ const TestEngine = ({ test, onFinish }) => {
       onFinish(data.result._id);
     } catch (err) {
       submitLock.current = false;
-      toast.error(err.response?.data?.message || 'Submission failed. Please check network.', { id: 'submit-exam' });
+      toast.error(err.response?.data?.message || 'Submission failed. Please check your internet connection and try again.', { id: 'submit-exam' });
     } finally {
       setSubmitting(false);
     }
@@ -183,7 +183,7 @@ const TestEngine = ({ test, onFinish }) => {
             return;
           }
 
-          toast.error('VIOLATION: Fullscreen exited! Automatic exam submission triggered.', { duration: 6000 });
+          toast.error('SECURITY VIOLATION: Fullscreen mode exited. Automatic exam submission initiated.', { duration: 6000 });
 
           api.post('/violations/log', {
             testId: test._id,
@@ -202,7 +202,7 @@ const TestEngine = ({ test, onFinish }) => {
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     
-    toast('Enter fullscreen to start your assessment.', { icon: '🖥️' });
+    toast('Please enter fullscreen mode to begin your assessment.', { icon: '🖥️' });
     
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -236,7 +236,7 @@ const TestEngine = ({ test, onFinish }) => {
         }, 3000);
 
         e.preventDefault();
-        e.returnValue = 'You are in the middle of an exam. Leaving will result in data loss or automatic submission!';
+        e.returnValue = 'An active assessment is in progress. Leaving will cause your exam to be submitted automatically.';
         return e.returnValue;
       }
     };
@@ -258,13 +258,13 @@ const TestEngine = ({ test, onFinish }) => {
     }).catch(() => {});
 
     if (isAutoSubmit) {
-      toast.error('Cheating violation limit reached. Automatic submission triggered!', { duration: 5000 });
+      toast.error('SECURITY VIOLATION: Maximum allowed tab switch limit reached. Exam submitted automatically.', { duration: 5000 });
       setTimeout(() => {
         autoSubmitRef.current(true);
       }, 500);
     } else {
       toast.error(
-        `WARNING: Tab switch detected! Violations: ${tabSwitches}/3. Repeated attempts will auto-submit the exam!`,
+        `SECURITY WARNING: Tab switch detected (${tabSwitches}/3). Further attempts will result in automatic submission.`,
         { duration: 6000 }
       );
     }

@@ -28,11 +28,11 @@ const AdminLogin = () => {
   const handleSendOTP = async (e) => {
     e.preventDefault();
     if (!forgotEmail.trim()) {
-      return toast.error('Please enter your registered email address.');
+      return toast.error('Please provide your registered faculty email address.');
     }
 
     setOtpLoading(true);
-    const loader = toast.loading('Sending verification code...');
+    const loader = toast.loading('Dispatching verification code...');
     try {
       const axiosApi = axios.create({
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -42,7 +42,7 @@ const AdminLogin = () => {
       toast.success(`Verification code sent to ${forgotEmail}`, { id: loader });
       setForgotStep(2);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send OTP code.', { id: loader });
+      toast.error(err.response?.data?.message || 'Unable to send security verification code.', { id: loader });
     } finally {
       setOtpLoading(false);
     }
@@ -51,21 +51,21 @@ const AdminLogin = () => {
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     if (!otp.trim()) {
-      return toast.error('Please enter the 6-digit OTP code.');
+      return toast.error('Please enter the 6-digit verification code.');
     }
 
     setOtpLoading(true);
-    const loader = toast.loading('Verifying code...');
+    const loader = toast.loading('Verifying security code...');
     try {
       const axiosApi = axios.create({
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
         withCredentials: true
       });
       await axiosApi.post('/auth/admin/verify-otp', { email: forgotEmail.trim(), otp: otp.trim() });
-      toast.success('Code verified successfully!', { id: loader });
+      toast.success('Security code verified successfully.', { id: loader });
       setForgotStep(3);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Invalid or expired OTP code.', { id: loader });
+      toast.error(err.response?.data?.message || 'Invalid or expired security code.', { id: loader });
     } finally {
       setOtpLoading(false);
     }
@@ -74,17 +74,17 @@ const AdminLogin = () => {
   const handleResetPasswordSubmit = async (e) => {
     e.preventDefault();
     if (!newPassword || !confirmNewPassword) {
-      return toast.error('Please fill in all fields.');
+      return toast.error('Please complete all required fields.');
     }
     if (newPassword !== confirmNewPassword) {
-      return toast.error('Passwords do not match.');
+      return toast.error('Passwords do not match. Please verify your entry.');
     }
     if (newPassword.length < 6) {
       return toast.error('Password must be at least 6 characters long.');
     }
 
     setOtpLoading(true);
-    const loader = toast.loading('Updating password...');
+    const loader = toast.loading('Updating password credentials...');
     try {
       const axiosApi = axios.create({
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -95,7 +95,7 @@ const AdminLogin = () => {
         otp: otp.trim(), 
         newPassword 
       });
-      toast.success('Password updated successfully! Please log in.', { id: loader });
+      toast.success('Password updated successfully. You may now log in.', { id: loader });
       setShowForgotModal(false);
       setForgotEmail('');
       setOtp('');
@@ -103,7 +103,7 @@ const AdminLogin = () => {
       setConfirmNewPassword('');
       setForgotStep(1);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to reset password.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to update password credentials.', { id: loader });
     } finally {
       setOtpLoading(false);
     }
@@ -112,20 +112,20 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password) {
-      return toast.error('Please enter both email and password.');
+      return toast.error('Please enter both your email address and password.');
     }
 
     setIsSubmitting(true);
     try {
       const loggedUser = await loginAdmin(email.trim(), password, rememberMe);
       if (loggedUser?.role === 'trainer') {
-        toast.success(`Welcome back, Trainer ${loggedUser.name}!`);
+        toast.success(`Authentication successful. Welcome back, Trainer ${loggedUser.name}!`);
       } else {
-        toast.success('Welcome back, Admin!');
+        toast.success('Authentication successful. Welcome back, Administrator!');
       }
       navigate('/admin/dashboard');
     } catch (err) {
-      toast.error(err || 'Invalid faculty credentials.');
+      toast.error(err || 'Authentication failed. Please check your credentials.');
     } finally {
       setIsSubmitting(false);
     }

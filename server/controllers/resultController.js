@@ -10,22 +10,22 @@ export const submitTest = async (req, res, next) => {
   const studentId = req.user.id;
 
   try {
-    const test = await Test.findById(testId);
+    const test = await Test.findById(testId).lean();
     if (!test) {
       return res.status(404).json({ message: 'Test not found' });
     }
 
     const now = new Date();
-    if (now > new Date(test.endTime.getTime() + 60000)) {
+    if (now > new Date(new Date(test.endTime).getTime() + 60000)) {
       return res.status(400).json({ message: 'Test active window has already closed.' });
     }
 
-    const existingResult = await Result.findOne({ studentId, testId });
+    const existingResult = await Result.findOne({ studentId, testId }).select('_id').lean();
     if (existingResult) {
       return res.status(400).json({ message: 'You have already attempted this test.' });
     }
 
-    const questions = await Question.find({ testId }).sort({ order: 1 });
+    const questions = await Question.find({ testId }).sort({ order: 1 }).lean();
     if (questions.length === 0) {
       return res.status(400).json({ message: 'No questions found for this test.' });
     }

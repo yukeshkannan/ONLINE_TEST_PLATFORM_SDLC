@@ -39,13 +39,13 @@ const ViewResults = ({ test, onBack }) => {
     const { studentId, studentName } = resetTarget;
     setResetTarget(null);
 
-    const loadToastId = toast.loading(`Resetting test attempt for ${studentName}...`);
+    const loadToastId = toast.loading(`Resetting assessment attempt for candidate ${studentName}...`);
     try {
       await api.delete(`/results/student/${studentId}/test/${test._id}`);
-      toast.success(`Exam attempt reset successfully! ${studentName} can now re-take the test.`, { id: loadToastId });
+      toast.success(`Assessment attempt reset successfully. Candidate ${studentName} may now retake the exam.`, { id: loadToastId });
       fetchResults();
     } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to reset test attempt for ${studentName}.`, { id: loadToastId });
+      toast.error(err.response?.data?.message || `Failed to reset assessment attempt for ${studentName}.`, { id: loadToastId });
     }
   };
 
@@ -74,10 +74,10 @@ const ViewResults = ({ test, onBack }) => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success('Spreadsheet downloaded successfully!', { id: loader });
+      toast.success('Excel workbook downloaded successfully.', { id: loader });
     } catch (error) {
       console.error(error);
-      toast.error('Failed to generate Excel report.', { id: loader });
+      toast.error('Failed to generate Excel report workbook.', { id: loader });
     }
   };
 

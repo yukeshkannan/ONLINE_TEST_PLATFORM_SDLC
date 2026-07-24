@@ -19,7 +19,7 @@ const Dashboard = () => {
         const response = await api.get('/reports/dashboard');
         setData(response.data);
       } catch (err) {
-        toast.error('Failed to load dashboard statistics.');
+        toast.error('Unable to load dashboard statistics.');
       } finally {
         setLoading(false);
       }
@@ -32,7 +32,7 @@ const Dashboard = () => {
     try {
       const { data } = await api.get('/auth/students');
       if (data.length === 0) {
-        toast.error('No student records found.', { id: loader });
+        toast.error('No candidate records found.', { id: loader });
         return;
       }
       
@@ -54,14 +54,14 @@ const Dashboard = () => {
       a.setAttribute('href', url);
       a.setAttribute('download', 'college_students_roster.csv');
       a.click();
-      toast.success('Roster downloaded successfully!', { id: loader });
+      toast.success('Student directory downloaded successfully.', { id: loader });
     } catch (err) {
-      toast.error('Failed to export students.', { id: loader });
+      toast.error('Failed to export candidate directory.', { id: loader });
     }
   };
 
   const handleDeleteClick = (attempt) => {
-    if (!attempt._id) return toast.error('Cannot identify this submission record.');
+    if (!attempt._id) return toast.error('Unable to identify submission record ID.');
     setDeleteTarget({
       id: attempt._id,
       testTitle: attempt.testId?.title || 'Unknown Exam',
@@ -78,12 +78,12 @@ const Dashboard = () => {
     const loadToastId = toast.loading('Deleting submission record...');
     try {
       await api.delete(`/results/${id}`);
-      toast.success('Submission deleted successfully!', { id: loadToastId });
+      toast.success('Submission record deleted successfully.', { id: loadToastId });
       // Refresh dashboard data (bypass cache)
       const response = await api.get('/reports/dashboard', { headers: { 'Cache-Control': 'no-cache' } });
       setData(response.data);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete submission.', { id: loadToastId });
+      toast.error(err.response?.data?.message || 'Failed to delete submission record.', { id: loadToastId });
     }
   };
 
@@ -111,7 +111,7 @@ const Dashboard = () => {
     a.setAttribute('href', url);
     a.setAttribute('download', 'sdlc_exam_submissions_report.csv');
     a.click();
-    toast.success('Submissions report downloaded successfully!');
+    toast.success('Submissions report downloaded successfully.');
   };
 
   if (loading) {

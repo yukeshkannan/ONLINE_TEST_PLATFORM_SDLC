@@ -93,7 +93,7 @@ const UserList = () => {
   const handleSaveUser = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.password.trim()) {
-      return toast.error('Please enter all required fields.');
+      return toast.error('Please complete all required fields.');
     }
 
     const roleText = formData.role === 'trainer' ? 'Trainer' : 'Administrator';
@@ -106,7 +106,7 @@ const UserList = () => {
         password: formData.password
       });
 
-      toast.success(`${roleText} registered successfully!`, { id: loader });
+      toast.success(`${roleText} account registered successfully.`, { id: loader });
       setShowAddModal(false);
       setFormData({
         name: '',
@@ -116,7 +116,7 @@ const UserList = () => {
       });
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to register ${roleText.toLowerCase()}.`, { id: loader });
+      toast.error(err.response?.data?.message || `Failed to register ${roleText.toLowerCase()} account.`, { id: loader });
     }
   };
 
@@ -137,7 +137,7 @@ const UserList = () => {
       toast.success(`${roleText} account deleted successfully.`, { id: loader });
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to delete ${roleText.toLowerCase()}.`, { id: loader });
+      toast.error(err.response?.data?.message || `Failed to delete ${roleText.toLowerCase()} account.`, { id: loader });
     } finally {
       setUserToDelete(null);
     }

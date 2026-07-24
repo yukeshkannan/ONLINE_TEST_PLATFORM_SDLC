@@ -38,7 +38,7 @@ const StudentPortal = () => {
           setSelectedTest(data);
         })
         .catch(() => {
-          toast.error('Failed to restore assessment session.');
+          toast.error('Unable to restore assessment session. Returning to portal...');
           setSearchParams({});
           setActiveScreen('dashboard');
         })

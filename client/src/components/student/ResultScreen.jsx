@@ -19,7 +19,7 @@ const ResultScreen = ({ resultId, onBack }) => {
         const { data } = await api.get(`/results/${resultId}`);
         setResult(data);
       } catch (err) {
-        toast.error('Failed to load scorecard details.');
+        toast.error('Unable to load performance scorecard details.');
       } finally {
         setLoading(false);
       }

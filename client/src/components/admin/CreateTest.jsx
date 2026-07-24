@@ -117,16 +117,16 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
     
     if (!isTxt && !isPdf) {
-      return toast.error('Please upload a valid plain text (.txt) or PDF (.pdf) file.');
+      return toast.error('Please upload a valid plain text (.txt) or PDF (.pdf) document.');
     }
 
-    const loader = toast.loading('Reading file...');
+    const loader = toast.loading('Reading document file...');
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
         let text = '';
         if (isPdf) {
-          toast.loading('Parsing PDF text content...', { id: loader });
+          toast.loading('Parsing document text content...', { id: loader });
           text = await parsePdfToText(event.target.result);
         } else {
           text = event.target.result;
@@ -135,14 +135,14 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
         setNotepadText(text);
         const parsed = parseTextToQuestions(text);
         setParsedQuestions(parsed);
-        toast.success(`Successfully parsed ${parsed.length} questions from file.`, { id: loader });
+        toast.success(`Successfully extracted ${parsed.length} questions from document.`, { id: loader });
       } catch (err) {
         console.error(err);
-        toast.error(err.message || 'Failed to parse file.', { id: loader });
+        toast.error(err.message || 'Unable to parse document content.', { id: loader });
       }
     };
     reader.onerror = () => {
-      toast.error('Failed to read file.', { id: loader });
+      toast.error('Unable to read document file.', { id: loader });
     };
 
     if (isPdf) {
@@ -238,7 +238,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
           }
         } catch (err) {
           console.error(err);
-          toast.error('Failed to load test questions.');
+          toast.error('Unable to load assessment questions.');
         } finally {
           setLoadingQuestions(false);
         }
@@ -265,7 +265,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   // Remove a question at a specific index
   const removeQuestion = (index) => {
     if (questions.length === 1) {
-      return toast.error('A test must contain at least one question.');
+      return toast.error('An assessment paper must contain at least one question.');
     }
     setQuestions(questions.filter((_, idx) => idx !== index));
   };
@@ -290,20 +290,20 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     let finalQuestions = [];
 
     if (parsedQuestions.length === 0) {
-      return toast.error('No questions parsed to import.');
+      return toast.error('No valid questions found to import.');
     }
 
     for (let i = 0; i < parsedQuestions.length; i++) {
       const q = parsedQuestions[i];
       if (!q.questionText.trim()) {
-        return toast.error(`Question #${i + 1} statement cannot be empty.`);
+        return toast.error(`Question #${i + 1} text cannot be empty.`);
       }
       if (!q.options[0].text.trim() || !q.options[1].text.trim()) {
-        return toast.error(`Question #${i + 1} must have at least Option A and Option B.`);
+        return toast.error(`Question #${i + 1} must contain at least Option A and Option B.`);
       }
       const correctOpt = q.options.find(o => o.label === q.correctAnswer);
       if (!correctOpt || !correctOpt.text.trim()) {
-        return toast.error(`Question #${i + 1} has correct answer set to '${q.correctAnswer}', but that option has no text.`);
+        return toast.error(`Question #${i + 1} has option '${q.correctAnswer}' marked as correct, but option text is empty.`);
       }
     }
 
@@ -322,7 +322,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       setQuestions([...questions, ...finalQuestions]);
     }
 
-    toast.success(`Successfully loaded ${finalQuestions.length} questions into the form.`);
+    toast.success(`Successfully loaded ${finalQuestions.length} questions into the assessment form.`);
     setNotepadText('');
     setParsedQuestions([]);
     setShowBulkModal(false);
@@ -334,28 +334,28 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     
     // Validations
     if (!title.trim() || !subject.trim() || !duration || !startDate || !endDate || !targetBatch.trim()) {
-      return toast.error('Please fill out all required fields.');
+      return toast.error('Please complete all required assessment fields.');
     }
 
     const startDateTime = parseDateTime(startDate, startHour, startMinute, startAmpm);
     const endDateTime = parseDateTime(endDate, endHour, endMinute, endAmpm);
 
     if (endDateTime <= startDateTime) {
-      return toast.error('End time must be after the start time.');
+      return toast.error('Assessment end time must be later than the start time.');
     }
 
     // Validate that questions are filled out
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       if (!q.questionText.trim()) {
-        return toast.error(`Please enter the question statement for Question ${i + 1}.`);
+        return toast.error(`Please enter question text for Question #${i + 1}.`);
       }
       if (!q.optionA.trim() || !q.optionB.trim()) {
-        return toast.error(`Please fill in at least Option A and Option B for Question ${i + 1}.`);
+        return toast.error(`Please fill in at least Option A and Option B for Question #${i + 1}.`);
       }
       const selectedField = `option${q.correctAnswer}`;
       if (!q[selectedField] || !q[selectedField].trim()) {
-        return toast.error(`Question ${i + 1} has correct answer set to '${q.correctAnswer}', but that option has no text.`);
+        return toast.error(`Question #${i + 1} has option '${q.correctAnswer}' marked as correct, but option text is empty.`);
       }
     }
 
@@ -382,7 +382,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
         }
       ]
     };
-    const toastId = toast.loading(isEditing ? 'Updating test...' : 'Creating test...');
+    const toastId = toast.loading(isEditing ? 'Updating assessment paper...' : 'Creating assessment paper...');
     try {
       let testId;
       if (isEditing) {
@@ -411,11 +411,11 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
 
       await api.post(`/questions/sync/${testId}`, questionsPayload);
 
-      toast.success(isEditing ? 'Test updated successfully.' : 'Test published successfully.', { id: toastId });
+      toast.success(isEditing ? 'Assessment paper updated successfully.' : 'Assessment paper published successfully.', { id: toastId });
       onSave();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to save test configurations.', { id: toastId });
+      toast.error(err.response?.data?.message || 'Failed to save assessment configurations.', { id: toastId });
     }
   };
 

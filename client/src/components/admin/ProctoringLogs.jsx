@@ -27,7 +27,7 @@ const ProctoringLogs = () => {
       setLogs(data);
       setLastRefreshed(new Date());
     } catch (err) {
-      toast.error('Failed to load proctoring data.');
+      toast.error('Unable to load proctoring logs.');
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ const ProctoringLogs = () => {
     const violationId = log._id;
 
     if (!studentId && !violationId) {
-      toast.error('Cannot identify student or violation record ID.');
+      toast.error('Unable to identify candidate or violation record ID.');
       return;
     }
     setResetTarget({ studentId, studentName, testId, testTitle, violationId });
@@ -59,7 +59,7 @@ const ProctoringLogs = () => {
     const { studentId, studentName, testId, testTitle, violationId } = resetTarget;
     setResetTarget(null);
 
-    const loadToastId = toast.loading(`Resetting exam clearance for ${studentName}...`);
+    const loadToastId = toast.loading(`Clearing security violation log for candidate ${studentName}...`);
     let cleared = false;
 
     if (studentId && testId) {
@@ -77,7 +77,7 @@ const ProctoringLogs = () => {
     }
 
     if (cleared) {
-      toast.success(`Exam access & violation log cleared for ${studentName}!`, { id: loadToastId });
+      toast.success(`Assessment clearance and violation log reset for ${studentName}.`, { id: loadToastId });
       fetchLogs();
     } else {
       toast.error(`Record not found or already cleared for ${studentName}.`, { id: loadToastId });

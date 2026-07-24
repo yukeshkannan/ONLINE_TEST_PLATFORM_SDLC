@@ -67,5 +67,10 @@ const testSchema = new mongoose.Schema({
   }
 });
 
+// Indexes for fast lookup during high concurrent exam requests
+testSchema.index({ status: 1, startTime: -1 });
+testSchema.index({ 'assignedTo.department': 1, 'assignedTo.batch': 1, 'assignedTo.year': 1 });
+
 const Test = mongoose.model('Test', testSchema);
 export default Test;
+

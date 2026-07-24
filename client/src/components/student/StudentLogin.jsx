@@ -17,16 +17,16 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password) {
-      return toast.error('Please enter both email and password.');
+      return toast.error('Please enter both your email address and roll number.');
     }
 
     setIsSubmitting(true);
     try {
       await loginStudent(email.trim(), password, rememberMe);
-      toast.success('Successfully signed in!');
+      toast.success('Authentication successful. Loading student portal...');
       navigate('/student/dashboard');
     } catch (err) {
-      toast.error(err || 'Failed to authenticate. Please check your credentials.');
+      toast.error(err || 'Authentication failed. Please check your email and roll number.');
     } finally {
       setIsSubmitting(false);
     }

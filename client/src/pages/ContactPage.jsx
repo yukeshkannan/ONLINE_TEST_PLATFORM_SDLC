@@ -26,14 +26,14 @@ const ContactPage = () => {
       
       const responseData = await response.json();
       if (response.ok && responseData.success) {
-        toast.success(`Thank you ${contactForm.name}! We've received your message.`, { id: loadingToast });
+        toast.success(`Thank you, ${contactForm.name}. Your message has been received successfully.`, { id: loadingToast });
         setContactForm({ name: '', email: '', message: '' });
       } else {
-        toast.error(responseData.message || "Failed to send message. Please try again.", { id: loadingToast });
+        toast.error(responseData.message || "Unable to send message. Please try again later.", { id: loadingToast });
       }
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      toast.error("Something went wrong. Please check your connection.", { id: loadingToast });
+      toast.error("Network error. Please check your connection and try again.", { id: loadingToast });
     }
   };
 

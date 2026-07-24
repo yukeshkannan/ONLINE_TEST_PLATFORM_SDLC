@@ -18,7 +18,7 @@ const TestList = ({ onStartTest, onViewResult }) => {
       setTests(data);
     } catch (err) {
       if (err?.response?.status !== 401) {
-        toast.error('Failed to retrieve test assignments.');
+        toast.error('Unable to retrieve assigned assessments.');
       }
     } finally {
       setLoading(false);

@@ -3,41 +3,37 @@ import Question from '../models/Question.js';
 import Student from '../models/Student.js';
 import Result from '../models/Result.js';
 
+const computeTestStatus = (test, now = new Date()) => {
+  if (!test || test.status === 'draft') return test?.status || 'draft';
+  const startTime = new Date(test.startTime);
+  const endTime = new Date(test.endTime);
+  if (now < startTime) return 'draft';
+  if (now >= startTime && now <= endTime) return 'active';
+  return 'ended';
+};
+
 export const getTests = async (req, res, next) => {
   try {
     const now = new Date();
 
-    const allTests = await Test.find();
-    for (let test of allTests) {
-      let updatedStatus = test.status;
-      if (test.status !== 'draft') {
-        if (now < test.startTime) {
-          updatedStatus = 'draft';
-        } else if (now >= test.startTime && now <= test.endTime) {
-          updatedStatus = 'active';
-        } else if (now > test.endTime) {
-          updatedStatus = 'ended';
-        }
-        if (updatedStatus !== test.status) {
-          test.status = updatedStatus;
-          await test.save();
-        }
-      }
-    }
-
     if (req.user.role === 'admin' || req.user.role === 'trainer') {
       const tests = await Test.find()
         .populate('createdBy', 'name email')
-        .sort({ createdAt: -1 });
-      return res.status(200).json(tests);
+        .sort({ createdAt: -1 })
+        .lean();
+      
+      const updatedTests = tests.map(t => ({
+        ...t,
+        status: computeTestStatus(t, now)
+      }));
+      return res.status(200).json(updatedTests);
     } else {
-      const student = await Student.findById(req.user.id);
+      const student = await Student.findById(req.user.id).select('department batch year').lean();
       if (!student) {
         return res.status(404).json({ message: 'Student not found' });
       }
 
       const filter = {
-        status: { $in: ['active', 'ended'] },
         assignedTo: {
           $elemMatch: {
             department: student.department,
@@ -48,14 +44,24 @@ export const getTests = async (req, res, next) => {
       };
 
       const tests = await Test.find(filter)
-        .sort({ startTime: -1 });
+        .sort({ startTime: -1 })
+        .lean();
 
-      const studentResults = await Result.find({ studentId: req.user.id });
+      // Compute dynamic status and filter out draft tests for students
+      const studentVisibleTests = tests
+        .map(t => ({ ...t, status: computeTestStatus(t, now) }))
+        .filter(t => t.status === 'active' || t.status === 'ended');
+
+      const studentResults = await Result.find({ studentId: req.user.id })
+        .select('testId score passed percentage _id')
+        .lean();
       
-      const testsWithResultStatus = tests.map(test => {
-        const result = studentResults.find(r => r.testId.toString() === test._id.toString());
+      const resultLookup = new Map(studentResults.map(r => [r.testId.toString(), r]));
+
+      const testsWithResultStatus = studentVisibleTests.map(test => {
+        const result = resultLookup.get(test._id.toString());
         return {
-          ...test.toObject(),
+          ...test,
           attempted: !!result,
           score: result ? result.score : null,
           passed: result ? result.passed : null,
@@ -74,21 +80,13 @@ export const getTests = async (req, res, next) => {
 export const getTestById = async (req, res, next) => {
   try {
     const test = await Test.findById(req.id || req.params.id)
-      .populate('createdBy', 'name email');
+      .populate('createdBy', 'name email')
+      .lean();
     if (!test) {
       return res.status(404).json({ message: 'Test not found' });
     }
 
-    const now = new Date();
-    if (test.status !== 'draft') {
-      if (now >= test.startTime && now <= test.endTime) {
-        test.status = 'active';
-      } else if (now > test.endTime) {
-        test.status = 'ended';
-      }
-      await test.save();
-    }
-
+    test.status = computeTestStatus(test);
     res.status(200).json(test);
   } catch (error) {
     next(error);
@@ -227,40 +225,39 @@ export const duplicateTest = async (req, res, next) => {
 
 export const getTestQuestions = async (req, res, next) => {
   try {
-    const test = await Test.findById(req.params.id);
+    const test = await Test.findById(req.params.id).lean();
     if (!test) {
       return res.status(404).json({ message: 'Test not found' });
     }
 
     // Fetch questions sorted by order
-    const questions = await Question.find({ testId: test._id }).sort({ order: 1 });
+    const questions = await Question.find({ testId: test._id }).sort({ order: 1 }).lean();
 
     if (req.user.role === 'admin' || req.user.role === 'trainer') {
       // Admins and trainers get questions with correct answers
       return res.status(200).json(questions);
     } else {
-      const student = await Student.findById(req.user.id);
+      const student = await Student.findById(req.user.id).select('_id').lean();
       if (!student) {
         return res.status(404).json({ message: 'Student not found' });
       }
 
-      // Students only get questions if the test is active, and they MUST NOT get correctAnswers
       const now = new Date();
-      if (test.status !== 'active' && (now < test.startTime || now > test.endTime)) {
+      const currentStatus = computeTestStatus(test, now);
+      if (currentStatus !== 'active') {
         return res.status(403).json({ message: 'Test is not active' });
       }
 
       // Check if student has already submitted this test
-      const existingResult = await Result.findOne({ studentId: req.user.id, testId: test._id });
+      const existingResult = await Result.findOne({ studentId: req.user.id, testId: test._id }).select('_id').lean();
       if (existingResult) {
         return res.status(403).json({ message: 'You have already attempted this test.' });
       }
 
-      // Sanitize correctAnswers
+      // Sanitize correctAnswers efficiently without Mongoose toObject overhead
       const sanitizedQuestions = questions.map(q => {
-        const questionObj = q.toObject();
-        delete questionObj.correctAnswer; // Crucial security!
-        return questionObj;
+        const { correctAnswer, ...rest } = q;
+        return rest;
       });
 
       return res.status(200).json(sanitizedQuestions);
