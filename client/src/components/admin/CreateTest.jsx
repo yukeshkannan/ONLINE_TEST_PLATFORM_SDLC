@@ -88,7 +88,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   // Cohort targeting controls
   const [targetDept, setTargetDept] = useState('All Departments');
   const [targetYear, setTargetYear] = useState('All Years');
-  const [targetBatch, setTargetBatch] = useState('Batch 1 - Web Design');
+  const [targetBatch, setTargetBatch] = useState('Web Design');
 
   // Questions state (Microsoft Forms style)
   const [questions, setQuestions] = useState([
@@ -681,9 +681,9 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     }}
                     className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                   >
-                    <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
-                    <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
-                    <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                    <option value="Web Design">Web Design</option>
+                    <option value="UI/UX">UI/UX</option>
+                    <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
                     <option value="All Batches">All Batches (Every Student)</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">

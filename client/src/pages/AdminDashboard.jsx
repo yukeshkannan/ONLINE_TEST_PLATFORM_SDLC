@@ -91,7 +91,7 @@ const AdminDashboard = ({ tab }) => {
   const [bulkDuration, setBulkDuration] = useState('30');
   const [bulkDept, setBulkDept] = useState('All Departments');
   const [bulkYear, setBulkYear] = useState('All Years');
-  const [bulkBatch, setBulkBatch] = useState('Batch 1 - Web Design');
+  const [bulkBatch, setBulkBatch] = useState('Web Design');
   const [bulkNotepadText, setBulkNotepadText] = useState('');
   const [bulkStatus, setBulkStatus] = useState('draft');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
@@ -913,9 +913,9 @@ const AdminDashboard = ({ tab }) => {
                       onChange={(e) => setBulkBatch(e.target.value)}
                       className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
                     >
-                      <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
-                      <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
-                      <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                      <option value="Web Design">Web Design</option>
+                      <option value="UI/UX">UI/UX</option>
+                      <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
                       <option value="All Batches">All Batches (Every Student)</option>
                     </select>
                   </div>

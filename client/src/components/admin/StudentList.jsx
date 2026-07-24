@@ -30,7 +30,7 @@ const StudentList = () => {
     rollNumber: '',
     email: '',
     department: 'Computer Science',
-    batch: 'Batch 1 - Web Design',
+    batch: 'Web Design',
     year: '3rd Year'
   });
 
@@ -42,7 +42,7 @@ const StudentList = () => {
     rollNumber: '',
     email: '',
     department: 'Computer Science',
-    batch: 'Batch 1 - Web Design',
+    batch: 'Web Design',
     year: '3rd Year'
   });
 
@@ -53,7 +53,7 @@ const StudentList = () => {
       rollNumber: student.rollNumber,
       email: student.email,
       department: student.department || 'Computer Science',
-      batch: student.batch || 'Batch 1 - Web Design',
+      batch: student.batch || 'Web Design',
       year: student.year || '3rd Year'
     });
     setShowEditModal(true);
@@ -190,7 +190,7 @@ const StudentList = () => {
       const rollNumber = rollIdx !== -1 && row[rollIdx] ? row[rollIdx] : '';
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
       const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'Computer Science';
-      const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : 'Batch 1 - Web Design';
+      const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : 'Web Design';
       const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
       const year = rawYear ? normalizeYear(rawYear) : calculateAcademicYear(batch);
 
@@ -276,8 +276,8 @@ const StudentList = () => {
     const headers = ['Student Name', 'Roll Number', 'Email', 'Department', 'Batch', 'Year'];
     const sampleRows = [
       headers.join(','),
-      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'Computer Science', 'Batch 1 - Web Design', '3rd Year'].join(','),
-      ['John Smith', 'IT23002', 'john.smith@example.com', 'Information Technology', 'Batch 2 - UI/UX', '3rd Year'].join(',')
+      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'Computer Science', 'Web Design', '3rd Year'].join(','),
+      ['John Smith', 'IT23002', 'john.smith@example.com', 'Information Technology', 'UI/UX', '3rd Year'].join(',')
     ];
     const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -549,9 +549,9 @@ const StudentList = () => {
                 className="border border-slate-200 text-slate-650 pl-5 pr-10 py-4.5 rounded-xl text-base font-semibold bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-sm focus:outline-none focus:border-[#004f90] appearance-none"
               >
                 <option value="All">All Batches</option>
-                <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
-                <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
-                <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                <option value="Web Design">Web Design</option>
+                <option value="UI/UX">UI/UX</option>
+                <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -820,9 +820,9 @@ const StudentList = () => {
                         }}
                         className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold cursor-pointer appearance-none shadow-sm"
                       >
-                        <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
-                        <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
-                        <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                        <option value="Web Design">Web Design</option>
+                        <option value="UI/UX">UI/UX</option>
+                        <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                         <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -1019,9 +1019,9 @@ const StudentList = () => {
                         }}
                         className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold cursor-pointer appearance-none shadow-sm"
                       >
-                        <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
-                        <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
-                        <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                        <option value="Web Design">Web Design</option>
+                        <option value="UI/UX">UI/UX</option>
+                        <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                         <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
