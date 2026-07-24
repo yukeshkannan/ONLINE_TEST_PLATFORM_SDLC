@@ -8,6 +8,13 @@ export const DEPARTMENTS = [
   'CIVIL'
 ];
 
+export const BATCH_TRACKS = [
+  'Web Design',
+  'UI/UX',
+  'SolidWorks',
+  'AutoCAD'
+];
+
 export const getDeptColor = (dept) => {
   switch (dept) {
     case 'CSE':

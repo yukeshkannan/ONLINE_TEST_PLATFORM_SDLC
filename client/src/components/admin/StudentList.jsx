@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
 import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
-import { DEPARTMENTS, getDeptColor } from '../../utils/constants.js';
+import { DEPARTMENTS, BATCH_TRACKS, getDeptColor } from '../../utils/constants.js';
 
 const StudentList = () => {
   const adminPortalContext = 'college';
@@ -533,9 +533,7 @@ const StudentList = () => {
                 className="border border-slate-200 text-slate-650 pl-5 pr-10 py-4.5 rounded-xl text-base font-semibold bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-sm focus:outline-none focus:border-[#004f90] appearance-none"
               >
                 <option value="All">All Batches</option>
-                <option value="Web Design">Web Design</option>
-                <option value="UI/UX">UI/UX</option>
-                <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
+                {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -804,9 +802,7 @@ const StudentList = () => {
                         }}
                         className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold cursor-pointer appearance-none shadow-sm"
                       >
-                        <option value="Web Design">Web Design</option>
-                        <option value="UI/UX">UI/UX</option>
-                        <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
+                        {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                         <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -998,9 +994,7 @@ const StudentList = () => {
                         }}
                         className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold cursor-pointer appearance-none shadow-sm"
                       >
-                        <option value="Web Design">Web Design</option>
-                        <option value="UI/UX">UI/UX</option>
-                        <option value="SolidWorks & AutoCAD">SolidWorks & AutoCAD</option>
+                        {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                         <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
