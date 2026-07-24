@@ -34,13 +34,18 @@ export const getTests = async (req, res, next) => {
       }
 
       const filter = {
-        assignedTo: {
-          $elemMatch: {
-            department: student.department,
-            batch: student.batch,
-            year: student.year
-          }
-        }
+        $or: [
+          {
+            assignedTo: {
+              $elemMatch: {
+                department: { $in: [student.department, 'All Departments', 'ALL', ''] },
+                batch: { $in: [student.batch, 'All Batches', 'ALL', ''] },
+                year: { $in: [student.year, 'All Years', 'ALL', ''] }
+              }
+            }
+          },
+          { assignedTo: { $size: 0 } }
+        ]
       };
 
       const tests = await Test.find(filter)

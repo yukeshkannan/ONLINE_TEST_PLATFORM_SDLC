@@ -86,9 +86,9 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [endAmpm, setEndAmpm] = useState('PM');
 
   // Cohort targeting controls
-  const [targetDept, setTargetDept] = useState('Computer Science');
-  const [targetYear, setTargetYear] = useState('3rd Year');
-  const [targetBatch, setTargetBatch] = useState('2023-2027');
+  const [targetDept, setTargetDept] = useState('All Departments');
+  const [targetYear, setTargetYear] = useState('All Years');
+  const [targetBatch, setTargetBatch] = useState('Batch 1 - Web Design');
 
   // Questions state (Microsoft Forms style)
   const [questions, setQuestions] = useState([
@@ -632,10 +632,12 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     onChange={(e) => setTargetDept(e.target.value)}
                     className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                   >
+                    <option value="All Departments">All Departments (Any Dept)</option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Information Technology">Information Technology</option>
                     <option value="Electronics">Electronics</option>
                     <option value="Mechanical">Mechanical</option>
+                    <option value="Civil">Civil</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                     <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -654,6 +656,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     onChange={(e) => setTargetYear(e.target.value)}
                     className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                   >
+                    <option value="All Years">All Years (Any Year)</option>
                     <option value="1st Year">1st Year</option>
                     <option value="2nd Year">2nd Year</option>
                     <option value="3rd Year">3rd Year</option>
@@ -665,23 +668,30 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                 </div>
               </div>
 
-              {/* Academic Batch */}
+              {/* Academic / Track Batch */}
               <div className="space-y-2 flex flex-col">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1 leading-none">
-                  TARGET BATCH
+                  TARGET BATCH / TRACK
                 </label>
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. 2023-2027"
-                  value={targetBatch}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setTargetBatch(val);
-                    setTargetYear(calculateAcademicYear(val));
-                  }}
-                  className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
-                />
+                <div className="relative">
+                  <select
+                    value={targetBatch}
+                    onChange={(e) => {
+                      setTargetBatch(e.target.value);
+                    }}
+                    className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
+                  >
+                    <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
+                    <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
+                    <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                    <option value="All Batches">All Batches (Every Student)</option>
+                    <option value="2023-2027">Academic Batch (2023-2027)</option>
+                    <option value="2024-2028">Academic Batch (2024-2028)</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
+                    <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
+                </div>
               </div>
             </div>
         </div>

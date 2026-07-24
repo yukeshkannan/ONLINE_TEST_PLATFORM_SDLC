@@ -89,9 +89,9 @@ const AdminDashboard = ({ tab }) => {
   const [bulkTitle, setBulkTitle] = useState('');
   const [bulkSubject, setBulkSubject] = useState('');
   const [bulkDuration, setBulkDuration] = useState('30');
-  const [bulkDept, setBulkDept] = useState('Computer Science');
-  const [bulkYear, setBulkYear] = useState('3rd Year');
-  const [bulkBatch, setBulkBatch] = useState('2023-2027');
+  const [bulkDept, setBulkDept] = useState('All Departments');
+  const [bulkYear, setBulkYear] = useState('All Years');
+  const [bulkBatch, setBulkBatch] = useState('Batch 1 - Web Design');
   const [bulkNotepadText, setBulkNotepadText] = useState('');
   const [bulkStatus, setBulkStatus] = useState('draft');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
@@ -880,10 +880,12 @@ const AdminDashboard = ({ tab }) => {
                       onChange={(e) => setBulkDept(e.target.value)}
                       className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
                     >
+                      <option value="All Departments">All Departments (Any Dept)</option>
                       <option value="Computer Science">Computer Science</option>
                       <option value="Information Technology">Information Technology</option>
                       <option value="Electronics">Electronics</option>
                       <option value="Mechanical">Mechanical</option>
+                      <option value="Civil">Civil</option>
                     </select>
                   </div>
 
@@ -895,6 +897,7 @@ const AdminDashboard = ({ tab }) => {
                       onChange={(e) => setBulkYear(e.target.value)}
                       className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
                     >
+                      <option value="All Years">All Years (Any Year)</option>
                       <option value="1st Year">1st Year</option>
                       <option value="2nd Year">2nd Year</option>
                       <option value="3rd Year">3rd Year</option>
@@ -904,19 +907,19 @@ const AdminDashboard = ({ tab }) => {
 
                   {/* Batch */}
                   <div className="space-y-1.5 flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Academic Batch</label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="e.g. 2023-2027"
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Batch / Track</label>
+                    <select
                       value={bulkBatch}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setBulkBatch(val);
-                        setBulkYear(calculateAcademicYear(val));
-                      }}
-                      className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-semibold shadow-sm"
-                    />
+                      onChange={(e) => setBulkBatch(e.target.value)}
+                      className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
+                    >
+                      <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
+                      <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
+                      <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                      <option value="All Batches">All Batches (Every Student)</option>
+                      <option value="2023-2027">2023-2027</option>
+                      <option value="2024-2028">2024-2028</option>
+                    </select>
                   </div>
                 </div>
 

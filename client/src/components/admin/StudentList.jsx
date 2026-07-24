@@ -11,6 +11,7 @@ const StudentList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [deptFilter, setDeptFilter] = useState('All');
+  const [batchFilter, setBatchFilter] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -29,7 +30,7 @@ const StudentList = () => {
     rollNumber: '',
     email: '',
     department: 'Computer Science',
-    batch: '2023-2027',
+    batch: 'Batch 1 - Web Design',
     year: '3rd Year'
   });
 
@@ -41,7 +42,7 @@ const StudentList = () => {
     rollNumber: '',
     email: '',
     department: 'Computer Science',
-    batch: '2023-2027',
+    batch: 'Batch 1 - Web Design',
     year: '3rd Year'
   });
 
@@ -52,7 +53,7 @@ const StudentList = () => {
       rollNumber: student.rollNumber,
       email: student.email,
       department: student.department || 'Computer Science',
-      batch: student.batch || '2023-2027',
+      batch: student.batch || 'Batch 1 - Web Design',
       year: student.year || '3rd Year'
     });
     setShowEditModal(true);
@@ -98,17 +99,18 @@ const StudentList = () => {
     fetchStudents();
   }, []);
 
-  // Reset page to 1 if search term or department filter changes
+  // Reset page to 1 if search term or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, deptFilter]);
+  }, [searchTerm, deptFilter, batchFilter]);
 
-  // Filter students based on search term and department filter (strictly checking name and roll number only as requested)
+  // Filter students based on search term, department filter, and batch filter
   const filteredStudents = students.filter(student => {
     const matchesSearch = (student.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (student.rollNumber || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = deptFilter === 'All' || student.department === deptFilter;
-    return matchesSearch && matchesDept;
+    const matchesBatch = batchFilter === 'All' || student.batch === batchFilter;
+    return matchesSearch && matchesDept && matchesBatch;
   });
 
   const totalItems = filteredStudents.length;
@@ -517,7 +519,8 @@ const StudentList = () => {
             />
           </div>
 
-          <div className="flex items-center space-x-3 w-full sm:w-auto shrink-0 justify-end">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto shrink-0 justify-end">
+            {/* Department Filter */}
             <div className="relative">
               <select
                 value={deptFilter}
@@ -529,6 +532,28 @@ const StudentList = () => {
                 <option value="Information Technology">Information Technology</option>
                 <option value="Electronics">Electronics</option>
                 <option value="Mechanical">Mechanical</option>
+                <option value="Civil">Civil</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Batch / Track Filter */}
+            <div className="relative">
+              <select
+                value={batchFilter}
+                onChange={(e) => setBatchFilter(e.target.value)}
+                className="border border-slate-200 text-slate-650 pl-5 pr-10 py-4.5 rounded-xl text-base font-semibold bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-sm focus:outline-none focus:border-[#004f90] appearance-none"
+              >
+                <option value="All">All Batches</option>
+                <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
+                <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
+                <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                <option value="2023-2027">2023-2027</option>
+                <option value="2024-2028">2024-2028</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -783,12 +808,12 @@ const StudentList = () => {
                   {/* BATCH */}
                   <div className="space-y-2.5 flex flex-col">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1 leading-none">
-                      BATCH
+                      BATCH / TRACK
                     </label>
                     <input
                       required
                       type="text"
-                      placeholder="Enter batch (e.g. 2023-2027)"
+                      placeholder="e.g. Batch 1 - Web Design"
                       value={formData.batch}
                       onChange={(e) => {
                         const newBatch = e.target.value;
@@ -800,6 +825,23 @@ const StudentList = () => {
                       }}
                       className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
                     />
+                    {/* Quick Batch Presets */}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {['Batch 1 - Web Design', 'Batch 2 - UI/UX', 'Batch 3 - SolidWorks & AutoCAD', '2023-2027'].map((bPreset) => (
+                        <button
+                          key={bPreset}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, batch: bPreset, year: calculateAcademicYear(bPreset) })}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                            formData.batch === bPreset
+                              ? 'bg-[#004f90] text-white border-[#004f90]'
+                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {bPreset}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* STUDENT EMAIL */}
@@ -833,6 +875,8 @@ const StudentList = () => {
                           <option value="Information Technology">Information Technology</option>
                           <option value="Electronics">Electronics</option>
                           <option value="Mechanical">Mechanical</option>
+                          <option value="Civil">Civil</option>
+                          <option value="Other">Other</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -975,12 +1019,12 @@ const StudentList = () => {
                   {/* BATCH */}
                   <div className="space-y-2.5 flex flex-col">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1 leading-none">
-                      BATCH
+                      BATCH / TRACK
                     </label>
                     <input
                       required
                       type="text"
-                      placeholder="Enter batch (e.g. 2023-2027)"
+                      placeholder="e.g. Batch 1 - Web Design"
                       value={editFormData.batch}
                       onChange={(e) => {
                         const newBatch = e.target.value;
@@ -992,6 +1036,23 @@ const StudentList = () => {
                       }}
                       className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
                     />
+                    {/* Quick Batch Presets */}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {['Batch 1 - Web Design', 'Batch 2 - UI/UX', 'Batch 3 - SolidWorks & AutoCAD', '2023-2027'].map((bPreset) => (
+                        <button
+                          key={bPreset}
+                          type="button"
+                          onClick={() => setEditFormData({ ...editFormData, batch: bPreset, year: calculateAcademicYear(bPreset) })}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                            editFormData.batch === bPreset
+                              ? 'bg-[#004f90] text-white border-[#004f90]'
+                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {bPreset}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* STUDENT EMAIL */}
@@ -1025,6 +1086,8 @@ const StudentList = () => {
                           <option value="Information Technology">Information Technology</option>
                           <option value="Electronics">Electronics</option>
                           <option value="Mechanical">Mechanical</option>
+                          <option value="Civil">Civil</option>
+                          <option value="Other">Other</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
