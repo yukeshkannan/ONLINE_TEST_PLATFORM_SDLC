@@ -34,27 +34,47 @@ export const submitTest = async (req, res, next) => {
     let totalMarks = 0;
     const evaluatedAnswers = [];
 
-    const answerMap = new Map();
+    const questionMap = new Map();
+    questions.forEach(q => {
+      questionMap.set(q._id.toString(), q);
+    });
+
+    const processedQuestionIds = new Set();
+
+    // Preserve the exact sequence in which the student attended/viewed questions
     if (Array.isArray(studentAnswers)) {
       studentAnswers.forEach(ans => {
-        answerMap.set(ans.questionId.toString(), ans.selectedOption);
+        const qId = ans.questionId ? ans.questionId.toString() : '';
+        const q = questionMap.get(qId);
+        if (q && !processedQuestionIds.has(qId)) {
+          processedQuestionIds.add(qId);
+          const studentChoice = (ans.selectedOption || '').trim();
+          const isCorrect = studentChoice.toUpperCase() === (q.correctAnswer || '').toUpperCase();
+          if (isCorrect) {
+            score += q.marks || 1;
+          }
+          totalMarks += q.marks || 1;
+          evaluatedAnswers.push({
+            questionId: q._id,
+            selectedOption: studentChoice,
+            isCorrect
+          });
+        }
       });
     }
 
+    // Append any remaining questions from DB that weren't in studentAnswers
     questions.forEach(q => {
-      const studentChoice = answerMap.get(q._id.toString()) || '';
-      const isCorrect = studentChoice.toUpperCase() === q.correctAnswer.toUpperCase();
-      
-      if (isCorrect) {
-        score += q.marks || 1;
+      const qId = q._id.toString();
+      if (!processedQuestionIds.has(qId)) {
+        processedQuestionIds.add(qId);
+        totalMarks += q.marks || 1;
+        evaluatedAnswers.push({
+          questionId: q._id,
+          selectedOption: '',
+          isCorrect: false
+        });
       }
-      totalMarks += q.marks || 1;
-
-      evaluatedAnswers.push({
-        questionId: q._id,
-        selectedOption: studentChoice,
-        isCorrect
-      });
     });
 
     const percentage = Number(((score / totalMarks) * 100).toFixed(2));

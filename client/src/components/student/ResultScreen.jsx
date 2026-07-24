@@ -218,7 +218,7 @@ const ResultScreen = ({ resultId, onBack }) => {
 
                     {/* Question index & marks */}
                     <div className="flex items-center justify-between text-xs border-b border-accent/5 pb-2.5">
-                      <span className="font-bold text-softgrey">Question {q.order || idx + 1}</span>
+                      <span className="font-bold text-softgrey">Question {idx + 1}</span>
                       <span className={`font-semibold ${isCorrect ? 'text-success' : 'text-danger'}`}>
                         {isCorrect ? `+${q.marks || 1} Marks` : '0 Marks'}
                       </span>
