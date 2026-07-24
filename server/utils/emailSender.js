@@ -4,7 +4,7 @@ export const sendCredentialsEmail = async (email, name, rollNumber) => {
   const logoUrl = process.env.LOGO_URL || (process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/logo.png` : 'https://raw.githubusercontent.com/sdlcskills/assets/main/logo.png');
 
   if (!apiKey) {
-    throw new Error('Brevo API key is not configured');
+    throw new Error('Brevo API Key (BREVO_API_KEY) is missing in server environment variables.');
   }
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -106,7 +106,7 @@ export const sendCredentialsEmail = async (email, name, rollNumber) => {
   const responseData = await response.json();
   if (!response.ok) {
     console.error('Brevo API response error:', responseData);
-    throw new Error(responseData.message || 'Failed to send transactional email');
+    throw new Error(responseData.message || 'Brevo email delivery failed. Verify API key and sender email.');
   }
 
   return responseData;

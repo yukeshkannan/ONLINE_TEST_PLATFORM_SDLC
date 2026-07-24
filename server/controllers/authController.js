@@ -385,14 +385,17 @@ export const sendStudentCredentials = async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id);
     if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
+      return res.status(404).json({ message: 'Student profile not found.' });
     }
 
     await sendCredentialsEmail(student.email, student.name, student.rollNumber);
 
-    res.status(200).json({ success: true, message: `Credentials sent successfully to ${student.email}` });
+    res.status(200).json({ success: true, message: `Login credentials dispatched to ${student.email}` });
   } catch (error) {
-    next(error);
+    console.error('Error dispatching credentials email:', error);
+    res.status(500).json({
+      message: error.message || 'Failed to send credentials email. Please verify Brevo API Key configuration.'
+    });
   }
 };
 
@@ -400,7 +403,7 @@ export const sendAllStudentsCredentials = async (req, res, next) => {
   try {
     const students = await Student.find({});
     if (students.length === 0) {
-      return res.status(400).json({ message: 'No students found in the database.' });
+      return res.status(400).json({ message: 'No student records found in database.' });
     }
 
     let successCount = 0;
@@ -417,15 +420,25 @@ export const sendAllStudentsCredentials = async (req, res, next) => {
       }
     }
 
+    if (successCount === 0 && failureCount > 0) {
+      return res.status(500).json({
+        message: `Failed to dispatch emails: ${failures[0]?.error || 'Brevo API key or Sender configuration error.'}`,
+        failures
+      });
+    }
+
     res.status(200).json({
       success: true,
-      message: `Completed sending emails. Sent: ${successCount}, Failed: ${failureCount}`,
+      message: `Completed email dispatch. Sent: ${successCount}${failureCount > 0 ? `, Failed: ${failureCount}` : ''}`,
       successCount,
       failureCount,
       failures
     });
   } catch (error) {
-    next(error);
+    console.error('Error in sendAllStudentsCredentials:', error);
+    res.status(500).json({
+      message: error.message || 'Failed to dispatch credentials emails.'
+    });
   }
 };
 
