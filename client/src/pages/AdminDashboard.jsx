@@ -97,6 +97,34 @@ const AdminDashboard = ({ tab }) => {
   const [bulkStatus, setBulkStatus] = useState('draft');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
 
+  const getTodayStr = () => new Date().toISOString().split('T')[0];
+  const getTomorrowStr = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+  const [bulkStartDate, setBulkStartDate] = useState(getTodayStr);
+  const [bulkStartHour, setBulkStartHour] = useState('09');
+  const [bulkStartMinute, setBulkStartMinute] = useState('00');
+  const [bulkStartAmpm, setBulkStartAmpm] = useState('AM');
+
+  const [bulkEndDate, setBulkEndDate] = useState(getTomorrowStr);
+  const [bulkEndHour, setBulkEndHour] = useState('11');
+  const [bulkEndMinute, setBulkEndMinute] = useState('59');
+  const [bulkEndAmpm, setBulkEndAmpm] = useState('PM');
+
+  const hourOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  const minuteOptions = ['00', '15', '30', '45', '59'];
+
+  const constructDateTime = (dateStr, hourStr, minuteStr, ampmStr) => {
+    if (!dateStr) return new Date();
+    let hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+    if (ampmStr === 'PM' && hour < 12) hour += 12;
+    if (ampmStr === 'AM' && hour === 12) hour = 0;
+    
+    const d = new Date(dateStr);
+    d.setHours(hour, minute, 0, 0);
+    return d;
+  };
+
   const handleBulkFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -205,8 +233,15 @@ const AdminDashboard = ({ tab }) => {
     const calculatedTotalMarks = questionsPayload.length;
     const calculatedPassMark = Math.ceil(calculatedTotalMarks * 0.4);
 
-    const startTime = new Date();
-    const endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+    const startTime = constructDateTime(bulkStartDate, bulkStartHour, bulkStartMinute, bulkStartAmpm);
+    const endTime = constructDateTime(bulkEndDate, bulkEndHour, bulkEndMinute, bulkEndAmpm);
+
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      return toast.error('Please select valid start and end dates.');
+    }
+    if (endTime <= startTime) {
+      return toast.error('End time (closing) must be after start time (opening).');
+    }
 
     const testPayload = {
       title: bulkTitle.trim(),
@@ -241,11 +276,19 @@ const AdminDashboard = ({ tab }) => {
       setBulkTitle('');
       setBulkSubject('');
       setBulkDuration('30');
-      setBulkDept('CSE');
-      setBulkYear('3rd Year');
-      setBulkBatch('2023-2027');
+      setBulkDept('All Departments');
+      setBulkYear('All Years');
+      setBulkBatch('Web Design');
       setBulkNotepadText('');
       setBulkStatus('draft');
+      setBulkStartDate(getTodayStr());
+      setBulkStartHour('09');
+      setBulkStartMinute('00');
+      setBulkStartAmpm('AM');
+      setBulkEndDate(getTomorrowStr());
+      setBulkEndHour('11');
+      setBulkEndMinute('59');
+      setBulkEndAmpm('PM');
       setParsedBulkQuestions([]);
       setShowBulkCreateModal(false);
       fetchTestsList();
@@ -913,6 +956,84 @@ const AdminDashboard = ({ tab }) => {
                       <option value="All Batches">All Batches (Every Student)</option>
                       {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
                     </select>
+                  </div>
+
+                  <h4 className="text-xs font-bold text-[#004f90] uppercase tracking-wider pl-2 border-l-2 border-[#004f90] pt-2">
+                    3. Exam Schedule & Timings
+                  </h4>
+
+                  {/* Start Date & Time */}
+                  <div className="space-y-1.5 flex flex-col bg-white border border-slate-200/80 p-3 rounded-xl shadow-xs">
+                    <label className="text-[10px] font-extrabold text-[#004f90] uppercase tracking-wider">Start Time (Opens)</label>
+                    <input
+                      required
+                      type="date"
+                      value={bulkStartDate}
+                      onChange={(e) => setBulkStartDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 text-slate-800 text-xs font-semibold focus:outline-none focus:border-[#004f90]"
+                    />
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <select
+                        value={bulkStartHour}
+                        onChange={(e) => setBulkStartHour(e.target.value)}
+                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
+                      >
+                        {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                      <span className="font-bold text-slate-400 text-xs">:</span>
+                      <select
+                        value={bulkStartMinute}
+                        onChange={(e) => setBulkStartMinute(e.target.value)}
+                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
+                      >
+                        {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                      <select
+                        value={bulkStartAmpm}
+                        onChange={(e) => setBulkStartAmpm(e.target.value)}
+                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none shrink-0"
+                      >
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* End Date & Time */}
+                  <div className="space-y-1.5 flex flex-col bg-white border border-slate-200/80 p-3 rounded-xl shadow-xs">
+                    <label className="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider">End Time (Closes)</label>
+                    <input
+                      required
+                      type="date"
+                      value={bulkEndDate}
+                      onChange={(e) => setBulkEndDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 text-slate-800 text-xs font-semibold focus:outline-none focus:border-[#004f90]"
+                    />
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <select
+                        value={bulkEndHour}
+                        onChange={(e) => setBulkEndHour(e.target.value)}
+                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
+                      >
+                        {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                      <span className="font-bold text-slate-400 text-xs">:</span>
+                      <select
+                        value={bulkEndMinute}
+                        onChange={(e) => setBulkEndMinute(e.target.value)}
+                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
+                      >
+                        {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                      <select
+                        value={bulkEndAmpm}
+                        onChange={(e) => setBulkEndAmpm(e.target.value)}
+                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none shrink-0"
+                      >
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
