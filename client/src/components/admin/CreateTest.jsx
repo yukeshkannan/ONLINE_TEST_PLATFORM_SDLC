@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { parsePdfToText } from '../../utils/pdfParser.js';
 import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
+import { DEPARTMENTS } from '../../utils/constants.js';
 import { FileText, Save, X, Plus, Trash2, Calendar, Clock, BookOpen, AlertCircle, ArrowLeft, Upload, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -184,7 +185,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       setShowResultsToStudents(testToEdit.showResultsToStudents !== undefined ? testToEdit.showResultsToStudents : true);
 
       if (testToEdit.assignedTo && testToEdit.assignedTo[0]) {
-        setTargetDept(testToEdit.assignedTo[0].department || 'Computer Science');
+        setTargetDept(testToEdit.assignedTo[0].department || 'CSE');
         setTargetYear(testToEdit.assignedTo[0].year || '3rd Year');
         setTargetBatch(testToEdit.assignedTo[0].batch || '2023-2027');
       }
@@ -496,7 +497,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
               <input
                 required
                 type="text"
-                placeholder="e.g. Computer Science"
+                placeholder="e.g. CSE"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full bg-white border border-slate-205 hover:border-slate-350 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-850 text-base focus:outline-none transition-all outline-none font-medium placeholder:text-slate-300 shadow-sm"
@@ -633,11 +634,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                   >
                     <option value="All Departments">All Departments (Any Dept)</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Information Technology">Information Technology</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Mechanical">Mechanical</option>
-                    <option value="Civil">Civil</option>
+                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                     <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>

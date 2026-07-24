@@ -39,14 +39,14 @@ const seedDatabase = async () => {
         name: 'System Admin',
         email: 'admin@gmail.com',
         password: adminPasswordHash,
-        department: 'Computer Science',
+        department: 'CSE',
         role: 'admin'
       },
       {
         name: 'Prof. Alan Turing',
         email: 'alan.turing@college.edu',
         password: adminPasswordHash,
-        department: 'Information Technology',
+        department: 'IT',
         role: 'admin'
       }
     ]);
@@ -56,16 +56,16 @@ const seedDatabase = async () => {
     // 4. Create 10 Student Accounts
     console.log('Creating Student records...');
     const studentsData = [
-      { name: 'John Doe', rollNumber: 'CS23001', email: 'john@gmail.com', department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Alice Smith', rollNumber: 'CS23002', email: 'alice@gmail.com', department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Bob Johnson', rollNumber: 'CS23003', email: 'bob@gmail.com', department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Emma Watson', rollNumber: 'CS23004', email: 'emma@gmail.com', department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Charlie Brown', rollNumber: 'CS23005', email: 'charlie@gmail.com', department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Diana Prince', rollNumber: 'IT23001', email: 'diana@gmail.com', department: 'Information Technology', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Clark Kent', rollNumber: 'IT23002', email: 'clark@gmail.com', department: 'Information Technology', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Bruce Wayne', rollNumber: 'EC23001', email: 'bruce@gmail.com', department: 'Electronics', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Peter Parker', rollNumber: 'EC23002', email: 'peter@gmail.com', department: 'Electronics', batch: '2023-2027', year: '3rd Year' },
-      { name: 'Tony Stark', rollNumber: 'CS24001', email: 'tony@gmail.com', department: 'Computer Science', batch: '2024-2028', year: '2nd Year' }
+      { name: 'John Doe', rollNumber: 'CS23001', email: 'john@gmail.com', department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Alice Smith', rollNumber: 'CS23002', email: 'alice@gmail.com', department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Bob Johnson', rollNumber: 'CS23003', email: 'bob@gmail.com', department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Emma Watson', rollNumber: 'CS23004', email: 'emma@gmail.com', department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Charlie Brown', rollNumber: 'CS23005', email: 'charlie@gmail.com', department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Diana Prince', rollNumber: 'IT23001', email: 'diana@gmail.com', department: 'IT', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Clark Kent', rollNumber: 'IT23002', email: 'clark@gmail.com', department: 'IT', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Bruce Wayne', rollNumber: 'EC23001', email: 'bruce@gmail.com', department: 'ECE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Peter Parker', rollNumber: 'EC23002', email: 'peter@gmail.com', department: 'ECE', batch: '2023-2027', year: '3rd Year' },
+      { name: 'Tony Stark', rollNumber: 'CS24001', email: 'tony@gmail.com', department: 'CSE', batch: '2024-2028', year: '2nd Year' }
     ];
 
     // Dynamically hash student passwords (roll number)
@@ -104,8 +104,8 @@ const seedDatabase = async () => {
         instructions: '1. Ensure stable internet. 2. Tab changes are tracked. 3. Fullscreen mode is enforced.',
         createdBy: adminId,
         assignedTo: [
-          { department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-          { department: 'Information Technology', batch: '2023-2027', year: '3rd Year' }
+          { department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+          { department: 'IT', batch: '2023-2027', year: '3rd Year' }
         ],
         startTime: mathStart,
         endTime: mathEnd,
@@ -121,7 +121,7 @@ const seedDatabase = async () => {
         instructions: '1. Attempt all questions. 2. There is no negative marking. 3. Ensure full-screen window focus.',
         createdBy: adminId,
         assignedTo: [
-          { department: 'Computer Science', batch: '2023-2027', year: '3rd Year' }
+          { department: 'CSE', batch: '2023-2027', year: '3rd Year' }
         ],
         startTime: csStart,
         endTime: csEnd,
@@ -137,8 +137,8 @@ const seedDatabase = async () => {
         instructions: '1. Standard quantitative tests. 2. Time-critical speed rounds.',
         createdBy: adminId,
         assignedTo: [
-          { department: 'Computer Science', batch: '2023-2027', year: '3rd Year' },
-          { department: 'Electronics', batch: '2023-2027', year: '3rd Year' }
+          { department: 'CSE', batch: '2023-2027', year: '3rd Year' },
+          { department: 'ECE', batch: '2023-2027', year: '3rd Year' }
         ],
         startTime: aptStart,
         endTime: aptEnd,

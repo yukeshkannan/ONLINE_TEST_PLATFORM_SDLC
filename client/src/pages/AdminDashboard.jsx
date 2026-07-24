@@ -12,6 +12,7 @@ import ProctoringLogs from '../components/admin/ProctoringLogs.jsx';
 import api from '../utils/api.js';
 import { parsePdfToText } from '../utils/pdfParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
+import { DEPARTMENTS } from '../utils/constants.js';
 import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -240,7 +241,7 @@ const AdminDashboard = ({ tab }) => {
       setBulkTitle('');
       setBulkSubject('');
       setBulkDuration('30');
-      setBulkDept('Computer Science');
+      setBulkDept('CSE');
       setBulkYear('3rd Year');
       setBulkBatch('2023-2027');
       setBulkNotepadText('');
@@ -828,7 +829,7 @@ const AdminDashboard = ({ tab }) => {
                     <input
                       required
                       type="text"
-                      placeholder="e.g. Computer Science"
+                      placeholder="e.g. CSE"
                       value={bulkSubject}
                       onChange={(e) => setBulkSubject(e.target.value)}
                       className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-medium placeholder:text-slate-300 shadow-sm"
@@ -881,11 +882,7 @@ const AdminDashboard = ({ tab }) => {
                       className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
                     >
                       <option value="All Departments">All Departments (Any Dept)</option>
-                      <option value="Computer Science">Computer Science</option>
-                      <option value="Information Technology">Information Technology</option>
-                      <option value="Electronics">Electronics</option>
-                      <option value="Mechanical">Mechanical</option>
-                      <option value="Civil">Civil</option>
+                      {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   </div>
 

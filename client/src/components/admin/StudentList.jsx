@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
 import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
+import { DEPARTMENTS, getDeptColor } from '../../utils/constants.js';
 
 const StudentList = () => {
   const adminPortalContext = 'college';
@@ -29,7 +30,7 @@ const StudentList = () => {
     name: '',
     rollNumber: '',
     email: '',
-    department: 'Computer Science',
+    department: 'CSE',
     batch: 'Web Design',
     year: '3rd Year'
   });
@@ -41,7 +42,7 @@ const StudentList = () => {
     name: '',
     rollNumber: '',
     email: '',
-    department: 'Computer Science',
+    department: 'CSE',
     batch: 'Web Design',
     year: '3rd Year'
   });
@@ -52,7 +53,7 @@ const StudentList = () => {
       name: student.name,
       rollNumber: student.rollNumber,
       email: student.email,
-      department: student.department || 'Computer Science',
+      department: student.department || 'CSE',
       batch: student.batch || 'Web Design',
       year: student.year || '3rd Year'
     });
@@ -189,7 +190,7 @@ const StudentList = () => {
       const name = nameIdx !== -1 && row[nameIdx] ? row[nameIdx] : '';
       const rollNumber = rollIdx !== -1 && row[rollIdx] ? row[rollIdx] : '';
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
-      const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'Computer Science';
+      const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'CSE';
       const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : 'Web Design';
       const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
       const year = rawYear ? normalizeYear(rawYear) : calculateAcademicYear(batch);
@@ -276,8 +277,8 @@ const StudentList = () => {
     const headers = ['Student Name', 'Roll Number', 'Email', 'Department', 'Batch', 'Year'];
     const sampleRows = [
       headers.join(','),
-      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'Computer Science', 'Web Design', '3rd Year'].join(','),
-      ['John Smith', 'IT23002', 'john.smith@example.com', 'Information Technology', 'UI/UX', '3rd Year'].join(',')
+      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'CSE', '2023-2027', '3rd Year'].join(','),
+      ['John Smith', 'IT23002', 'john.smith@example.com', 'IT', '2023-2027', '3rd Year'].join(',')
     ];
     const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -324,7 +325,7 @@ const StudentList = () => {
         name: '',
         rollNumber: '',
         email: '',
-        department: 'Computer Science',
+        department: 'CSE',
         batch: '2023-2027',
         year: '3rd Year'
       });
@@ -408,20 +409,7 @@ const StudentList = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const getDeptColor = (dept) => {
-    switch (dept) {
-      case 'Computer Science':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Information Technology':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'Electronics':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Mechanical':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
-      default:
-        return 'bg-slate-50 text-slate-700 border-slate-200';
-    }
-  };
+
 
   // Click handler for Export CSV
   const handleExportCSV = () => {
@@ -528,11 +516,7 @@ const StudentList = () => {
                 className="border border-slate-200 text-slate-650 pl-5 pr-10 py-4.5 rounded-xl text-base font-semibold bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-sm focus:outline-none focus:border-[#004f90] appearance-none"
               >
                 <option value="All">All Departments</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Information Technology">Information Technology</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Mechanical">Mechanical</option>
-                <option value="Civil">Civil</option>
+                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -857,12 +841,7 @@ const StudentList = () => {
                           onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                           className="w-full bg-white border border-slate-200/80 hover:border-slate-350 focus:border-[#004f90] rounded-full py-4.5 px-5 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                         >
-                          <option value="Computer Science">Computer Science</option>
-                          <option value="Information Technology">Information Technology</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Mechanical">Mechanical</option>
-                          <option value="Civil">Civil</option>
-                          <option value="Other">Other</option>
+                          {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -1056,12 +1035,7 @@ const StudentList = () => {
                           onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
                           className="w-full bg-white border border-slate-200/80 hover:border-slate-350 focus:border-[#004f90] rounded-full py-4.5 px-5 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                         >
-                          <option value="Computer Science">Computer Science</option>
-                          <option value="Information Technology">Information Technology</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Mechanical">Mechanical</option>
-                          <option value="Civil">Civil</option>
-                          <option value="Other">Other</option>
+                          {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -1484,10 +1458,7 @@ const StudentList = () => {
                                   onChange={(e) => handlePreviewChange(idx, 'department', e.target.value)}
                                   className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1 px-2 text-slate-800 text-xs focus:outline-none focus:border-[#004f90] font-semibold"
                                 >
-                                  <option value="Computer Science">Computer Science</option>
-                                  <option value="Information Technology">Information Technology</option>
-                                  <option value="Electronics">Electronics</option>
-                                  <option value="Mechanical">Mechanical</option>
+                                  {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
                               </div>
                               <div className="space-y-1">
