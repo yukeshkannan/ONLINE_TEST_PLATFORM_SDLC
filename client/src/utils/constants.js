@@ -15,6 +15,33 @@ export const BATCH_TRACKS = [
   'AutoCAD'
 ];
 
+export const normalizeBatch = (rawBatch) => {
+  if (!rawBatch) return 'Web Design';
+  const clean = rawBatch.toString().trim().toLowerCase();
+  
+  if (clean.includes('web')) return 'Web Design';
+  if (clean.includes('ui') || clean.includes('ux')) return 'UI/UX';
+  if (clean.includes('solid')) return 'SolidWorks';
+  if (clean.includes('cad') || clean.includes('auto')) return 'AutoCAD';
+  
+  return 'Web Design';
+};
+
+export const normalizeDept = (rawDept) => {
+  if (!rawDept) return 'CSE';
+  const clean = rawDept.toString().trim().toLowerCase();
+  
+  if (clean === 'cse' || clean.includes('computer')) return 'CSE';
+  if (clean === 'it' || clean.includes('information')) return 'IT';
+  if (clean === 'aids' || clean.includes('data') || clean.includes('artificial')) return 'AIDS';
+  if (clean === 'ece' || clean.includes('electronics')) return 'ECE';
+  if (clean === 'eee' || clean.includes('electrical')) return 'EEE';
+  if (clean === 'mech' || clean.includes('mechanical')) return 'MECH';
+  if (clean === 'civil') return 'CIVIL';
+  
+  return 'CSE';
+};
+
 export const getDeptColor = (dept) => {
   switch (dept) {
     case 'CSE':

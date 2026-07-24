@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
 import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
-import { DEPARTMENTS, BATCH_TRACKS, getDeptColor } from '../../utils/constants.js';
+import { DEPARTMENTS, BATCH_TRACKS, normalizeBatch, normalizeDept, getDeptColor } from '../../utils/constants.js';
 
 const StudentList = () => {
   const adminPortalContext = 'college';
@@ -190,10 +190,12 @@ const StudentList = () => {
       const name = nameIdx !== -1 && row[nameIdx] ? row[nameIdx] : '';
       const rollNumber = rollIdx !== -1 && row[rollIdx] ? row[rollIdx] : '';
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
-      const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'CSE';
-      const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : 'Web Design';
+      const rawDept = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'CSE';
+      const rawBatch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : 'Web Design';
+      const department = normalizeDept(rawDept);
+      const batch = normalizeBatch(rawBatch);
       const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
-      const year = rawYear ? normalizeYear(rawYear) : calculateAcademicYear(batch);
+      const year = rawYear ? normalizeYear(rawYear) : '1st Year';
 
       if (name && rollNumber && email) {
         parsed.push({
@@ -277,8 +279,8 @@ const StudentList = () => {
     const headers = ['Student Name', 'Roll Number', 'Email', 'Department', 'Batch', 'Year'];
     const sampleRows = [
       headers.join(','),
-      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'CSE', '2023-2027', '3rd Year'].join(','),
-      ['John Smith', 'IT23002', 'john.smith@example.com', 'IT', '2023-2027', '3rd Year'].join(',')
+      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'CSE', 'Web Design', '3rd Year'].join(','),
+      ['John Smith', 'IT23002', 'john.smith@example.com', 'IT', 'UI/UX', '3rd Year'].join(',')
     ];
     const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

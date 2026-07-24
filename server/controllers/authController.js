@@ -210,7 +210,7 @@ export const bulkCreateStudents = async (req, res, next) => {
         email,
         department: item.department.trim(),
         batch: item.batch.trim(),
-        year: item.year ? item.year.trim() : calculateAcademicYear(item.batch.trim()),
+        year: (item.year && item.year.trim()) ? item.year.trim() : '1st Year',
         password: hashedPassword
       });
 
