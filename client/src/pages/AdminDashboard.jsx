@@ -917,8 +917,6 @@ const AdminDashboard = ({ tab }) => {
                       <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
                       <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
                       <option value="All Batches">All Batches (Every Student)</option>
-                      <option value="2023-2027">2023-2027</option>
-                      <option value="2024-2028">2024-2028</option>
                     </select>
                   </div>
                 </div>

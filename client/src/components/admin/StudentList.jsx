@@ -190,7 +190,7 @@ const StudentList = () => {
       const rollNumber = rollIdx !== -1 && row[rollIdx] ? row[rollIdx] : '';
       const email = emailIdx !== -1 && row[emailIdx] ? row[emailIdx] : '';
       const department = deptIdx !== -1 && row[deptIdx] ? row[deptIdx] : 'Computer Science';
-      const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : '2023-2027';
+      const batch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : 'Batch 1 - Web Design';
       const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
       const year = rawYear ? normalizeYear(rawYear) : calculateAcademicYear(batch);
 
@@ -276,8 +276,8 @@ const StudentList = () => {
     const headers = ['Student Name', 'Roll Number', 'Email', 'Department', 'Batch', 'Year'];
     const sampleRows = [
       headers.join(','),
-      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'Computer Science', '2023-2027', '3rd Year'].join(','),
-      ['John Smith', 'IT23002', 'john.smith@example.com', 'Information Technology', '2023-2027', '3rd Year'].join(',')
+      ['Jane Doe', 'CS23001', 'jane.doe@example.com', 'Computer Science', 'Batch 1 - Web Design', '3rd Year'].join(','),
+      ['John Smith', 'IT23002', 'john.smith@example.com', 'Information Technology', 'Batch 2 - UI/UX', '3rd Year'].join(',')
     ];
     const blob = new Blob([sampleRows.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -552,8 +552,6 @@ const StudentList = () => {
                 <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
                 <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
                 <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
-                <option value="2023-2027">2023-2027</option>
-                <option value="2024-2028">2024-2028</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -810,37 +808,25 @@ const StudentList = () => {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1 leading-none">
                       BATCH / TRACK
                     </label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="e.g. Batch 1 - Web Design"
-                      value={formData.batch}
-                      onChange={(e) => {
-                        const newBatch = e.target.value;
-                        setFormData({ 
-                          ...formData, 
-                          batch: newBatch,
-                          year: calculateAcademicYear(newBatch)
-                        });
-                      }}
-                      className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
-                    />
-                    {/* Quick Batch Presets */}
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {['Batch 1 - Web Design', 'Batch 2 - UI/UX', 'Batch 3 - SolidWorks & AutoCAD', '2023-2027'].map((bPreset) => (
-                        <button
-                          key={bPreset}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, batch: bPreset, year: calculateAcademicYear(bPreset) })}
-                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
-                            formData.batch === bPreset
-                              ? 'bg-[#004f90] text-white border-[#004f90]'
-                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {bPreset}
-                        </button>
-                      ))}
+                    <div className="relative">
+                      <select
+                        value={formData.batch}
+                        onChange={(e) => {
+                          const newBatch = e.target.value;
+                          setFormData({ 
+                            ...formData, 
+                            batch: newBatch
+                          });
+                        }}
+                        className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold cursor-pointer appearance-none shadow-sm"
+                      >
+                        <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
+                        <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
+                        <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
+                        <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                      </div>
                     </div>
                   </div>
 
@@ -1021,37 +1007,25 @@ const StudentList = () => {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1 leading-none">
                       BATCH / TRACK
                     </label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="e.g. Batch 1 - Web Design"
-                      value={editFormData.batch}
-                      onChange={(e) => {
-                        const newBatch = e.target.value;
-                        setEditFormData({ 
-                          ...editFormData, 
-                          batch: newBatch,
-                          year: calculateAcademicYear(newBatch)
-                        });
-                      }}
-                      className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold placeholder:text-slate-300 shadow-sm"
-                    />
-                    {/* Quick Batch Presets */}
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {['Batch 1 - Web Design', 'Batch 2 - UI/UX', 'Batch 3 - SolidWorks & AutoCAD', '2023-2027'].map((bPreset) => (
-                        <button
-                          key={bPreset}
-                          type="button"
-                          onClick={() => setEditFormData({ ...editFormData, batch: bPreset, year: calculateAcademicYear(bPreset) })}
-                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
-                            editFormData.batch === bPreset
-                              ? 'bg-[#004f90] text-white border-[#004f90]'
-                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {bPreset}
-                        </button>
-                      ))}
+                    <div className="relative">
+                      <select
+                        value={editFormData.batch}
+                        onChange={(e) => {
+                          const newBatch = e.target.value;
+                          setEditFormData({ 
+                            ...editFormData, 
+                            batch: newBatch
+                          });
+                        }}
+                        className="w-full bg-white border border-slate-200/80 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-855 text-base focus:outline-none transition-all outline-none font-semibold cursor-pointer appearance-none shadow-sm"
+                      >
+                        <option value="Batch 1 - Web Design">Batch 1 - Web Design</option>
+                        <option value="Batch 2 - UI/UX">Batch 2 - UI/UX</option>
+                        <option value="Batch 3 - SolidWorks & AutoCAD">Batch 3 - SolidWorks & AutoCAD</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
+                        <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                      </div>
                     </div>
                   </div>
 
