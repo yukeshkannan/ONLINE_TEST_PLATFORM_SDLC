@@ -118,6 +118,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin/users" element={<AdminDashboard tab="users" />} />
           <Route path="/admin/tests" element={<AdminDashboard tab="tests" />} />
           <Route path="/admin/proctoring" element={<AdminDashboard tab="proctoring" />} />
+          <Route path="/admin/cohorts" element={<AdminDashboard tab="cohorts" />} />
 
           {/* Fallback Redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />

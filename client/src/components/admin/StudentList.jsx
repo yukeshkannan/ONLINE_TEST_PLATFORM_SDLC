@@ -17,6 +17,27 @@ const StudentList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  const [deptList, setDeptList] = useState(DEPARTMENTS);
+  const [batchList, setBatchList] = useState(BATCH_TRACKS);
+
+  useEffect(() => {
+    api.get('/cohorts/departments')
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDeptList(data.filter(d => d.isActive).map(d => d.code));
+        }
+      })
+      .catch(() => {});
+
+    api.get('/cohorts/batches')
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setBatchList(data.filter(b => b.isActive).map(b => b.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Custom confirmation dialog states
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState(null);

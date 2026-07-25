@@ -91,6 +91,27 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [targetYear, setTargetYear] = useState('All Years');
   const [targetBatch, setTargetBatch] = useState('Web Design');
 
+  const [deptList, setDeptList] = useState(DEPARTMENTS);
+  const [batchList, setBatchList] = useState(BATCH_TRACKS);
+
+  useEffect(() => {
+    api.get('/cohorts/departments')
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDeptList(data.filter(d => d.isActive).map(d => d.code));
+        }
+      })
+      .catch(() => {});
+
+    api.get('/cohorts/batches')
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setBatchList(data.filter(b => b.isActive).map(b => b.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Questions state (Microsoft Forms style)
   const [questions, setQuestions] = useState([
     {
@@ -634,7 +655,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                   >
                     <option value="All Departments">All Departments (Any Dept)</option>
-                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                    {deptList.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                     <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -679,7 +700,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     className="w-full bg-white border border-slate-205 hover:border-slate-355 focus:border-[#004f90] rounded-full py-4.5 px-6 pr-10 text-slate-800 text-base focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
                   >
                     <option value="All Batches">All Batches (Every Student)</option>
-                    {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
+                    {batchList.map(b => <option key={b} value={b}>{b}</option>)}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center px-1 text-slate-500">
                     <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>

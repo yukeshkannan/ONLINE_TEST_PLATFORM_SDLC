@@ -9,6 +9,7 @@ import ViewResults from '../components/admin/ViewResults.jsx';
 import StudentList from '../components/admin/StudentList.jsx';
 import UserList from '../components/admin/UserList.jsx';
 import ProctoringLogs from '../components/admin/ProctoringLogs.jsx';
+import CohortManagement from '../components/admin/CohortManagement.jsx';
 import api from '../utils/api.js';
 import { parsePdfToText } from '../utils/pdfParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
@@ -389,6 +390,7 @@ const AdminDashboard = ({ tab }) => {
     switch(activeTab) {
       case 'dashboard': return 'Dashboard Overview';
       case 'students': return 'Student Management';
+      case 'cohorts': return 'Department & Batch Metadata Management';
       case 'users': return 'User Account Directory';
       case 'tests': return 'Assessment Manager';
       case 'proctoring': return 'Proctoring Monitor';
@@ -470,6 +472,10 @@ const AdminDashboard = ({ tab }) => {
                 </p>
               </div>
             )
+          )}
+
+          {activeTab === 'cohorts' && (
+            <CohortManagement />
           )}
 
           {activeTab === 'users' && (

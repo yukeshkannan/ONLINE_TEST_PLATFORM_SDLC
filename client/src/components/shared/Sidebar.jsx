@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, PlusCircle, LogOut, Shield, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, PlusCircle, LogOut, Shield, ShieldAlert, Layers } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 const Sidebar = () => {
@@ -15,6 +15,11 @@ const Sidebar = () => {
       name: 'Students',
       path: '/admin/students',
       icon: Users
+    },
+    {
+      name: 'Departments & Batches',
+      path: '/admin/cohorts',
+      icon: Layers
     },
     {
       name: 'Create Test',

@@ -13,6 +13,7 @@ import resultRoutes from './routes/result.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import violationRoutes from './routes/violation.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import cohortRoutes from './routes/cohort.routes.js';
 
 import errorHandler from './middleware/errorHandler.js';
 import Student from './models/Student.js';
@@ -77,6 +78,7 @@ app.use('/api/results', resultRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/violations', violationRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/cohorts', cohortRoutes);
 
 app.use(errorHandler);
 
