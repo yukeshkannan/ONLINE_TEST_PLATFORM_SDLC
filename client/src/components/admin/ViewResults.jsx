@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
-import { Award, FileSpreadsheet, Filter, Search, ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight, Eye, AlertCircle, RotateCcw, AlertTriangle, ShieldAlert, Download } from 'lucide-react';
+import { Award, FileSpreadsheet, Filter, Search, ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight, Eye, AlertCircle, RotateCcw, AlertTriangle, ShieldAlert, Download, Users } from 'lucide-react';
 import ResultScreen from '../student/ResultScreen.jsx';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ViewResults = ({ test, onBack }) => {
   const [results, setResults] = useState([]);
+  const [pendingStudents, setPendingStudents] = useState([]);
+  const [summary, setSummary] = useState({
+    totalEligible: 0,
+    submittedCount: 0,
+    pendingCount: 0,
+    completionRate: 0
+  });
+  const [viewTab, setViewTab] = useState('submitted'); // 'submitted' | 'pending'
   const [loading, setLoading] = useState(true);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +29,25 @@ const ViewResults = ({ test, onBack }) => {
     setLoading(true);
     try {
       const { data } = await api.get(`/results/test/${test._id}`);
-      setResults(data);
+      if (Array.isArray(data)) {
+        setResults(data);
+        setPendingStudents([]);
+        setSummary({
+          totalEligible: data.length,
+          submittedCount: data.length,
+          pendingCount: 0,
+          completionRate: 100
+        });
+      } else {
+        setResults(data.results || []);
+        setPendingStudents(data.pendingStudents || []);
+        setSummary(data.summary || {
+          totalEligible: 0,
+          submittedCount: 0,
+          pendingCount: 0,
+          completionRate: 0
+        });
+      }
     } catch (err) {
       toast.error('Failed to retrieve test candidate attempts.');
     } finally {
@@ -82,47 +108,88 @@ const ViewResults = ({ test, onBack }) => {
   };
 
   const handleExportFilteredCSV = () => {
-    if (filteredResults.length === 0) return toast.error('No matching candidates to export.');
+    if (viewTab === 'submitted') {
+      if (filteredResults.length === 0) return toast.error('No matching candidates to export.');
 
-    const headers = ['Rank', 'Candidate Name', 'Roll Number', 'Department', 'Batch', 'Score Obtained', 'Total Marks', 'Percentage (%)', 'Status', 'Time Taken (Mins)'];
-    const csvRows = [
-      headers.join(','),
-      ...filteredResults.map((resItem, idx) => [
-        idx + 1,
-        `"${resItem.studentId?.name || 'N/A'}"`,
-        `"${resItem.studentId?.rollNumber || 'N/A'}"`,
-        `"${resItem.studentId?.department || 'N/A'}"`,
-        `"${resItem.studentId?.batch || 'N/A'}"`,
-        resItem.score,
-        resItem.totalMarks,
-        resItem.percentage,
-        resItem.passed ? 'PASS' : 'FAIL',
-        Number((resItem.timeTaken / 60).toFixed(2))
-      ].join(','))
-    ];
+      const headers = ['Rank', 'Candidate Name', 'Roll Number', 'Department', 'Batch', 'Score Obtained', 'Total Marks', 'Percentage (%)', 'Status', 'Time Taken (Mins)'];
+      const csvRows = [
+        headers.join(','),
+        ...filteredResults.map((resItem, idx) => [
+          idx + 1,
+          `"${resItem.studentId?.name || 'N/A'}"`,
+          `"${resItem.studentId?.rollNumber || 'N/A'}"`,
+          `"${resItem.studentId?.department || 'N/A'}"`,
+          `"${resItem.studentId?.batch || 'N/A'}"`,
+          resItem.score,
+          resItem.totalMarks,
+          resItem.percentage,
+          resItem.passed ? 'PASS' : 'FAIL',
+          Number((resItem.timeTaken / 60).toFixed(2))
+        ].join(','))
+      ];
 
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    const safeTitle = test.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    link.href = url;
-    link.download = `test-results-${safeTitle}-${test._id.slice(-4)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success(`Exported ${filteredResults.length} candidate results successfully.`);
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeTitle = test.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      link.href = url;
+      link.download = `submitted-results-${safeTitle}-${test._id.slice(-4)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Exported ${filteredResults.length} submitted candidate results successfully.`);
+    } else {
+      if (filteredPendingStudents.length === 0) return toast.error('No matching pending candidates to export.');
+
+      const headers = ['#', 'Candidate Name', 'Roll Number', 'Department', 'Batch', 'Year', 'Email Address', 'Status'];
+      const csvRows = [
+        headers.join(','),
+        ...filteredPendingStudents.map((st, idx) => [
+          idx + 1,
+          `"${st.name || 'N/A'}"`,
+          `"${st.rollNumber || 'N/A'}"`,
+          `"${st.department || 'N/A'}"`,
+          `"${st.batch || 'N/A'}"`,
+          `"${st.year || 'N/A'}"`,
+          `"${st.email || 'N/A'}"`,
+          'Pending Attempt'
+        ].join(','))
+      ];
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeTitle = test.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      link.href = url;
+      link.download = `pending-students-${safeTitle}-${test._id.slice(-4)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Exported ${filteredPendingStudents.length} pending candidate records successfully.`);
+    }
   };
 
-  const uniqueDepts = Array.from(new Set(results.map((r) => r.studentId?.department).filter(Boolean)));
-  const uniqueBatches = Array.from(new Set(results.map((r) => r.studentId?.batch).filter(Boolean)));
+  const allDepts = Array.from(
+    new Set([
+      ...results.map((r) => r.studentId?.department),
+      ...pendingStudents.map((s) => s.department)
+    ].filter(Boolean))
+  );
+
+  const allBatches = Array.from(
+    new Set([
+      ...results.map((r) => r.studentId?.batch),
+      ...pendingStudents.map((s) => s.batch)
+    ].filter(Boolean))
+  );
 
   const filteredResults = results.filter((res) => {
     const student = res.studentId;
     if (!student) return false;
 
     const matchSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchDept = selectedDept === 'ALL' || student.department === selectedDept;
     const matchBatch = selectedBatch === 'ALL' || student.batch === selectedBatch;
@@ -132,6 +199,20 @@ const ViewResults = ({ test, onBack }) => {
     if (selectedStatus === 'FAIL') matchStatus = !res.passed;
 
     return matchSearch && matchDept && matchBatch && matchStatus;
+  });
+
+  const filteredPendingStudents = pendingStudents.filter((st) => {
+    if (!st) return false;
+
+    const matchSearch =
+      st.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      st.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      st.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchDept = selectedDept === 'ALL' || st.department === selectedDept;
+    const matchBatch = selectedBatch === 'ALL' || st.batch === selectedBatch;
+
+    return matchSearch && matchDept && matchBatch;
   });
 
   if (activeScorecardId) {
@@ -147,45 +228,114 @@ const ViewResults = ({ test, onBack }) => {
   }
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn">
       
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-accent/15 pb-4 gap-4">
         <div className="space-y-1">
           <button
             onClick={onBack}
-            className="flex items-center space-x-1.5 text-xs text-softgrey hover:text-[#004f90] transition-colors mb-1.5"
+            className="flex items-center space-x-1.5 text-xs text-softgrey hover:text-[#004f90] transition-colors mb-1.5 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Test Manager</span>
           </button>
           
-          <span className="text-[10px] text-accent font-bold tracking-widest uppercase">Grading & Score sheets</span>
+          <span className="text-[10px] text-accent font-bold tracking-widest uppercase">Grading & Participation Ledger</span>
           <h2 className="text-xl font-black text-white">{test.title}</h2>
           <p className="text-xs text-softgrey">
             Pass Marks Threshold: <span className="text-white font-bold">{test.passMark}</span> out of {test.totalMarks}
           </p>
         </div>
 
-        {results.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={handleExportFilteredCSV}
-              className="bg-[#004f90] hover:bg-[#003c6e] text-white font-extrabold px-3.5 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-blue-400/20 shadow-md transition-all shrink-0 cursor-pointer"
-            >
-              <Download className="h-4 w-4" />
-              <span>Export Filtered CSV ({filteredResults.length})</span>
-            </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={handleExportFilteredCSV}
+            className="bg-[#004f90] hover:bg-[#003c6e] text-white font-extrabold px-3.5 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-blue-400/20 shadow-md transition-all shrink-0 cursor-pointer"
+          >
+            <Download className="h-4 w-4" />
+            <span>
+              {viewTab === 'submitted' 
+                ? `Export Submitted CSV (${filteredResults.length})` 
+                : `Export Pending CSV (${filteredPendingStudents.length})`}
+            </span>
+          </button>
 
-            <button
-              onClick={handleDownloadExcel}
-              className="gold-shimmer-hover bg-gradient-to-r from-success to-success hover:from-green-500 hover:to-success text-charcoal hover:text-white font-extrabold px-4 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-accent/20 shadow-md transition-all duration-300 shrink-0 cursor-pointer"
-            >
-              <FileSpreadsheet className="h-4.5 w-4.5" />
-              <span>Download Excel Report (All {results.length} Candidates)</span>
-            </button>
+          <button
+            onClick={handleDownloadExcel}
+            className="gold-shimmer-hover bg-gradient-to-r from-success to-success hover:from-green-500 hover:to-success text-charcoal hover:text-white font-extrabold px-4 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-accent/20 shadow-md transition-all duration-300 shrink-0 cursor-pointer"
+          >
+            <FileSpreadsheet className="h-4.5 w-4.5" />
+            <span>Download Excel Report (All {summary.totalEligible} Candidates)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Executive Participation Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Card 1: Total Assigned */}
+        <div className="bg-charcoal-surface border border-accent/15 rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-softgrey uppercase tracking-widest">Total Assigned Cohort</p>
+            <h3 className="text-2xl font-black text-white font-mono">{summary.totalEligible} <span className="text-xs text-softgrey font-sans font-normal">Students</span></h3>
           </div>
-        )}
+          <div className="p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl">
+            <Users className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Card 2: Submitted / Completed */}
+        <div className="bg-charcoal-surface border border-accent/15 rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Completed / Submitted</p>
+            <h3 className="text-2xl font-black text-emerald-400 font-mono">
+              {summary.submittedCount} <span className="text-xs font-sans text-emerald-300 font-bold ml-1">({summary.completionRate}% Turnout)</span>
+            </h3>
+          </div>
+          <div className="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl">
+            <CheckCircle className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Card 3: Pending / Outstanding */}
+        <div className="bg-charcoal-surface border border-accent/15 rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Pending Attempts</p>
+            <h3 className="text-2xl font-black text-amber-400 font-mono">
+              {summary.pendingCount} <span className="text-xs font-sans text-amber-300 font-bold ml-1">({summary.totalEligible > 0 ? (100 - summary.completionRate).toFixed(1) : 0}% Pending)</span>
+            </h3>
+          </div>
+          <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl">
+            <Clock className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation View Tabs */}
+      <div className="flex items-center space-x-2 border-b border-accent/10 pb-2">
+        <button
+          onClick={() => setViewTab('submitted')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 cursor-pointer ${
+            viewTab === 'submitted'
+              ? 'bg-[#004f90] text-white shadow-md'
+              : 'bg-charcoal-surface text-softgrey hover:text-white border border-accent/10'
+          }`}
+        >
+          <CheckCircle className="h-4 w-4 text-emerald-400" />
+          <span>Submitted Candidates ({results.length})</span>
+        </button>
+
+        <button
+          onClick={() => setViewTab('pending')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 cursor-pointer ${
+            viewTab === 'pending'
+              ? 'bg-amber-600 text-white shadow-md'
+              : 'bg-charcoal-surface text-softgrey hover:text-white border border-accent/10'
+          }`}
+        >
+          <Clock className="h-4 w-4 text-amber-300" />
+          <span>Pending Candidates ({pendingStudents.length})</span>
+        </button>
       </div>
 
       {/* Filter panel console */}
@@ -195,7 +345,7 @@ const ViewResults = ({ test, onBack }) => {
         <div className="relative w-full md:flex-1">
           <input
             type="text"
-            placeholder="Search by candidate name or roll number..."
+            placeholder={viewTab === 'submitted' ? "Search by candidate name or roll number..." : "Search pending student by name, roll number, or email..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-charcoal-light border border-accent/5 rounded-lg py-2.5 pl-9 pr-4 text-white text-xs placeholder-softgrey/35 focus:outline-none focus:border-accent/40"
@@ -212,10 +362,10 @@ const ViewResults = ({ test, onBack }) => {
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none"
+              className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Departments</option>
-              {uniqueDepts.map(dept => <option key={dept} value={dept}>{dept}</option>)}
+              {allDepts.map(dept => <option key={dept} value={dept}>{dept}</option>)}
             </select>
           </div>
 
@@ -223,105 +373,152 @@ const ViewResults = ({ test, onBack }) => {
           <select
             value={selectedBatch}
             onChange={(e) => setSelectedBatch(e.target.value)}
-            className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none"
+            className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Batches</option>
-            {uniqueBatches.map(batch => <option key={batch} value={batch}>Batch {batch}</option>)}
+            {allBatches.map(batch => <option key={batch} value={batch}>Batch {batch}</option>)}
           </select>
 
-          {/* Result Status */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none"
-          >
-            <option value="ALL">All Grades</option>
-            <option value="PASS">Passes Only</option>
-            <option value="FAIL">Fails Only</option>
-          </select>
+          {/* Result Status (Only for Submitted tab) */}
+          {viewTab === 'submitted' && (
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Grades</option>
+              <option value="PASS">Passes Only</option>
+              <option value="FAIL">Fails Only</option>
+            </select>
+          )}
         </div>
       </div>
 
-      {/* Main Leaderboard Table */}
+      {/* Main Content Table (Submitted vs Pending) */}
       <div className="bg-charcoal-surface border border-accent/15 rounded-xl p-5 shadow-xl">
         {loading ? (
-          <div className="py-20 text-center text-xs text-softgrey">Loading results ledger...</div>
-        ) : filteredResults.length === 0 ? (
-          <div className="py-12 text-center text-xs text-softgrey space-y-2">
-            <AlertCircle className="h-8 w-8 text-softgrey/30 mx-auto" />
-            <p className="font-semibold">No candidate entries found matching criteria.</p>
-            <p className="text-[10px] text-softgrey/50">Ensure that candidates have finished their test attempts.</p>
-          </div>
+          <div className="py-20 text-center text-xs text-softgrey">Loading results and candidate roster...</div>
+        ) : viewTab === 'submitted' ? (
+          // SUBMITTED CANDIDATES TABLE
+          filteredResults.length === 0 ? (
+            <div className="py-12 text-center text-xs text-softgrey space-y-2">
+              <AlertCircle className="h-8 w-8 text-softgrey/30 mx-auto" />
+              <p className="font-semibold">No submitted candidate entries found matching criteria.</p>
+              <p className="text-[10px] text-softgrey/50">Ensure that candidates have finished their test attempts.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-accent/10 text-softgrey uppercase font-bold tracking-wider">
+                    <th className="pb-3.5 pl-3">Rank</th>
+                    <th className="pb-3.5">Candidate</th>
+                    <th className="pb-3.5">Roll No</th>
+                    <th className="pb-3.5">Department</th>
+                    <th className="pb-3.5">Batch</th>
+                    <th className="pb-3.5 text-center">Score Ratio</th>
+                    <th className="pb-3.5 text-center">Percentage</th>
+                    <th className="pb-3.5 text-center">Status</th>
+                    <th className="pb-3.5 text-center">Duration</th>
+                    <th className="pb-3.5 pr-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-accent/5">
+                  {filteredResults.map((res, index) => {
+                    const s = res.studentId;
+                    const mins = Math.floor(res.timeTaken / 60);
+                    const secs = res.timeTaken % 60;
+                    
+                    return (
+                      <tr key={res._id} className="hover:bg-charcoal-light/30 transition-colors">
+                        <td className="py-3.5 pl-3 font-bold text-accent font-mono">#{index + 1}</td>
+                        <td className="py-3.5 font-bold text-white">{s?.name || 'Unknown'}</td>
+                        <td className="py-3.5 text-softgrey font-mono uppercase">{s?.rollNumber || 'N/A'}</td>
+                        <td className="py-3.5 text-softgrey">{s?.department || 'N/A'}</td>
+                        <td className="py-3.5 text-softgrey font-mono">{s?.batch || 'N/A'}</td>
+                        <td className="py-3.5 text-center text-white font-bold">{res.score} / {res.totalMarks}</td>
+                        <td className="py-3.5 text-center font-bold text-white font-mono">{res.percentage}%</td>
+                        <td className="py-3.5 text-center">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-[9px] border ${
+                            res.passed
+                              ? 'bg-success/15 border-success/30 text-success'
+                              : 'bg-danger/15 border-danger/30 text-danger'
+                          }`}>
+                            {res.passed ? 'PASS' : 'FAIL'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 text-center text-softgrey/80 font-mono">
+                          {mins > 0 ? `${mins}m ${secs}s` : `${secs}s`}
+                        </td>
+                        <td className="py-3.5 pr-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setActiveScorecardId(res._id)}
+                              className="flex items-center space-x-1 text-accent hover:text-white bg-charcoal-light hover:bg-primary/20 border border-accent/15 hover:border-accent/40 px-2.5 py-1 rounded transition-colors text-[10px] font-bold cursor-pointer"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              <span>Review Sheet</span>
+                            </button>
+                            
+                            <button
+                              onClick={() => handleResetAttempt(s?._id, s?.name)}
+                              className="flex items-center space-x-1 text-red-500 hover:text-white bg-charcoal-light hover:bg-red-950/30 border border-red-500/20 hover:border-red-500 px-2.5 py-1 rounded transition-all text-[10px] font-bold cursor-pointer"
+                              title="Reset candidate test attempt and violation history"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              <span>Reset Attempt</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-accent/10 text-softgrey uppercase font-bold tracking-wider">
-                  <th className="pb-3.5 pl-3">Rank</th>
-                  <th className="pb-3.5">Candidate</th>
-                  <th className="pb-3.5">Roll No</th>
-                  <th className="pb-3.5">Department</th>
-                  <th className="pb-3.5">Batch</th>
-                  <th className="pb-3.5 text-center">Score Ratio</th>
-                  <th className="pb-3.5 text-center">Percentage</th>
-                  <th className="pb-3.5 text-center">Status</th>
-                  <th className="pb-3.5 text-center">Duration</th>
-                  <th className="pb-3.5 pr-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-accent/5">
-                {filteredResults.map((res, index) => {
-                  const s = res.studentId;
-                  const mins = Math.floor(res.timeTaken / 60);
-                  const secs = res.timeTaken % 60;
-                  
-                  return (
-                    <tr key={res._id} className="hover:bg-charcoal-light/30 transition-colors">
-                      <td className="py-3.5 pl-3 font-bold text-accent font-mono">#{index + 1}</td>
-                      <td className="py-3.5 font-bold text-white">{s?.name || 'Unknown'}</td>
-                      <td className="py-3.5 text-softgrey font-mono uppercase">{s?.rollNumber || 'N/A'}</td>
-                      <td className="py-3.5 text-softgrey">{s?.department || 'N/A'}</td>
-                      <td className="py-3.5 text-softgrey font-mono">{s?.batch || 'N/A'}</td>
-                      <td className="py-3.5 text-center text-white font-bold">{res.score} / {res.totalMarks}</td>
-                      <td className="py-3.5 text-center font-bold text-white font-mono">{res.percentage}%</td>
+          // PENDING CANDIDATES TABLE
+          filteredPendingStudents.length === 0 ? (
+            <div className="py-12 text-center text-xs text-softgrey space-y-2">
+              <CheckCircle className="h-8 w-8 text-emerald-500/40 mx-auto" />
+              <p className="font-semibold text-emerald-400">All assigned candidates have completed this assessment!</p>
+              <p className="text-[10px] text-softgrey/50">There are no pending candidates remaining for this test cohort.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-accent/10 text-softgrey uppercase font-bold tracking-wider">
+                    <th className="pb-3.5 pl-3">#</th>
+                    <th className="pb-3.5">Candidate Name</th>
+                    <th className="pb-3.5">Roll Number</th>
+                    <th className="pb-3.5">Department</th>
+                    <th className="pb-3.5">Batch & Year</th>
+                    <th className="pb-3.5">Email Address</th>
+                    <th className="pb-3.5 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-accent/5">
+                  {filteredPendingStudents.map((st, index) => (
+                    <tr key={st._id} className="hover:bg-charcoal-light/30 transition-colors">
+                      <td className="py-3.5 pl-3 font-bold text-softgrey/60 font-mono">#{index + 1}</td>
+                      <td className="py-3.5 font-bold text-white">{st.name}</td>
+                      <td className="py-3.5 text-softgrey font-mono uppercase">{st.rollNumber || 'N/A'}</td>
+                      <td className="py-3.5 text-softgrey">{st.department || 'N/A'}</td>
+                      <td className="py-3.5 text-softgrey font-mono">{st.batch || 'N/A'} ({st.year || 'N/A'})</td>
+                      <td className="py-3.5 text-softgrey/80 font-mono text-[11px]">{st.email || 'N/A'}</td>
                       <td className="py-3.5 text-center">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-[9px] border ${
-                          res.passed
-                            ? 'bg-success/15 border-success/30 text-success'
-                            : 'bg-danger/15 border-danger/30 text-danger'
-                        }`}>
-                          {res.passed ? 'PASS' : 'FAIL'}
+                        <span className="inline-block px-3 py-1 rounded-full font-extrabold text-[10px] bg-amber-500/15 border border-amber-500/30 text-amber-400 uppercase tracking-wider">
+                          Pending Attempt
                         </span>
                       </td>
-                      <td className="py-3.5 text-center text-softgrey/80 font-mono">
-                        {mins > 0 ? `${mins}m ${secs}s` : `${secs}s`}
-                      </td>
-                      <td className="py-3.5 pr-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setActiveScorecardId(res._id)}
-                            className="flex items-center space-x-1 text-accent hover:text-white bg-charcoal-light hover:bg-primary/20 border border-accent/15 hover:border-accent/40 px-2.5 py-1 rounded transition-colors text-[10px] font-bold"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            <span>Review Sheet</span>
-                          </button>
-                          
-                          <button
-                            onClick={() => handleResetAttempt(s?._id, s?.name)}
-                            className="flex items-center space-x-1 text-red-500 hover:text-white bg-charcoal-light hover:bg-red-950/30 border border-red-500/20 hover:border-red-500 px-2.5 py-1 rounded transition-all text-[10px] font-bold cursor-pointer"
-                            title="Reset candidate test attempt and violation history"
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                            <span>Reset Attempt</span>
-                          </button>
-                        </div>
-                      </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
       </div>
 

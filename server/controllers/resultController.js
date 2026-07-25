@@ -114,8 +114,13 @@ export const getResultsByTest = async (req, res, next) => {
   const { testId } = req.params;
 
   try {
+    const test = await Test.findById(testId).lean();
+    if (!test) {
+      return res.status(404).json({ message: 'Test not found' });
+    }
+
     const results = await Result.find({ testId })
-      .populate('studentId', 'name rollNumber department batch year')
+      .populate('studentId', 'name rollNumber department batch year email')
       .sort({ score: -1, timeTaken: 1 }); // Rank highest score first, ties broken by timeTaken
 
     // Clean up orphaned results where the student was deleted
@@ -126,7 +131,56 @@ export const getResultsByTest = async (req, res, next) => {
     }
 
     const validResults = results.filter(r => r.studentId);
-    res.status(200).json(validResults);
+
+    // Determine eligible cohort students based on test.assignedTo
+    let eligibleStudents = [];
+    if (test.assignedTo && test.assignedTo.length > 0) {
+      const queryConditions = test.assignedTo.map(assign => {
+        const condition = {};
+        if (assign.department && !['All Departments', 'ALL', ''].includes(assign.department)) {
+          condition.department = assign.department;
+        }
+        if (assign.batch && !['All Batches', 'ALL', ''].includes(assign.batch)) {
+          condition.batch = assign.batch;
+        }
+        if (assign.year && !['All Years', 'ALL', ''].includes(assign.year)) {
+          condition.year = assign.year;
+        }
+        return condition;
+      });
+
+      if (queryConditions.some(c => Object.keys(c).length === 0)) {
+        eligibleStudents = await Student.find().select('name rollNumber department batch year email').lean();
+      } else {
+        eligibleStudents = await Student.find({ $or: queryConditions }).select('name rollNumber department batch year email').lean();
+      }
+    } else {
+      eligibleStudents = await Student.find().select('name rollNumber department batch year email').lean();
+    }
+
+    const submittedStudentIdSet = new Set(
+      validResults.map(r => (r.studentId._id ? r.studentId._id.toString() : r.studentId.toString()))
+    );
+
+    const pendingStudents = eligibleStudents.filter(
+      student => !submittedStudentIdSet.has(student._id.toString())
+    );
+
+    const totalEligible = eligibleStudents.length;
+    const submittedCount = validResults.length;
+    const pendingCount = pendingStudents.length;
+    const completionRate = totalEligible > 0 ? Number(((submittedCount / totalEligible) * 100).toFixed(1)) : 0;
+
+    res.status(200).json({
+      summary: {
+        totalEligible,
+        submittedCount,
+        pendingCount,
+        completionRate
+      },
+      results: validResults,
+      pendingStudents
+    });
   } catch (error) {
     next(error);
   }
