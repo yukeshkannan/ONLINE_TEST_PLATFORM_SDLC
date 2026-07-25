@@ -56,8 +56,8 @@ const TestList = ({ onStartTest, onViewResult }) => {
   
   const activeTests = tests.filter((t) => {
     const isStatusActive = t.status === 'active';
-    const isNotExpired = now <= new Date(t.endTime);
-    return isStatusActive && isNotExpired && !t.attempted;
+    const isWithinWindow = now >= new Date(t.startTime) && now <= new Date(t.endTime);
+    return isStatusActive && isWithinWindow && !t.attempted;
   });
   
   const completedTests = tests.filter((t) => t.attempted);
