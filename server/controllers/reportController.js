@@ -87,6 +87,20 @@ export const getDashboardStats = async (req, res, next) => {
   }
 };
 
+export const getAllSubmissions = async (req, res, next) => {
+  try {
+    const submissions = await Result.find()
+      .populate('studentId', 'name rollNumber department batch year email')
+      .populate('testId', 'title subject totalMarks passMark duration')
+      .sort({ submittedAt: -1 });
+
+    const validSubmissions = submissions.filter(r => r.studentId && r.testId);
+    res.status(200).json(validSubmissions);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const downloadExcelReport = async (req, res, next) => {
   const { testId } = req.params;
 

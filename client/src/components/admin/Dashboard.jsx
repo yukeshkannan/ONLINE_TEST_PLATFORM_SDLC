@@ -87,31 +87,44 @@ const Dashboard = () => {
     }
   };
 
-  const handleExportSubmissions = (recentActivity) => {
-    if (!recentActivity || recentActivity.length === 0) return toast.error('No exam submissions available to export.');
-    
-    const headers = ['Candidate Name', 'Roll Number', 'Department', 'Assessment Title', 'Score', 'Total Marks', 'Passed', 'Submitted At'];
-    const csvRows = [
-      headers.join(','),
-      ...recentActivity.map(attempt => [
-        `"${attempt.studentId?.name || 'N/A'}"`,
-        `"${attempt.studentId?.rollNumber || 'N/A'}"`,
-        `"${attempt.studentId?.department || 'N/A'}"`,
-        `"${attempt.testId?.title || 'Unknown'}"`,
-        attempt.score,
-        attempt.totalMarks,
-        attempt.passed ? 'Yes' : 'No',
-        `"${new Date(attempt.submittedAt).toLocaleString()}"`
-      ].join(','))
-    ];
+  const handleExportSubmissions = async () => {
+    const loader = toast.loading('Compiling complete student submissions report...');
+    try {
+      const { data: allSubmissions } = await api.get('/reports/submissions');
+      
+      if (!allSubmissions || allSubmissions.length === 0) {
+        return toast.error('No exam submissions available to export.', { id: loader });
+      }
 
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', 'sdlc_exam_submissions_report.csv');
-    a.click();
-    toast.success('Submissions report downloaded successfully.');
+      const headers = ['Candidate Name', 'Roll Number', 'Department', 'Batch', 'Year', 'Assessment Title', 'Subject', 'Score', 'Total Marks', 'Passed', 'Submitted At'];
+      const csvRows = [
+        headers.join(','),
+        ...allSubmissions.map(attempt => [
+          `"${attempt.studentId?.name || 'N/A'}"`,
+          `"${attempt.studentId?.rollNumber || 'N/A'}"`,
+          `"${attempt.studentId?.department || 'N/A'}"`,
+          `"${attempt.studentId?.batch || 'N/A'}"`,
+          `"${attempt.studentId?.year || 'N/A'}"`,
+          `"${attempt.testId?.title || 'Unknown'}"`,
+          `"${attempt.testId?.subject || 'N/A'}"`,
+          attempt.score,
+          attempt.totalMarks,
+          attempt.passed ? 'Yes' : 'No',
+          `"${new Date(attempt.submittedAt).toLocaleString()}"`
+        ].join(','))
+      ];
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `all_exam_submissions_report_${new Date().toISOString().slice(0, 10)}.csv`);
+      a.click();
+      toast.success(`Exported ${allSubmissions.length} student submission records successfully.`, { id: loader });
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to compile student submissions report.', { id: loader });
+    }
   };
 
   if (loading) {
@@ -263,10 +276,10 @@ const Dashboard = () => {
             </div>
             
             <button 
-              onClick={() => handleExportSubmissions(recentActivity)}
-              disabled={!recentActivity || recentActivity.length === 0}
+              onClick={handleExportSubmissions}
+              disabled={stats.totalSubmissions === 0}
               className={`font-bold text-xs px-4 py-2.5 rounded-lg transition-all flex items-center space-x-2 shrink-0 justify-center ${
-                !recentActivity || recentActivity.length === 0
+                stats.totalSubmissions === 0
                   ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
               }`}

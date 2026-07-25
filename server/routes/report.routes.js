@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDashboardStats, downloadExcelReport } from '../controllers/reportController.js';
+import { getDashboardStats, downloadExcelReport, getAllSubmissions } from '../controllers/reportController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import roleMiddleware from '../middleware/roleMiddleware.js';
 
@@ -10,6 +10,7 @@ router.use(authMiddleware);
 router.use(roleMiddleware('admin', 'trainer'));
 
 router.get('/dashboard', getDashboardStats);
+router.get('/submissions', getAllSubmissions);
 router.get('/excel/:testId', downloadExcelReport);
 
 export default router;

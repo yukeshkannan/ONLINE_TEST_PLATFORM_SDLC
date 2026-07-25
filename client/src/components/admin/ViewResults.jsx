@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
-import { Award, FileSpreadsheet, Filter, Search, ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight, Eye, AlertCircle, RotateCcw, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Award, FileSpreadsheet, Filter, Search, ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight, Eye, AlertCircle, RotateCcw, AlertTriangle, ShieldAlert, Download } from 'lucide-react';
 import ResultScreen from '../student/ResultScreen.jsx';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,6 +81,38 @@ const ViewResults = ({ test, onBack }) => {
     }
   };
 
+  const handleExportFilteredCSV = () => {
+    if (filteredResults.length === 0) return toast.error('No matching candidates to export.');
+
+    const headers = ['Rank', 'Candidate Name', 'Roll Number', 'Department', 'Batch', 'Score Obtained', 'Total Marks', 'Percentage (%)', 'Status', 'Time Taken (Mins)'];
+    const csvRows = [
+      headers.join(','),
+      ...filteredResults.map((resItem, idx) => [
+        idx + 1,
+        `"${resItem.studentId?.name || 'N/A'}"`,
+        `"${resItem.studentId?.rollNumber || 'N/A'}"`,
+        `"${resItem.studentId?.department || 'N/A'}"`,
+        `"${resItem.studentId?.batch || 'N/A'}"`,
+        resItem.score,
+        resItem.totalMarks,
+        resItem.percentage,
+        resItem.passed ? 'PASS' : 'FAIL',
+        Number((resItem.timeTaken / 60).toFixed(2))
+      ].join(','))
+    ];
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const safeTitle = test.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    link.href = url;
+    link.download = `test-results-${safeTitle}-${test._id.slice(-4)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${filteredResults.length} candidate results successfully.`);
+  };
+
   const uniqueDepts = Array.from(new Set(results.map((r) => r.studentId?.department).filter(Boolean)));
   const uniqueBatches = Array.from(new Set(results.map((r) => r.studentId?.batch).filter(Boolean)));
 
@@ -136,13 +168,23 @@ const ViewResults = ({ test, onBack }) => {
         </div>
 
         {results.length > 0 && (
-          <button
-            onClick={handleDownloadExcel}
-            className="gold-shimmer-hover bg-gradient-to-r from-success to-success hover:from-green-500 hover:to-success text-charcoal hover:text-white font-extrabold px-4 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-accent/20 shadow-md transition-all duration-300 shrink-0"
-          >
-            <FileSpreadsheet className="h-4.5 w-4.5" />
-            <span>Download Excel Report</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={handleExportFilteredCSV}
+              className="bg-[#004f90] hover:bg-[#003c6e] text-white font-extrabold px-3.5 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-blue-400/20 shadow-md transition-all shrink-0 cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export Filtered CSV ({filteredResults.length})</span>
+            </button>
+
+            <button
+              onClick={handleDownloadExcel}
+              className="gold-shimmer-hover bg-gradient-to-r from-success to-success hover:from-green-500 hover:to-success text-charcoal hover:text-white font-extrabold px-4 py-2.5 rounded-lg text-xs flex items-center space-x-2 border border-accent/20 shadow-md transition-all duration-300 shrink-0 cursor-pointer"
+            >
+              <FileSpreadsheet className="h-4.5 w-4.5" />
+              <span>Download Excel Report (All {results.length} Candidates)</span>
+            </button>
+          </div>
         )}
       </div>
 
