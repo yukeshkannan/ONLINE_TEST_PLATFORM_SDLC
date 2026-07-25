@@ -390,7 +390,7 @@ const AdminDashboard = ({ tab }) => {
     switch(activeTab) {
       case 'dashboard': return 'Dashboard Overview';
       case 'students': return 'Student Management';
-      case 'cohorts': return 'Department & Batch Metadata Management';
+      case 'cohorts': return 'Department Roster Management';
       case 'users': return 'User Account Directory';
       case 'tests': return 'Assessment Manager';
       case 'proctoring': return 'Proctoring Monitor';
