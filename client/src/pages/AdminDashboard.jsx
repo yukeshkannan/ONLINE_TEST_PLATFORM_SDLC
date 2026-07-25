@@ -375,6 +375,18 @@ const AdminDashboard = ({ tab }) => {
     }
   };
 
+  const handleQuickStatusChange = async (testId, newStatus) => {
+    const loader = toast.loading(`Updating test status to ${newStatus.toUpperCase()}...`);
+    try {
+      const { data } = await api.put(`/tests/${testId}`, { status: newStatus });
+      setTests(prev => prev.map(t => t._id === testId ? { ...t, status: data.status, startTime: data.startTime, endTime: data.endTime } : t));
+      toast.success(`Assessment status updated to ${newStatus.toUpperCase()}!`, { id: loader });
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to update test status.', { id: loader });
+    }
+  };
+
   if (loading || !isAuthenticated || (user?.role !== 'admin' && user?.role !== 'trainer')) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] space-y-4">
@@ -598,15 +610,21 @@ const AdminDashboard = ({ tab }) => {
                             </td>
                             {/* Status */}
                             <td className="py-6 px-6 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border uppercase ${
-                                test.status === 'active'
-                                  ? 'bg-emerald-50 border-emerald-150 text-emerald-700'
-                                  : test.status === 'ended'
-                                  ? 'bg-red-50 border-red-150 text-red-700'
-                                  : 'bg-amber-50 border-amber-150 text-amber-700'
-                              }`}>
-                                {test.status}
-                              </span>
+                              <select
+                                value={test.status}
+                                onChange={(e) => handleQuickStatusChange(test._id, e.target.value)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-extrabold border uppercase tracking-wider cursor-pointer focus:outline-none transition-all ${
+                                  test.status === 'active'
+                                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
+                                    : test.status === 'ended'
+                                    ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+                                    : 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100'
+                                }`}
+                              >
+                                <option value="draft" className="bg-white text-slate-800 font-bold">Draft</option>
+                                <option value="active" className="bg-white text-slate-800 font-bold">Active</option>
+                                <option value="ended" className="bg-white text-slate-800 font-bold">Ended</option>
+                              </select>
                             </td>
                             {/* Actions circular buttons */}
                             <td className="py-6 px-6 text-right">

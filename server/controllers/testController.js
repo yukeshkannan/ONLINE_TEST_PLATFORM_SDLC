@@ -4,12 +4,13 @@ import Student from '../models/Student.js';
 import Result from '../models/Result.js';
 
 const computeTestStatus = (test, now = new Date()) => {
-  if (!test || test.status === 'draft') return test?.status || 'draft';
-  const startTime = new Date(test.startTime);
+  if (!test) return 'draft';
+  if (test.status === 'draft') return 'draft';
+  if (test.status === 'ended') return 'ended';
+
   const endTime = new Date(test.endTime);
-  if (now < startTime) return 'draft';
-  if (now >= startTime && now <= endTime) return 'active';
-  return 'ended';
+  if (now > endTime) return 'ended';
+  return 'active';
 };
 
 export const getTests = async (req, res, next) => {
@@ -102,6 +103,15 @@ export const createTest = async (req, res, next) => {
   const { title, subject, description, duration, totalMarks, passMark, instructions, assignedTo, startTime, endTime, status, showResultsToStudents } = req.body;
 
   try {
+    const now = new Date();
+    let sTime = new Date(startTime);
+    let eTime = new Date(endTime);
+
+    if (status === 'active') {
+      if (sTime > now) sTime = now;
+      if (eTime <= now) eTime = new Date(now.getTime() + (duration || 60) * 60000);
+    }
+
     const newTest = new Test({
       title,
       subject,
@@ -112,14 +122,17 @@ export const createTest = async (req, res, next) => {
       instructions,
       createdBy: req.user.id,
       assignedTo,
-      startTime: new Date(startTime),
-      endTime: new Date(endTime),
+      startTime: sTime,
+      endTime: eTime,
       status: status || 'draft',
       showResultsToStudents: showResultsToStudents !== undefined ? showResultsToStudents : true
     });
 
     const savedTest = await newTest.save();
-    res.status(201).json(savedTest);
+    const resultObj = savedTest.toObject();
+    resultObj.status = computeTestStatus(resultObj, now);
+
+    res.status(201).json(resultObj);
   } catch (error) {
     next(error);
   }
@@ -148,8 +161,22 @@ export const updateTest = async (req, res, next) => {
     if (endTime) test.endTime = new Date(endTime);
     if (status) test.status = status;
 
+    if (test.status === 'active') {
+      const now = new Date();
+      if (new Date(test.startTime) > now) {
+        test.startTime = now;
+      }
+      if (new Date(test.endTime) <= now) {
+        test.endTime = new Date(now.getTime() + (test.duration || 60) * 60000);
+      }
+    }
+
     const updatedTest = await test.save();
-    res.status(200).json(updatedTest);
+    const now = new Date();
+    const resultObj = updatedTest.toObject();
+    resultObj.status = computeTestStatus(resultObj, now);
+
+    res.status(200).json(resultObj);
   } catch (error) {
     next(error);
   }
