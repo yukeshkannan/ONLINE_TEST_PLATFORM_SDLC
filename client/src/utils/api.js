@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -18,8 +19,8 @@ export const setAccessToken = (token) => {
 
 export const getAccessToken = () => accessToken;
 
-const isTokenExpired = (token) => {
-  if (!token) return false;
+export const isTokenExpired = (token) => {
+  if (!token) return true;
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload.exp * 1000 < Date.now() + 10000;
@@ -30,6 +31,7 @@ const isTokenExpired = (token) => {
 
 let isRefreshing = false;
 let failedQueue = [];
+let isAuthToastShown = false;
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
@@ -44,24 +46,39 @@ const processQueue = (error, token = null) => {
 
 const refreshAuthToken = async () => {
   const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  const response = await axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true });
-  const newAccessToken = response.data?.accessToken;
-  if (newAccessToken) {
-    setAccessToken(newAccessToken);
-    return newAccessToken;
-  } else {
+  try {
+    const response = await axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true });
+    const newAccessToken = response.data?.accessToken;
+    if (newAccessToken) {
+      setAccessToken(newAccessToken);
+      return newAccessToken;
+    } else {
+      throw new Error('No access token returned');
+    }
+  } catch (refreshErr) {
     setAccessToken('');
-    window.dispatchEvent(new Event('auth-expired'));
-    throw new Error('No access token in refresh response');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
+      window.dispatchEvent(new Event('auth-expired'));
+      if (!isAuthToastShown) {
+        isAuthToastShown = true;
+        toast.error('Session expired. Please log in again.');
+        setTimeout(() => { isAuthToastShown = false; }, 4000);
+      }
+    }
+    const errObj = new Error('Session expired. Please log in again.');
+    errObj.isAuthExpired = true;
+    throw errObj;
   }
 };
 
 api.interceptors.request.use(
   async (config) => {
     if (
-      accessToken && 
-      isTokenExpired(accessToken) && 
-      config.url && 
+      accessToken &&
+      isTokenExpired(accessToken) &&
+      config.url &&
       !config.url.includes('/auth/refresh') &&
       !config.url.includes('/auth/admin/login') &&
       !config.url.includes('/auth/student/login')

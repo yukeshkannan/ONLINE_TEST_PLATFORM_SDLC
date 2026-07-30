@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import api, { setAccessToken } from '../utils/api.js';
+import api, { setAccessToken, isTokenExpired } from '../utils/api.js';
 
 const AuthContext = createContext(null);
 
@@ -14,11 +14,13 @@ export const AuthProvider = ({ children }) => {
       const savedUser = localStorage.getItem('auth_user');
       if (savedToken && savedUser) {
         try {
-          const parsedUser = JSON.parse(savedUser);
-          setAccessToken(savedToken);
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-          return true;
+          if (!isTokenExpired(savedToken)) {
+            const parsedUser = JSON.parse(savedUser);
+            setAccessToken(savedToken);
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+            return true;
+          }
         } catch (e) {
           console.error('Failed to parse saved user:', e);
         }
@@ -27,6 +29,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setAccessToken('');
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
       return false;
     };
 
@@ -58,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setAccessToken('');
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
     };
 
     window.addEventListener('auth-expired', handleAuthExpired);

@@ -295,7 +295,11 @@ const AdminDashboard = ({ tab }) => {
       fetchTestsList();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to create bulk assessment.', { id: loader });
+      if (err.isAuthExpired || err.response?.status === 401) {
+        if (loader) toast.dismiss(loader);
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to create bulk assessment.', { id: loader });
+      }
     }
   };
 
