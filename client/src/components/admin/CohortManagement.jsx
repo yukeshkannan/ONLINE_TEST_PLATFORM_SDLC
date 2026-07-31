@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { 
-  BookOpen, Plus, Search, Edit3, Trash2, RefreshCw, AlertTriangle, CheckCircle2, XCircle, Sparkles
+  BookOpen, Plus, Search, Edit3, Trash2, RefreshCw, AlertTriangle, CheckCircle2, XCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -69,11 +69,16 @@ const CohortManagement = () => {
     setShowDeptModal(true);
   };
 
-  const handleApplyPreset = (preset) => {
-    setDeptCode(preset.code);
-    setDeptName(preset.name);
-    setDeptDesc(preset.desc);
-    toast.success(`Loaded preset: ${preset.name}`);
+  const handleSelectTemplate = (e) => {
+    const selectedCode = e.target.value;
+    if (!selectedCode) return;
+    const preset = PRESET_COURSES.find(p => p.code === selectedCode);
+    if (preset) {
+      setDeptCode(preset.code);
+      setDeptName(preset.name);
+      setDeptDesc(preset.desc);
+      toast.success(`Autofilled template: ${preset.name}`);
+    }
   };
 
   const handleSaveDepartment = async (e) => {
@@ -353,10 +358,10 @@ const CohortManagement = () => {
               <div className="flex justify-between items-center border-b border-slate-100 pb-3.5">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">
-                    {deptToEdit ? 'Edit Course' : 'Add New Course'}
+                    {deptToEdit ? 'Edit Course Details' : 'Add New Course'}
                   </h3>
                   <p className="text-xs text-slate-400 font-medium">
-                    Configure institute course title, short code & syllabus overview.
+                    Configure institute course title, code & syllabus details.
                   </p>
                 </div>
                 <button
@@ -367,29 +372,29 @@ const CohortManagement = () => {
                 </button>
               </div>
 
-              {/* QUICK PRESETS (Only for new courses) */}
-              {!deptToEdit && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#004f90] uppercase tracking-wider">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Quick Course Presets (Click to autofill)</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRESET_COURSES.map((preset) => (
-                      <button
-                        key={preset.code}
-                        type="button"
-                        onClick={() => handleApplyPreset(preset)}
-                        className="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-700 hover:text-[#004f90] font-semibold text-[11px] px-2.5 py-1 rounded-lg transition-all cursor-pointer"
-                      >
-                        + {preset.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <form onSubmit={handleSaveDepartment} className="space-y-4 text-left">
+                
+                {/* Standard Course Template Selector (Optional, clean dropdown) */}
+                {!deptToEdit && (
+                  <div className="space-y-1 bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                    <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider block">
+                      Quick Template (Optional)
+                    </label>
+                    <select
+                      onChange={handleSelectTemplate}
+                      defaultValue=""
+                      className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg py-2 px-3 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+                    >
+                      <option value="" disabled>-- Select a standard course template to autofill --</option>
+                      {PRESET_COURSES.map(p => (
+                        <option key={p.code} value={p.code}>
+                          {p.name} ({p.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1 sm:col-span-1">
                     <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
@@ -398,7 +403,7 @@ const CohortManagement = () => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. WEB, UIUX, FSD"
+                      placeholder="e.g. WEB, UIUX"
                       value={deptCode}
                       onChange={(e) => setDeptCode(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-bold text-slate-800 focus:outline-none uppercase font-mono"
@@ -412,7 +417,7 @@ const CohortManagement = () => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Web Designing, UI/UX Design"
+                      placeholder="e.g. Web Designing"
                       value={deptName}
                       onChange={(e) => setDeptName(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-bold text-slate-800 focus:outline-none"
@@ -422,11 +427,11 @@ const CohortManagement = () => {
 
                 <div className="space-y-1">
                   <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
-                    Syllabus / Overview (Optional)
+                    Syllabus / Overview
                   </label>
                   <textarea
                     rows="3"
-                    placeholder="Brief overview of course modules (e.g. HTML, CSS, JS & Tailwind)..."
+                    placeholder="Brief overview of topics covered (e.g. HTML5, CSS3, JS, Figma)..."
                     value={deptDesc}
                     onChange={(e) => setDeptDesc(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-medium text-slate-800 focus:outline-none resize-none"
