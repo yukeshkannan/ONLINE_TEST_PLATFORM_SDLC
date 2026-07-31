@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { 
   Building2, Plus, Search, Edit3, Trash2, RefreshCw, AlertTriangle, CheckCircle2, 
-  Grid, List, Layers, X, SlidersHorizontal, FolderKanban
+  Layers, X, FolderKanban
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -17,7 +17,6 @@ const CohortManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'inactive'
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
 
   // Department Modal State
   const [showDeptModal, setShowDeptModal] = useState(false);
@@ -238,7 +237,6 @@ const CohortManagement = () => {
   });
 
   const activeDeptCount = departments.filter(d => d.isActive).length;
-  const activeTrackCount = tracks.filter(t => t.isActive).length;
 
   return (
     <div className="space-y-6 animate-fadeIn font-sans text-left pb-16">
@@ -380,29 +378,10 @@ const CohortManagement = () => {
               <option value="inactive">Inactive Only</option>
             </select>
           </div>
-
-          <div className="flex items-center p-1 bg-slate-100 rounded-xl gap-1 shrink-0">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'grid' ? 'bg-white text-[#004f90] shadow-sm' : 'text-slate-400 hover:text-slate-700'
-              }`}
-            >
-              <Grid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'table' ? 'bg-white text-[#004f90] shadow-sm' : 'text-slate-400 hover:text-slate-700'
-              }`}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT AREA - LIST / TABLE VIEW ONLY */}
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-2xl py-20 text-center text-xs font-bold text-slate-400 flex flex-col items-center gap-2 shadow-sm">
           <div className="h-7 w-7 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
@@ -416,81 +395,15 @@ const CohortManagement = () => {
             <p className="font-bold text-slate-700 text-sm">No departments found.</p>
             <p className="text-xs">Click "Add Department" above to create a new department.</p>
           </div>
-        ) : viewMode === 'grid' ? (
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredDepartments.map((dept) => {
-              const linkedTracks = tracks.filter(t => t.department === dept.code || t.department === 'All Departments');
-
-              return (
-                <div
-                  key={dept._id}
-                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl shadow-sm p-5 space-y-4 transition-all flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="bg-blue-50 border border-blue-150 text-[#004f90] font-mono font-black px-3 py-1 rounded-lg text-xs">
-                        {dept.code}
-                      </span>
-
-                      <button
-                        onClick={() => handleToggleDeptActive(dept)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border transition-all cursor-pointer ${
-                          dept.isActive
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-                            : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200'
-                        }`}
-                      >
-                        <span className={`h-1.5 w-1.5 rounded-full ${dept.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                        <span>{dept.isActive ? 'Active' : 'Inactive'}</span>
-                      </button>
-                    </div>
-
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900 leading-snug">
-                        {dept.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 font-medium mt-1 line-clamp-2 min-h-[32px]">
-                        {dept.description || <span className="text-slate-300 italic">No description provided</span>}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-400 font-semibold text-[11px]">
-                      {linkedTracks.length} specialization tracks
-                    </span>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleOpenDeptModal(dept)}
-                        className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                        title="Edit Department"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-
-                      <button
-                        onClick={() => setDeleteTarget({ type: 'dept', id: dept._id, code: dept.code, name: dept.name })}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
-                        title="Delete Department"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         ) : (
 
+          /* DEPARTMENTS PURE TABLE / LIST VIEW */
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-150 text-slate-400 uppercase font-extrabold text-[10px] tracking-widest bg-slate-50/70">
-                    <th className="py-3.5 px-5">Code</th>
+                    <th className="py-3.5 px-5">Dept Code</th>
                     <th className="py-3.5 px-5">Department Full Name</th>
                     <th className="py-3.5 px-5">Description</th>
                     <th className="py-3.5 px-5 text-center">Status</th>
@@ -561,71 +474,9 @@ const CohortManagement = () => {
             <p className="font-bold text-slate-700 text-sm">No specialization tracks found.</p>
             <p className="text-xs">Click "Add Track" above to create a new specialization track.</p>
           </div>
-        ) : viewMode === 'grid' ? (
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTracks.map((track) => (
-              <div
-                key={track._id}
-                className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl shadow-sm p-5 space-y-4 transition-all flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="bg-slate-100 border border-slate-200 text-slate-800 font-mono font-black px-3 py-1 rounded-lg text-xs">
-                      {track.code || 'TRACK'}
-                    </span>
-
-                    <button
-                      onClick={() => handleToggleTrackActive(track)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border transition-all cursor-pointer ${
-                        track.isActive
-                          ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-                          : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200'
-                      }`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${track.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                      <span>{track.isActive ? 'Active' : 'Inactive'}</span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">
-                      {track.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium mt-1 line-clamp-2 min-h-[32px]">
-                      {track.description || <span className="text-slate-300 italic">No description specified</span>}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="font-bold text-[#004f90] bg-blue-50 px-2 py-0.5 rounded-md text-[11px]">
-                    {track.department || 'All Departments'}
-                  </span>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleOpenTrackModal(track)}
-                      className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                      title="Edit Track"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-
-                    <button
-                      onClick={() => setDeleteTarget({ type: 'track', id: track._id, code: track.code, name: track.name })}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
-                      title="Delete Track"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         ) : (
 
+          /* SPECIALIZATIONS PURE TABLE / LIST VIEW */
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
@@ -968,3 +819,4 @@ const CohortManagement = () => {
 };
 
 export default CohortManagement;
+
