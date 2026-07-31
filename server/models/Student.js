@@ -35,6 +35,27 @@ const studentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  studentType: {
+    type: String,
+    enum: ['college', 'institute'],
+    default: 'college'
+  },
+  enrollmentId: {
+    type: String,
+    trim: true,
+    uppercase: true,
+    sparse: true
+  },
+  courseTrack: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  batchTime: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   password: {
     type: String,
     required: true
@@ -46,6 +67,9 @@ const studentSchema = new mongoose.Schema({
 });
 
 studentSchema.index({ department: 1, batch: 1, year: 1 });
+studentSchema.index({ studentType: 1, courseTrack: 1 });
+studentSchema.index({ enrollmentId: 1 }, { sparse: true });
 
 const Student = mongoose.model('Student', studentSchema);
 export default Student;
+

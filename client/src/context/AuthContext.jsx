@@ -89,10 +89,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginStudent = async (email, password, rememberMe) => {
+  const loginStudent = async (identifier, password, rememberMe) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/student/login', { email, password, rememberMe });
+      const { data } = await api.post('/auth/student/login', { identifier, email: identifier, password, rememberMe });
       setAccessToken(data.accessToken);
       setUser(data.user);
       localStorage.setItem('auth_user', JSON.stringify(data.user));

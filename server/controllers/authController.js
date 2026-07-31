@@ -34,21 +34,30 @@ export const adminLogin = async (req, res, next) => {
 };
 
 export const studentLogin = async (req, res, next) => {
-  const { email, password, rememberMe } = req.body;
+  const { identifier, email, password, rememberMe } = req.body;
+  const loginId = (identifier || email || '').trim();
 
   try {
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide email and password' });
+    if (!loginId || !password) {
+      return res.status(400).json({ message: 'Please enter your login ID and password.' });
     }
 
-    const student = await Student.findOne({ email: email.toLowerCase() });
+    // Smart lookup: Match Email OR College Roll Number OR Institute Enrollment ID
+    const student = await Student.findOne({
+      $or: [
+        { email: loginId.toLowerCase() },
+        { rollNumber: loginId.toUpperCase() },
+        { enrollmentId: loginId.toUpperCase() }
+      ]
+    });
+
     if (!student) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid credentials. Student account not found.' });
     }
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid credentials. Password or Roll Number does not match.' });
     }
 
     const { accessToken, user } = sendTokens(res, student, rememberMe);
@@ -57,6 +66,7 @@ export const studentLogin = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const refreshToken = async (req, res, next) => {
   const token = req.cookies.refreshToken;
