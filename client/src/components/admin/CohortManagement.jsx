@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { 
-  Building2, Plus, Search, Edit3, Trash2, RefreshCw, AlertTriangle, CheckCircle2, XCircle
+  BookOpen, Plus, Search, Edit3, Trash2, RefreshCw, AlertTriangle, CheckCircle2, XCircle, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+
+const PRESET_COURSES = [
+  { code: 'WEB', name: 'Web Designing', desc: 'HTML5, CSS3, Tailwind CSS, JavaScript & Responsive Web Design' },
+  { code: 'UIUX', name: 'UI/UX Design', desc: 'Figma Prototyping, Wireframing, User Research & Design Systems' },
+  { code: 'FSD', name: 'Full Stack Web Development', desc: 'MERN Stack (MongoDB, Express, React, Node.js) & System Design' },
+  { code: 'CLOUD', name: 'Cloud Computing & DevOps', desc: 'AWS Cloud Infrastructure, Docker, Kubernetes & CI/CD Pipelines' },
+  { code: 'PYTHON', name: 'Python & Data Science', desc: 'Python Programming, Pandas, Data Analysis & Machine Learning Basics' },
+  { code: 'JAVA', name: 'Java Full Stack', desc: 'Core Java, Spring Boot, Microservices & Frontend Integration' }
+];
 
 const CohortManagement = () => {
   // Data States
@@ -32,7 +41,7 @@ const CohortManagement = () => {
       setDepartments(data || []);
     } catch (err) {
       console.error(err);
-      toast.error('Unable to load department roster.');
+      toast.error('Unable to load institute course catalog.');
     } finally {
       setLoading(false);
     }
@@ -42,7 +51,7 @@ const CohortManagement = () => {
     fetchData();
   }, []);
 
-  // Department Handlers
+  // Handlers
   const handleOpenDeptModal = (dept = null) => {
     if (dept) {
       setDeptToEdit(dept);
@@ -60,10 +69,17 @@ const CohortManagement = () => {
     setShowDeptModal(true);
   };
 
+  const handleApplyPreset = (preset) => {
+    setDeptCode(preset.code);
+    setDeptName(preset.name);
+    setDeptDesc(preset.desc);
+    toast.success(`Loaded preset: ${preset.name}`);
+  };
+
   const handleSaveDepartment = async (e) => {
     e.preventDefault();
     if (!deptCode.trim() || !deptName.trim()) {
-      return toast.error('Department code and name are required.');
+      return toast.error('Course code and course title are required.');
     }
 
     const payload = {
@@ -73,21 +89,21 @@ const CohortManagement = () => {
       isActive: deptIsActive
     };
 
-    const loader = toast.loading(deptToEdit ? 'Updating department...' : 'Adding department...');
+    const loader = toast.loading(deptToEdit ? 'Updating course...' : 'Adding course...');
     try {
       if (deptToEdit) {
         const { data } = await api.put(`/cohorts/departments/${deptToEdit._id}`, payload);
         setDepartments(prev => prev.map(d => d._id === deptToEdit._id ? data : d));
-        toast.success(`Department '${data.code}' updated.`, { id: loader });
+        toast.success(`Course '${data.name}' updated.`, { id: loader });
       } else {
         const { data } = await api.post('/cohorts/departments', payload);
         setDepartments(prev => [...prev, data]);
-        toast.success(`Department '${data.code}' added.`, { id: loader });
+        toast.success(`Course '${data.name}' added to catalog.`, { id: loader });
       }
       setShowDeptModal(false);
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to save department.', { id: loader });
+      toast.error(err.response?.data?.message || 'Failed to save course.', { id: loader });
     }
   };
 
@@ -96,9 +112,9 @@ const CohortManagement = () => {
     try {
       const { data } = await api.put(`/cohorts/departments/${dept._id}`, { isActive: !dept.isActive });
       setDepartments(prev => prev.map(d => d._id === dept._id ? data : d));
-      toast.success(`Department '${dept.code}' is now ${data.isActive ? 'Active' : 'Inactive'}.`, { id: loader });
+      toast.success(`Course '${dept.name}' is now ${data.isActive ? 'Active' : 'Inactive'}.`, { id: loader });
     } catch (err) {
-      toast.error('Failed to update department status.', { id: loader });
+      toast.error('Failed to update course status.', { id: loader });
     }
   };
 
@@ -108,15 +124,15 @@ const CohortManagement = () => {
     const { id, code, name } = deleteTarget;
     setDeleteTarget(null);
 
-    const displayName = code || name;
+    const displayName = name || code;
     const loader = toast.loading(`Deleting '${displayName}'...`);
 
     try {
       await api.delete(`/cohorts/departments/${id}`);
       setDepartments(prev => prev.filter(d => d._id !== id));
-      toast.success(`Deleted department '${displayName}'.`, { id: loader });
+      toast.success(`Deleted course '${displayName}'.`, { id: loader });
     } catch (err) {
-      toast.error('Failed to delete department.', { id: loader });
+      toast.error('Failed to delete course.', { id: loader });
     }
   };
 
@@ -146,14 +162,14 @@ const CohortManagement = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-black text-slate-900 font-poppins">
-              Department Management
+              Institute Course Catalog
             </h1>
             <span className="text-[10px] font-extrabold text-[#004f90] uppercase tracking-wider bg-blue-50 border border-blue-150 px-2.5 py-0.5 rounded-md">
-              Academic Roster
+              Institute Courses
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Manage active departments and course categories for student accounts and assessment targeting.
+            Manage training courses (Web Design, UI/UX, Full Stack, Cloud, Python, etc.) for student enrollment and assessment targeting.
           </p>
         </div>
 
@@ -171,7 +187,7 @@ const CohortManagement = () => {
             className="bg-[#004f90] hover:bg-[#003d70] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>Add Department</span>
+            <span>Add New Course</span>
           </button>
         </div>
       </div>
@@ -180,17 +196,17 @@ const CohortManagement = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Departments</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Courses Offered</p>
             <h3 className="text-2xl font-black text-slate-900 font-mono mt-0.5">{departments.length}</h3>
           </div>
           <div className="p-3 bg-blue-50 text-[#004f90] border border-blue-100 rounded-xl">
-            <Building2 className="h-5 w-5" />
+            <BookOpen className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Departments</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Courses</p>
             <h3 className="text-2xl font-black text-emerald-600 font-mono mt-0.5">{activeDeptCount}</h3>
           </div>
           <div className="p-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl">
@@ -200,7 +216,7 @@ const CohortManagement = () => {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Inactive Departments</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Inactive Courses</p>
             <h3 className="text-2xl font-black text-slate-500 font-mono mt-0.5">{inactiveDeptCount}</h3>
           </div>
           <div className="p-3 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl">
@@ -214,7 +230,7 @@ const CohortManagement = () => {
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search department code, title or description..."
+            placeholder="Search course code, title or syllabus..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#004f90]"
@@ -239,13 +255,13 @@ const CohortManagement = () => {
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-2xl py-20 text-center text-xs font-bold text-slate-400 flex flex-col items-center gap-2 shadow-sm">
           <div className="h-7 w-7 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
-          <span>Loading department roster...</span>
+          <span>Loading course catalog...</span>
         </div>
       ) : filteredDepartments.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl py-16 text-center text-slate-400 space-y-2 shadow-sm">
-          <Building2 className="h-10 w-10 text-slate-300 mx-auto" />
-          <p className="font-bold text-slate-700 text-sm">No departments found.</p>
-          <p className="text-xs">Click "Add Department" above to create a new department.</p>
+          <BookOpen className="h-10 w-10 text-slate-300 mx-auto" />
+          <p className="font-bold text-slate-700 text-sm">No courses added yet.</p>
+          <p className="text-xs">Click "Add New Course" above to manually add Web Design, UI/UX, Full Stack, etc.</p>
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -253,9 +269,9 @@ const CohortManagement = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-150 text-slate-400 uppercase font-extrabold text-[10px] tracking-widest bg-slate-50/70">
-                  <th className="py-3.5 px-5">Dept Code</th>
-                  <th className="py-3.5 px-5">Department Full Name</th>
-                  <th className="py-3.5 px-5">Description</th>
+                  <th className="py-3.5 px-5">Course Code</th>
+                  <th className="py-3.5 px-5">Course Title</th>
+                  <th className="py-3.5 px-5">Syllabus Overview</th>
                   <th className="py-3.5 px-5 text-center">Status</th>
                   <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
@@ -296,14 +312,14 @@ const CohortManagement = () => {
                         <button
                           onClick={() => handleOpenDeptModal(dept)}
                           className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                          title="Edit Department"
+                          title="Edit Course"
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setDeleteTarget({ id: dept._id, code: dept.code, name: dept.name })}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
-                          title="Delete Department"
+                          title="Delete Course"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -317,7 +333,7 @@ const CohortManagement = () => {
         </div>
       )}
 
-      {/* ADD / EDIT DEPARTMENT MODAL */}
+      {/* ADD / EDIT COURSE MODAL */}
       <AnimatePresence>
         {showDeptModal && (
           <>
@@ -337,10 +353,10 @@ const CohortManagement = () => {
               <div className="flex justify-between items-center border-b border-slate-100 pb-3.5">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">
-                    {deptToEdit ? 'Edit Department' : 'Add New Department'}
+                    {deptToEdit ? 'Edit Course' : 'Add New Course'}
                   </h3>
                   <p className="text-xs text-slate-400 font-medium">
-                    Configure department short code and full title.
+                    Configure institute course title, short code & syllabus overview.
                   </p>
                 </div>
                 <button
@@ -351,42 +367,66 @@ const CohortManagement = () => {
                 </button>
               </div>
 
+              {/* QUICK PRESETS (Only for new courses) */}
+              {!deptToEdit && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#004f90] uppercase tracking-wider">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Quick Course Presets (Click to autofill)</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_COURSES.map((preset) => (
+                      <button
+                        key={preset.code}
+                        type="button"
+                        onClick={() => handleApplyPreset(preset)}
+                        className="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-700 hover:text-[#004f90] font-semibold text-[11px] px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      >
+                        + {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSaveDepartment} className="space-y-4 text-left">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
-                    Department Code *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. CSE, IT, FSWD, WEB"
-                    value={deptCode}
-                    onChange={(e) => setDeptCode(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-bold text-slate-800 focus:outline-none uppercase font-mono"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1 sm:col-span-1">
+                    <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
+                      Course Code *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. WEB, UIUX, FSD"
+                      value={deptCode}
+                      onChange={(e) => setDeptCode(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-bold text-slate-800 focus:outline-none uppercase font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
+                      Course Title *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Web Designing, UI/UX Design"
+                      value={deptName}
+                      onChange={(e) => setDeptName(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-bold text-slate-800 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
-                    Department Full Title *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Full Stack Web Development"
-                    value={deptName}
-                    onChange={(e) => setDeptName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-bold text-slate-800 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
-                    Description (Optional)
+                    Syllabus / Overview (Optional)
                   </label>
                   <textarea
                     rows="3"
-                    placeholder="Brief description of department or course track scope..."
+                    placeholder="Brief overview of course modules (e.g. HTML, CSS, JS & Tailwind)..."
                     value={deptDesc}
                     onChange={(e) => setDeptDesc(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl py-2.5 px-3.5 text-xs font-medium text-slate-800 focus:outline-none resize-none"
@@ -398,7 +438,7 @@ const CohortManagement = () => {
                     type="submit"
                     className="flex-1 bg-[#004f90] hover:bg-[#003d70] text-white font-extrabold py-2.5 rounded-xl text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
                   >
-                    {deptToEdit ? 'Save Changes' : 'Create Department'}
+                    {deptToEdit ? 'Save Changes' : 'Create Course'}
                   </button>
                   <button
                     type="button"
@@ -436,10 +476,10 @@ const CohortManagement = () => {
               </div>
               <div className="space-y-1">
                 <h4 className="text-base font-bold text-slate-900">
-                  Delete Department?
+                  Delete Course?
                 </h4>
                 <p className="text-xs text-slate-500 font-medium">
-                  Are you sure you want to delete department <span className="font-extrabold text-slate-800">'{deleteTarget.code || deleteTarget.name}'</span>?
+                  Are you sure you want to delete course <span className="font-extrabold text-slate-800">'{deleteTarget.name || deleteTarget.code}'</span>?
                 </p>
               </div>
 
