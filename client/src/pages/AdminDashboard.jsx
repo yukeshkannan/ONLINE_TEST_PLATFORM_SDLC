@@ -13,7 +13,7 @@ import CourseManagement from '../components/admin/CourseManagement.jsx';
 import api from '../utils/api.js';
 import { parsePdfToText } from '../utils/pdfParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
-import { DEPARTMENTS, BATCH_TRACKS } from '../utils/constants.js';
+import { normalizeBatch, normalizeDept } from '../utils/constants.js';
 import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -97,6 +97,17 @@ const AdminDashboard = ({ tab }) => {
   const [bulkNotepadText, setBulkNotepadText] = useState('');
   const [bulkStatus, setBulkStatus] = useState('draft');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
+  const [deptList, setDeptList] = useState([]);
+
+  useEffect(() => {
+    api.get('/cohorts/departments')
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          setDeptList(data.filter(d => d.isActive !== false).map(d => d.code));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const getTodayStr = () => new Date().toISOString().split('T')[0];
   const getTomorrowStr = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -928,7 +939,7 @@ const AdminDashboard = ({ tab }) => {
                         className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
                       >
                         <option value="All Departments">All Departments (Any Dept)</option>
-                        {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                        {deptList.map(d => <option key={d} value={d}>{d}</option>)}
                       </select>
                       <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 pointer-events-none" />
                     </div>
