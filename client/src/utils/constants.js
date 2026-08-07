@@ -1,12 +1,4 @@
-export const DEPARTMENTS = [
-  'CSE',
-  'IT',
-  'AIDS',
-  'ECE',
-  'EEE',
-  'MECH',
-  'CIVIL'
-];
+export const DEPARTMENTS = [];
 
 export const BATCH_TRACKS = [];
 

@@ -19,7 +19,13 @@ const DEFAULT_CENTERS = [
   { name: 'Dindigul', code: 'DGL', location: 'Dindigul District Branch' }
 ];
 
-const DEFAULT_BATCHES = [];
+const DEFAULT_BATCHES = [
+  { name: 'Full Stack Web Dev (MERN)', code: 'FS-WEB', category: 'institute', description: 'Complete MERN Stack Web Development' },
+  { name: 'AutoCAD & Mechanical CAD', code: 'CAD-MECH', category: 'institute', description: '2D & 3D Mechanical Computer Aided Design' },
+  { name: 'SolidWorks & 3D Modeling', code: 'SOLID-3D', category: 'institute', description: 'SolidWorks Industry Standard 3D Modeling' },
+  { name: 'Python Data Science & AI', code: 'PY-DS', category: 'institute', description: 'Python Analytics, Machine Learning & AI' },
+  { name: 'Embedded Systems & IoT', code: 'EMB-IOT', category: 'institute', description: 'Embedded Systems, Microcontrollers & IoT' }
+];
 
 // Optional Manual Reset Endpoint for Admin
 export const resetDefaults = async (req, res, next) => {
@@ -38,10 +44,6 @@ export const resetDefaults = async (req, res, next) => {
     next(error);
   }
 };
-
-// ==========================================
-// DEPARTMENT CONTROLLERS
-// ==========================================
 
 export const getDepartments = async (req, res, next) => {
   try {

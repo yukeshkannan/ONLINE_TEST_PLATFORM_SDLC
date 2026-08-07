@@ -35,11 +35,11 @@ const StudentList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const [deptList, setDeptList] = useState(DEPARTMENTS);
-  const [courseTracksList, setCourseTracksList] = useState(COURSE_TRACKS);
+  const [deptList, setDeptList] = useState([]);
+  const [courseTracksList, setCourseTracksList] = useState([]);
   const [centersList, setCentersList] = useState(INSTITUTE_CENTERS);
 
-  useEffect(() => {
+  const fetchMetadataCatalog = () => {
     Promise.all([
       api.get('/cohorts/departments'),
       api.get('/cohorts/batches'),
@@ -47,17 +47,31 @@ const StudentList = () => {
     ])
       .then(([deptRes, batchRes, centerRes]) => {
         if (Array.isArray(deptRes.data)) {
-          setDeptList(deptRes.data.filter(d => d.isActive !== false).map(d => d.code));
+          const dCodes = deptRes.data.filter(d => d.isActive !== false).map(d => d.code);
+          setDeptList(dCodes);
+          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || '') }));
         }
         if (Array.isArray(batchRes.data)) {
-          setCourseTracksList(batchRes.data.filter(b => b.isActive !== false).map(b => b.name));
+          const bNames = batchRes.data.filter(b => b.isActive !== false).map(b => b.name);
+          setCourseTracksList(bNames);
+          setFormData(prev => ({ ...prev, courseTrack: bNames.includes(prev.courseTrack) ? prev.courseTrack : (bNames[0] || '') }));
         }
-        if (Array.isArray(centerRes.data)) {
+        if (Array.isArray(centerRes.data) && centerRes.data.length > 0) {
           setCentersList(centerRes.data.filter(c => c.isActive !== false).map(c => ({ name: c.name, code: c.code })));
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchMetadataCatalog();
   }, []);
+
+  useEffect(() => {
+    if (showAddModal || showEditModal) {
+      fetchMetadataCatalog();
+    }
+  }, [showAddModal, showEditModal]);
 
   // Confirmation dialog states
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -74,11 +88,11 @@ const StudentList = () => {
     email: '',
     dob: '',
     rollNumber: '',
-    department: 'CSE',
+    department: '',
     batch: '2023-2027',
     year: '3rd Year',
     enrollmentId: '',
-    courseTrack: 'Full Stack Web Dev (MERN)',
+    courseTrack: '',
     center: 'Karur'
   });
 
@@ -91,11 +105,11 @@ const StudentList = () => {
     dob: '',
     studentType: 'college',
     rollNumber: '',
-    department: 'CSE',
+    department: '',
     batch: '2023-2027',
     year: '3rd Year',
     enrollmentId: '',
-    courseTrack: 'Full Stack Web Dev (MERN)',
+    courseTrack: '',
     center: 'Karur'
   });
 
@@ -1200,9 +1214,13 @@ const StudentList = () => {
                               onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                               className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                             >
-                              {deptList.map(d => (
-                                <option key={d} value={d}>{d}</option>
-                              ))}
+                              {deptList.length === 0 ? (
+                                <option value="">-- No Departments Added Yet (Add in Course Catalog) --</option>
+                              ) : (
+                                deptList.map(d => (
+                                  <option key={d} value={d}>{d}</option>
+                                ))
+                              )}
                             </select>
                             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                           </div>
@@ -1298,9 +1316,13 @@ const StudentList = () => {
                             onChange={(e) => setFormData({ ...formData, courseTrack: e.target.value })}
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
-                            {courseTracksList.map(ct => (
-                              <option key={ct} value={ct}>{ct}</option>
-                            ))}
+                            {courseTracksList.length === 0 ? (
+                              <option value="">-- No SDLC Courses Added Yet (Add in Course Catalog) --</option>
+                            ) : (
+                              courseTracksList.map(ct => (
+                                <option key={ct} value={ct}>{ct}</option>
+                              ))
+                            )}
                           </select>
                           <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                         </div>
@@ -1424,9 +1446,13 @@ const StudentList = () => {
                               onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
                               className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                             >
-                              {deptList.map(d => (
-                                <option key={d} value={d}>{d}</option>
-                              ))}
+                              {deptList.length === 0 ? (
+                                <option value="">-- No Departments Added Yet --</option>
+                              ) : (
+                                deptList.map(d => (
+                                  <option key={d} value={d}>{d}</option>
+                                ))
+                              )}
                             </select>
                             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                           </div>
@@ -1521,9 +1547,13 @@ const StudentList = () => {
                             onChange={(e) => setEditFormData({ ...editFormData, courseTrack: e.target.value })}
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
-                            {courseTracksList.map(ct => (
-                              <option key={ct} value={ct}>{ct}</option>
-                            ))}
+                            {courseTracksList.length === 0 ? (
+                              <option value="">-- No SDLC Courses Added Yet --</option>
+                            ) : (
+                              courseTracksList.map(ct => (
+                                <option key={ct} value={ct}>{ct}</option>
+                              ))
+                            )}
                           </select>
                           <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                         </div>
