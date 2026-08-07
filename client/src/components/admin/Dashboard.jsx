@@ -50,7 +50,7 @@ const Dashboard = () => {
 
   const fetchTestsList = async () => {
     try {
-      const { data } = await api.get('/test');
+      const { data } = await api.get('/tests');
       setAllTestsList(data || []);
     } catch (err) {}
   };
