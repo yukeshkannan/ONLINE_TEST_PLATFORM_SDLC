@@ -98,12 +98,21 @@ const AdminDashboard = ({ tab }) => {
   const [bulkStatus, setBulkStatus] = useState('draft');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
   const [deptList, setDeptList] = useState([]);
+  const [batchList, setBatchList] = useState([]);
 
   useEffect(() => {
     api.get('/cohorts/departments')
       .then(({ data }) => {
         if (Array.isArray(data)) {
           setDeptList(data.filter(d => d.isActive !== false).map(d => d.code));
+        }
+      })
+      .catch(() => {});
+
+    api.get('/cohorts/batches')
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          setBatchList(data.filter(b => b.isActive !== false).map(b => b.name));
         }
       })
       .catch(() => {});
@@ -974,7 +983,7 @@ const AdminDashboard = ({ tab }) => {
                         className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
                       >
                         <option value="All Batches">All Batches (Every Student)</option>
-                        {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
+                        {batchList.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                       <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 pointer-events-none" />
                     </div>

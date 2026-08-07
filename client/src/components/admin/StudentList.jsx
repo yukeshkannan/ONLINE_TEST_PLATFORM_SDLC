@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
 import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
-import { DEPARTMENTS, BATCH_TRACKS, normalizeBatch, normalizeDept } from '../../utils/constants.js';
+import { normalizeBatch, normalizeDept } from '../../utils/constants.js';
 
 const COURSE_TRACKS = [];
 
