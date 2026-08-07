@@ -18,7 +18,7 @@ const Sidebar = () => {
     },
     {
       name: 'Course Catalog',
-      path: '/admin/cohorts',
+      path: '/admin/courses',
       icon: BookOpen
     },
     {
@@ -42,22 +42,17 @@ const Sidebar = () => {
     <aside className="w-64 h-screen bg-white border-r border-slate-100 flex flex-col justify-between py-8 font-sans">
       {/* Brand Header */}
       <div>
-        <div className="px-8 mb-4 text-left flex flex-col items-start">
+        <div className="px-6 mb-6 text-left flex flex-col items-start">
           <img 
             src="/logo.png" 
             alt="Assessment Portal Logo" 
             className="h-10 w-auto object-contain max-w-[180px] self-start"
           />
-          <div className="mt-2.5">
-            <span className="text-[10px] font-black text-[#004f90] tracking-wider uppercase bg-blue-50 px-2.5 py-1 rounded-md">
-              Assessment Portal
-            </span>
-          </div>
         </div>
 
         {/* Navigation Links */}
-        <div className="px-4">
-          <nav className="space-y-1">
+        <div className="px-3">
+          <nav className="space-y-1.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -65,15 +60,24 @@ const Sidebar = () => {
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center space-x-3.5 px-6 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    `flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       isActive
-                        ? 'bg-[#eef2f6] text-[#004f90] font-bold'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-[#004f90] text-white font-bold shadow-md shadow-blue-900/15'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`
                   }
                 >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.name}</span>
+                  {({ isActive }) => (
+                    <>
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                        <span className={isActive ? 'text-white font-bold' : 'text-slate-600'}>{item.name}</span>
+                      </div>
+                      {isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F7931A] shadow-xs" />
+                      )}
+                    </>
+                  )}
                 </NavLink>
               );
             })}

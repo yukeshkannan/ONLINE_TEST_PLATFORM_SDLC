@@ -29,19 +29,42 @@ export const getTests = async (req, res, next) => {
       }));
       return res.status(200).json(updatedTests);
     } else {
-      const student = await Student.findById(req.user.id).select('department batch year').lean();
+      const student = await Student.findById(req.user.id).select('department courseTrack batch year studentType center').lean();
       if (!student) {
         return res.status(404).json({ message: 'Student not found' });
       }
+
+      const deptMatches = [
+        student.department,
+        student.courseTrack,
+        'All Departments',
+        'ALL',
+        ''
+      ].filter(Boolean);
+
+      const batchMatches = [
+        student.batch,
+        student.courseTrack,
+        'All Batches',
+        'ALL',
+        ''
+      ].filter(Boolean);
+
+      const yearMatches = [
+        student.year,
+        'All Years',
+        'ALL',
+        ''
+      ].filter(Boolean);
 
       const filter = {
         $or: [
           {
             assignedTo: {
               $elemMatch: {
-                department: { $in: [student.department, 'All Departments', 'ALL', ''] },
-                batch: { $in: [student.batch, 'All Batches', 'ALL', ''] },
-                year: { $in: [student.year, 'All Years', 'ALL', ''] }
+                department: { $in: deptMatches },
+                batch: { $in: batchMatches },
+                year: { $in: yearMatches }
               }
             }
           },
@@ -107,11 +130,6 @@ export const createTest = async (req, res, next) => {
     let sTime = new Date(startTime);
     let eTime = new Date(endTime);
 
-    if (status === 'active') {
-      if (sTime > now) sTime = now;
-      if (eTime <= now) eTime = new Date(now.getTime() + (duration || 60) * 60000);
-    }
-
     const newTest = new Test({
       title,
       subject,
@@ -160,16 +178,6 @@ export const updateTest = async (req, res, next) => {
     if (startTime) test.startTime = new Date(startTime);
     if (endTime) test.endTime = new Date(endTime);
     if (status) test.status = status;
-
-    if (test.status === 'active') {
-      const now = new Date();
-      if (new Date(test.startTime) > now) {
-        test.startTime = now;
-      }
-      if (new Date(test.endTime) <= now) {
-        test.endTime = new Date(now.getTime() + (test.duration || 60) * 60000);
-      }
-    }
 
     const updatedTest = await test.save();
     const now = new Date();

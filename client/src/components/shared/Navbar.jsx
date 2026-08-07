@@ -19,10 +19,6 @@ const Navbar = () => {
           alt="SDLC Logo" 
           className="h-10 sm:h-11 w-auto object-contain"
         />
-        <div className="hidden sm:block ml-4 h-5 w-[1px] bg-slate-200" />
-        <span className="hidden sm:block ml-4 text-[10px] font-black text-[#004f90] tracking-wider uppercase bg-blue-50/80 px-2.5 py-1 rounded-md border border-blue-100/30">
-          Student Portal
-        </span>
       </div>
 
       {/* User Actions */}

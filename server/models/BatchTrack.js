@@ -13,6 +13,12 @@ const batchTrackSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
+  category: {
+    type: String,
+    enum: ['college', 'institute'],
+    default: 'institute',
+    trim: true
+  },
   department: {
     type: String,
     default: 'All Departments',

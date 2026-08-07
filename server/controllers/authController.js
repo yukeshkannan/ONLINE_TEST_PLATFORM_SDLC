@@ -122,53 +122,139 @@ export const getAllStudents = async (req, res, next) => {
   }
 };
 
+const getDistrictCode = (centerName) => {
+  const map = {
+    'Karur': 'KRR',
+    'Coimbatore': 'CBE',
+    'Namakkal': 'NKL',
+    'Dindigul': 'DGL'
+  };
+  return map[centerName] || (centerName ? centerName.substring(0, 3).toUpperCase() : 'KRR');
+};
+
+const formatDobDigits = (dobStr) => {
+  if (!dobStr) return '';
+  if (dobStr.includes('-') && dobStr.indexOf('-') === 4) {
+    const parts = dobStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2].padStart(2, '0')}${parts[1].padStart(2, '0')}${parts[0]}`;
+    }
+  }
+  return dobStr.replace(/\D/g, '');
+};
+
 export const createStudent = async (req, res, next) => {
-  const { name, rollNumber, email, department, batch, year } = req.body;
+  const {
+    name,
+    studentType = 'college',
+    rollNumber,
+    enrollmentId,
+    email,
+    department,
+    batch,
+    year,
+    courseTrack,
+    batchTime,
+    center = 'Karur',
+    dob = ''
+  } = req.body;
 
   try {
-    if (!name || !rollNumber || !email || !department || !batch) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and Email are required' });
     }
 
+    const type = studentType === 'institute' ? 'institute' : 'college';
+    const cleanEmail = email.trim().toLowerCase();
+
+    let identifier = '';
+    if (type === 'college') {
+      if (!rollNumber || !department || !batch) {
+        return res.status(400).json({ message: 'Roll Number, Department, and Batch are required for college students' });
+      }
+      identifier = rollNumber.trim().toUpperCase();
+    } else {
+      // Auto-generate Enrollment ID if not provided
+      if (!enrollmentId || enrollmentId.trim() === '') {
+        const distCode = getDistrictCode(center);
+        const dobClean = formatDobDigits(dob);
+        if (dobClean && dobClean.length === 8) {
+          identifier = `SDLC-${distCode}-${dobClean}`;
+        } else {
+          const currentYear = new Date().getFullYear();
+          const prefix = `SDLC-${distCode}-${currentYear}-`;
+
+          const count = await Student.countDocuments({
+            studentType: 'institute',
+            $or: [
+              { enrollmentId: new RegExp(`^(SDLC|INS)-${distCode}-`, 'i') },
+              { center: center }
+            ]
+          });
+
+          let nextSeq = count + 1;
+          let generatedId = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+
+          while (await Student.findOne({ $or: [{ enrollmentId: generatedId }, { rollNumber: generatedId }] })) {
+            nextSeq += 1;
+            generatedId = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+          }
+          identifier = generatedId;
+        }
+      } else {
+        identifier = enrollmentId.trim().toUpperCase();
+      }
+    }
+
+    // Check duplicate student
     const existingStudent = await Student.findOne({
       $or: [
-        { rollNumber: rollNumber.toUpperCase() },
-        { email: email.toLowerCase() }
+        { email: cleanEmail },
+        ...(type === 'college' && rollNumber ? [{ rollNumber: identifier }] : []),
+        ...(type === 'institute' && identifier ? [{ enrollmentId: identifier }, { rollNumber: identifier }] : [])
       ]
     });
 
     if (existingStudent) {
-      if (existingStudent.rollNumber === rollNumber.toUpperCase()) {
-        return res.status(400).json({ message: 'Student with this roll number already exists' });
+      if (existingStudent.email === cleanEmail) {
+        return res.status(400).json({ message: 'Student with this email already exists' });
       }
-      return res.status(400).json({ message: 'Student with this email already exists' });
+      return res.status(400).json({ message: 'Student with this Roll Number / Enrollment ID already exists' });
     }
 
-    const defaultPassword = rollNumber.trim().toUpperCase();
+    const defaultPassword = identifier;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
-    const student = await Student.create({
-      name,
-      rollNumber: rollNumber.toUpperCase(),
-      email: email.toLowerCase(),
-      department,
-      batch,
-      year: year || calculateAcademicYear(batch),
-      password: hashedPassword
-    });
+    const studentData = {
+      name: name.trim(),
+      email: cleanEmail,
+      studentType: type,
+      password: hashedPassword,
+      center: center || 'Karur'
+    };
+
+    if (type === 'college') {
+      studentData.rollNumber = identifier;
+      studentData.department = department.trim();
+      studentData.batch = batch ? batch.trim() : '2023-2027';
+      studentData.year = year ? year.trim() : calculateAcademicYear(batch);
+      studentData.courseTrack = courseTrack ? courseTrack.trim() : '';
+    } else {
+      studentData.enrollmentId = identifier;
+      studentData.rollNumber = identifier;
+      studentData.courseTrack = (courseTrack || 'General').trim();
+      studentData.batchTime = (batchTime || 'Standard Batch').trim();
+      studentData.department = (courseTrack || 'Institute').trim();
+      studentData.batch = (batchTime || 'Institute Batch').trim();
+      studentData.year = 'Institute';
+    }
+
+    const student = await Student.create(studentData);
 
     res.status(201).json({
-      message: 'Student registered successfully',
-      student: {
-        _id: student._id,
-        name: student.name,
-        rollNumber: student.rollNumber,
-        email: student.email,
-        department: student.department,
-        batch: student.batch,
-        year: student.year
-      }
+      message: `${type === 'college' ? 'College' : 'Institute'} student registered successfully`,
+      student
     });
   } catch (error) {
     next(error);
@@ -183,49 +269,106 @@ export const bulkCreateStudents = async (req, res, next) => {
       return res.status(400).json({ message: 'Payload must be a non-empty array of students' });
     }
 
-    for (let i = 0; i < studentsArray.length; i++) {
-      const { name, rollNumber, email, department, batch } = studentsArray[i];
-      if (!name || !rollNumber || !email || !department || !batch) {
-        return res.status(400).json({ message: `Student record at index ${i + 1} is missing required fields.` });
-      }
-    }
-
-    const existingStudents = await Student.find({}, 'rollNumber email');
+    const existingStudents = await Student.find({}, 'rollNumber enrollmentId email');
     const existingRolls = new Set(existingStudents.map(s => s.rollNumber ? s.rollNumber.toUpperCase() : ''));
+    const existingEnrollments = new Set(existingStudents.map(s => s.enrollmentId ? s.enrollmentId.toUpperCase() : ''));
     const existingEmails = new Set(existingStudents.map(s => s.email.toLowerCase()));
 
     const toInsert = [];
     const skipped = [];
     const salt = await bcrypt.genSalt(10);
 
-    for (const item of studentsArray) {
-      const roll = item.rollNumber.trim().toUpperCase();
-      const email = item.email.trim().toLowerCase();
+    for (let i = 0; i < studentsArray.length; i++) {
+      const item = studentsArray[i];
+      const name = (item.name || '').trim();
+      const email = (item.email || '').trim().toLowerCase();
+      const type = item.studentType === 'institute' ? 'institute' : 'college';
 
-      if (existingRolls.has(roll) || existingEmails.has(email)) {
-        skipped.push({
-          rollNumber: roll,
-          email,
-          reason: existingRolls.has(roll) ? 'Roll number already exists' : 'Email already exists'
-        });
+      if (!name || !email) {
+        skipped.push({ name, email, reason: 'Missing name or email' });
         continue;
       }
 
-      const defaultPassword = roll;
+      if (existingEmails.has(email)) {
+        skipped.push({ email, reason: 'Email already exists' });
+        continue;
+      }
+
+      const center = item.center || 'Karur';
+
+      let identifier = '';
+      if (type === 'college') {
+        identifier = (item.rollNumber || '').trim().toUpperCase();
+        if (!identifier) {
+          skipped.push({ name, email, reason: 'Missing roll number for college student' });
+          continue;
+        }
+        if (existingRolls.has(identifier)) {
+          skipped.push({ rollNumber: identifier, email, reason: 'Roll number already exists' });
+          continue;
+        }
+      } else {
+        identifier = (item.enrollmentId || item.rollNumber || '').trim().toUpperCase();
+        if (!identifier) {
+          const distCode = getDistrictCode(center);
+          const dobClean = formatDobDigits(item.dob);
+          if (dobClean && dobClean.length === 8) {
+            identifier = `SDLC-${distCode}-${dobClean}`;
+          } else {
+            const currentYear = new Date().getFullYear();
+            const prefix = `SDLC-${distCode}-${currentYear}-`;
+            let seq = 1;
+            while (existingEnrollments.has(`${prefix}${String(seq).padStart(4, '0')}`) || existingRolls.has(`${prefix}${String(seq).padStart(4, '0')}`)) {
+              seq++;
+            }
+            identifier = `${prefix}${String(seq).padStart(4, '0')}`;
+          }
+        }
+
+        // If duplicate SDLC ID exists due to same DOB or duplicate row, append sequence suffix
+        if (existingEnrollments.has(identifier) || existingRolls.has(identifier)) {
+          let dupSeq = 2;
+          let newId = `${identifier}-${dupSeq}`;
+          while (existingEnrollments.has(newId) || existingRolls.has(newId)) {
+            dupSeq++;
+            newId = `${identifier}-${dupSeq}`;
+          }
+          identifier = newId;
+        }
+      }
+
+      const defaultPassword = identifier;
       const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
-      toInsert.push({
-        name: item.name.trim(),
-        rollNumber: roll,
+      const doc = {
+        name,
         email,
-        department: item.department.trim(),
-        batch: item.batch.trim(),
-        year: (item.year && item.year.trim()) ? item.year.trim() : '1st Year',
-        password: hashedPassword
-      });
+        studentType: type,
+        password: hashedPassword,
+        center
+      };
 
-      existingRolls.add(roll);
+      if (type === 'college') {
+        doc.rollNumber = identifier;
+        doc.department = (item.department || 'CSE').trim();
+        doc.batch = (item.batch || '2023-2027').trim();
+        doc.year = (item.year || '3rd Year').trim();
+        doc.courseTrack = (item.courseTrack || '').trim();
+        existingRolls.add(identifier);
+      } else {
+        doc.enrollmentId = identifier;
+        doc.rollNumber = identifier;
+        doc.courseTrack = (item.courseTrack || 'Full Stack Web Dev').trim();
+        doc.batchTime = (item.batchTime || 'Regular Batch').trim();
+        doc.department = doc.courseTrack;
+        doc.batch = doc.batchTime;
+        doc.year = 'Institute';
+        existingEnrollments.add(identifier);
+        existingRolls.add(identifier);
+      }
+
       existingEmails.add(email);
+      toInsert.push(doc);
     }
 
     if (toInsert.length > 0) {
@@ -263,26 +406,24 @@ export const deleteStudent = async (req, res, next) => {
 };
 
 export const updateStudent = async (req, res, next) => {
-  const { name, rollNumber, email, department, batch, year } = req.body;
+  const {
+    name,
+    studentType,
+    rollNumber,
+    enrollmentId,
+    email,
+    department,
+    batch,
+    year,
+    courseTrack,
+    batchTime,
+    center,
+    dob
+  } = req.body;
 
   try {
-    if (!name || !rollNumber || !email || !department || !batch) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    const existingStudent = await Student.findOne({
-      _id: { $ne: req.params.id },
-      $or: [
-        { rollNumber: rollNumber.toUpperCase() },
-        { email: email.toLowerCase() }
-      ]
-    });
-
-    if (existingStudent) {
-      if (existingStudent.rollNumber === rollNumber.toUpperCase()) {
-        return res.status(400).json({ message: 'Student with this roll number already exists' });
-      }
-      return res.status(400).json({ message: 'Student with this email already exists' });
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
     }
 
     const student = await Student.findById(req.params.id);
@@ -290,33 +431,82 @@ export const updateStudent = async (req, res, next) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    student.name = name.trim();
-    student.email = email.trim().toLowerCase();
-    student.department = department;
-    student.batch = batch.trim();
-    student.year = year ? year.trim() : student.year;
+    const type = studentType || student.studentType || 'college';
+    const cleanEmail = email.trim().toLowerCase();
 
-    // If roll number changes, re-hash default password
-    if (student.rollNumber !== rollNumber.trim().toUpperCase()) {
-      student.rollNumber = rollNumber.trim().toUpperCase();
-      const defaultPassword = student.rollNumber;
-      const salt = await bcrypt.genSalt(10);
-      student.password = await bcrypt.hash(defaultPassword, salt);
+    let identifier = '';
+    if (type === 'college') {
+      identifier = (rollNumber || student.rollNumber || '').trim().toUpperCase();
+    } else {
+      const activeCenter = center || student.center || 'Karur';
+      const activeDob = dob !== undefined ? dob : (student.dob || '');
+      const dobClean = formatDobDigits(activeDob);
+
+      if (dobClean && dobClean.length === 8 && (!enrollmentId || enrollmentId.trim() === '' || enrollmentId.startsWith('SDLC-'))) {
+        const distCode = getDistrictCode(activeCenter);
+        identifier = `SDLC-${distCode}-${dobClean}`;
+      } else if (enrollmentId && enrollmentId.trim() !== '') {
+        identifier = enrollmentId.trim().toUpperCase();
+      } else {
+        identifier = (student.enrollmentId || student.rollNumber || '').trim().toUpperCase();
+      }
+    }
+
+    const existingStudent = await Student.findOne({
+      _id: { $ne: req.params.id },
+      $or: [
+        { email: cleanEmail },
+        ...(type === 'college' && identifier ? [{ rollNumber: identifier }] : []),
+        ...(type === 'institute' && identifier ? [{ enrollmentId: identifier }] : [])
+      ]
+    });
+
+    if (existingStudent) {
+      if (existingStudent.email === cleanEmail) {
+        return res.status(400).json({ message: 'Student with this email already exists' });
+      }
+      return res.status(400).json({ message: 'Student with this identifier already exists' });
+    }
+
+    student.name = name.trim();
+    student.email = cleanEmail;
+    student.studentType = type;
+    if (dob !== undefined) student.dob = dob.trim();
+
+    if (type === 'college') {
+      const oldRoll = student.rollNumber;
+      student.rollNumber = identifier;
+      student.department = department ? department.trim() : student.department;
+      student.batch = batch ? batch.trim() : student.batch;
+      student.year = year ? year.trim() : student.year;
+      student.courseTrack = courseTrack !== undefined ? courseTrack.trim() : student.courseTrack;
+
+      if (oldRoll !== identifier) {
+        const salt = await bcrypt.genSalt(10);
+        student.password = await bcrypt.hash(identifier, salt);
+      }
+    } else {
+      const oldEnroll = student.enrollmentId || student.rollNumber;
+      student.center = center || student.center || 'Karur';
+      student.enrollmentId = identifier;
+      student.rollNumber = identifier;
+      student.courseTrack = courseTrack ? courseTrack.trim() : (student.courseTrack || 'General');
+      student.batchTime = batchTime ? batchTime.trim() : (student.batchTime || 'Standard Batch');
+      student.department = student.courseTrack;
+      student.batch = student.batchTime;
+      student.year = 'Institute';
+
+      if (oldEnroll !== identifier) {
+        const salt = await bcrypt.genSalt(10);
+        student.password = await bcrypt.hash(identifier, salt);
+      }
     }
 
     await student.save();
 
     res.status(200).json({
-      message: 'Student updated successfully',
-      student: {
-        _id: student._id,
-        name: student.name,
-        rollNumber: student.rollNumber,
-        email: student.email,
-        department: student.department,
-        batch: student.batch,
-        year: student.year
-      }
+      message: 'Student profile updated successfully',
+      student
     });
   } catch (error) {
     next(error);
@@ -335,11 +525,11 @@ export const getAllAdmins = async (req, res, next) => {
 };
 
 export const createAdmin = async (req, res, next) => {
-  const { name, email, department, role, password } = req.body;
+  const { name, email, department, courseTrack, categoryMode, role, password } = req.body;
 
   try {
-    if (!name || !email || !role || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required' });
     }
 
     const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
@@ -351,20 +541,24 @@ export const createAdmin = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const admin = await Admin.create({
-      name,
-      email: email.toLowerCase(),
-      department: department || 'N/A',
-      role,
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      department: department ? department.trim() : 'N/A',
+      courseTrack: courseTrack ? courseTrack.trim() : 'N/A',
+      categoryMode: categoryMode === 'institute' ? 'institute' : 'college',
+      role: role || 'trainer',
       password: hashedPassword
     });
 
     res.status(201).json({
-      message: 'User registered successfully',
+      message: 'Staff account registered successfully',
       admin: {
         _id: admin._id,
         name: admin.name,
         email: admin.email,
         department: admin.department,
+        courseTrack: admin.courseTrack,
+        categoryMode: admin.categoryMode,
         role: admin.role
       }
     });

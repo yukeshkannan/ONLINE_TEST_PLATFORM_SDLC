@@ -8,23 +8,11 @@ export const DEPARTMENTS = [
   'CIVIL'
 ];
 
-export const BATCH_TRACKS = [
-  'Web Design',
-  'UI/UX',
-  'SolidWorks',
-  'AutoCAD'
-];
+export const BATCH_TRACKS = [];
 
 export const normalizeBatch = (rawBatch) => {
-  if (!rawBatch) return 'Web Design';
-  const clean = rawBatch.toString().trim().toLowerCase();
-  
-  if (clean.includes('web')) return 'Web Design';
-  if (clean.includes('ui') || clean.includes('ux')) return 'UI/UX';
-  if (clean.includes('solid')) return 'SolidWorks';
-  if (clean.includes('cad') || clean.includes('auto')) return 'AutoCAD';
-  
-  return 'Web Design';
+  if (!rawBatch) return '';
+  return rawBatch.toString().trim();
 };
 
 export const normalizeDept = (rawDept) => {

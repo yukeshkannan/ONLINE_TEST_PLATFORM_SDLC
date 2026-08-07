@@ -85,7 +85,7 @@ export const handleContactSubmit = async (req, res, next) => {
 
     if (!response.ok) {
       console.error('Brevo API error response:', responseData);
-      
+
       // Map 401 (Unauthorized) or other external errors to 500 Internal Server Error
       // to prevent client-side authentication middleware from misinterpreting it.
       return res.status(500).json({

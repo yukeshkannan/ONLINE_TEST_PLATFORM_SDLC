@@ -79,6 +79,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/violations', violationRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/cohorts', cohortRoutes);
+app.use('/api/courses', cohortRoutes);
 
 app.use(errorHandler);
 

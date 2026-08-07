@@ -9,12 +9,12 @@ import ViewResults from '../components/admin/ViewResults.jsx';
 import StudentList from '../components/admin/StudentList.jsx';
 import UserList from '../components/admin/UserList.jsx';
 import ProctoringLogs from '../components/admin/ProctoringLogs.jsx';
-import CohortManagement from '../components/admin/CohortManagement.jsx';
+import CourseManagement from '../components/admin/CourseManagement.jsx';
 import api from '../utils/api.js';
 import { parsePdfToText } from '../utils/pdfParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
 import { DEPARTMENTS, BATCH_TRACKS } from '../utils/constants.js';
-import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText } from 'lucide-react';
+import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -394,7 +394,8 @@ const AdminDashboard = ({ tab }) => {
     switch(activeTab) {
       case 'dashboard': return 'Dashboard Overview';
       case 'students': return 'Student Management';
-      case 'cohorts': return 'Department Roster Management';
+      case 'courses':
+      case 'cohorts': return 'Course Catalog & Track Management';
       case 'users': return 'User Account Directory';
       case 'tests': return 'Assessment Manager';
       case 'proctoring': return 'Proctoring Monitor';
@@ -478,8 +479,8 @@ const AdminDashboard = ({ tab }) => {
             )
           )}
 
-          {activeTab === 'cohorts' && (
-            <CohortManagement />
+          {(activeTab === 'courses' || activeTab === 'cohorts') && (
+            <CourseManagement />
           )}
 
           {activeTab === 'users' && (
@@ -521,15 +522,6 @@ const AdminDashboard = ({ tab }) => {
                     title="Refresh Tests List"
                   >
                     <RefreshCw className="h-4.5 w-4.5" />
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setShowBulkCreateModal(true)}
-                    className="bg-white border border-slate-200 hover:border-[#004f90] hover:bg-slate-50 text-slate-700 font-bold px-5 py-3 rounded-xl text-sm shadow-sm transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <Upload className="h-4 w-4 text-[#004f90]" />
-                    <span>Bulk Import Test</span>
                   </button>
 
                   <button
@@ -929,43 +921,52 @@ const AdminDashboard = ({ tab }) => {
                   {/* Department */}
                   <div className="space-y-1.5 flex flex-col">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Department</label>
-                    <select
-                      value={bulkDept}
-                      onChange={(e) => setBulkDept(e.target.value)}
-                      className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
-                    >
-                      <option value="All Departments">All Departments (Any Dept)</option>
-                      {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                    <div className="relative flex items-center">
+                      <select
+                        value={bulkDept}
+                        onChange={(e) => setBulkDept(e.target.value)}
+                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
+                      >
+                        <option value="All Departments">All Departments (Any Dept)</option>
+                        {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 pointer-events-none" />
+                    </div>
                   </div>
 
                   {/* Year */}
                   <div className="space-y-1.5 flex flex-col">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Academic Year</label>
-                    <select
-                      value={bulkYear}
-                      onChange={(e) => setBulkYear(e.target.value)}
-                      className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
-                    >
-                      <option value="All Years">All Years (Any Year)</option>
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                      <option value="4th Year">4th Year</option>
-                    </select>
+                    <div className="relative flex items-center">
+                      <select
+                        value={bulkYear}
+                        onChange={(e) => setBulkYear(e.target.value)}
+                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
+                      >
+                        <option value="All Years">All Years (Any Year)</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 pointer-events-none" />
+                    </div>
                   </div>
 
                   {/* Batch */}
                   <div className="space-y-1.5 flex flex-col">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Batch / Track</label>
-                    <select
-                      value={bulkBatch}
-                      onChange={(e) => setBulkBatch(e.target.value)}
-                      className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer"
-                    >
-                      <option value="All Batches">All Batches (Every Student)</option>
-                      {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
+                    <div className="relative flex items-center">
+                      <select
+                        value={bulkBatch}
+                        onChange={(e) => setBulkBatch(e.target.value)}
+                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
+                      >
+                        <option value="All Batches">All Batches (Every Student)</option>
+                        {BATCH_TRACKS.map(b => <option key={b} value={b}>{b}</option>)}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 pointer-events-none" />
+                    </div>
                   </div>
 
                   <h4 className="text-xs font-bold text-[#004f90] uppercase tracking-wider pl-2 border-l-2 border-[#004f90] pt-2">
@@ -983,29 +984,38 @@ const AdminDashboard = ({ tab }) => {
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 text-slate-800 text-xs font-semibold focus:outline-none focus:border-[#004f90]"
                     />
                     <div className="flex items-center gap-1.5 pt-1">
-                      <select
-                        value={bulkStartHour}
-                        onChange={(e) => setBulkStartHour(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
-                      >
-                        {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
+                      <div className="relative flex-1 flex items-center">
+                        <select
+                          value={bulkStartHour}
+                          onChange={(e) => setBulkStartHour(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-2 pr-6 text-slate-800 text-xs font-bold focus:outline-none appearance-none cursor-pointer"
+                        >
+                          {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
+                      </div>
                       <span className="font-bold text-slate-400 text-xs">:</span>
-                      <select
-                        value={bulkStartMinute}
-                        onChange={(e) => setBulkStartMinute(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
-                      >
-                        {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                      <select
-                        value={bulkStartAmpm}
-                        onChange={(e) => setBulkStartAmpm(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none shrink-0"
-                      >
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
-                      </select>
+                      <div className="relative flex-1 flex items-center">
+                        <select
+                          value={bulkStartMinute}
+                          onChange={(e) => setBulkStartMinute(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-2 pr-6 text-slate-800 text-xs font-bold focus:outline-none appearance-none cursor-pointer"
+                        >
+                          {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
+                      </div>
+                      <div className="relative flex items-center shrink-0">
+                        <select
+                          value={bulkStartAmpm}
+                          onChange={(e) => setBulkStartAmpm(e.target.value)}
+                          className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-2 pr-6 text-slate-800 text-xs font-bold focus:outline-none appearance-none cursor-pointer"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
+                      </div>
                     </div>
                   </div>
 
@@ -1020,29 +1030,38 @@ const AdminDashboard = ({ tab }) => {
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 text-slate-800 text-xs font-semibold focus:outline-none focus:border-[#004f90]"
                     />
                     <div className="flex items-center gap-1.5 pt-1">
-                      <select
-                        value={bulkEndHour}
-                        onChange={(e) => setBulkEndHour(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
-                      >
-                        {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
+                      <div className="relative flex-1 flex items-center">
+                        <select
+                          value={bulkEndHour}
+                          onChange={(e) => setBulkEndHour(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-2 pr-6 text-slate-800 text-xs font-bold focus:outline-none appearance-none cursor-pointer"
+                        >
+                          {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
+                      </div>
                       <span className="font-bold text-slate-400 text-xs">:</span>
-                      <select
-                        value={bulkEndMinute}
-                        onChange={(e) => setBulkEndMinute(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none flex-1"
-                      >
-                        {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                      <select
-                        value={bulkEndAmpm}
-                        onChange={(e) => setBulkEndAmpm(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 text-xs font-bold focus:outline-none shrink-0"
-                      >
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
-                      </select>
+                      <div className="relative flex-1 flex items-center">
+                        <select
+                          value={bulkEndMinute}
+                          onChange={(e) => setBulkEndMinute(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-2 pr-6 text-slate-800 text-xs font-bold focus:outline-none appearance-none cursor-pointer"
+                        >
+                          {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
+                      </div>
+                      <div className="relative flex items-center shrink-0">
+                        <select
+                          value={bulkEndAmpm}
+                          onChange={(e) => setBulkEndAmpm(e.target.value)}
+                          className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-2 pr-6 text-slate-800 text-xs font-bold focus:outline-none appearance-none cursor-pointer"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 pointer-events-none" />
+                      </div>
                     </div>
                   </div>
                 </div>

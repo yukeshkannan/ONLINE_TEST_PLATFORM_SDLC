@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, GraduationCap, Building2, UserCheck, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, GraduationCap, Building2, UserCheck, ShieldCheck, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -133,8 +133,8 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Building2 className="h-4 w-4" />
-              <span>Institute Course</span>
+              <BookOpen className="h-4 w-4" />
+              <span>SDLC Portal</span>
             </button>
           </div>
 
@@ -147,26 +147,6 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
             transition={{ duration: 0.3 }}
             className="bg-white border border-slate-200/90 shadow-xl shadow-slate-100 rounded-[28px] p-6 sm:p-7 space-y-5"
           >
-            
-            {/* Helper Subtext Badge */}
-            <div className={`p-3 rounded-2xl text-xs font-medium border flex items-center gap-2.5 ${
-              loginType === 'college'
-                ? 'bg-blue-50/70 border-blue-100 text-[#004f90]'
-                : 'bg-amber-50/70 border-amber-100 text-amber-900'
-            }`}>
-              {loginType === 'college' ? (
-                <>
-                  <GraduationCap className="h-4 w-4 shrink-0 text-[#004f90]" />
-                  <span>College students: Login with your registered email & roll number.</span>
-                </>
-              ) : (
-                <>
-                  <BookOpen className="h-4 w-4 shrink-0 text-amber-600" />
-                  <span>Institute students: Login with your Enrollment ID or personal email.</span>
-                </>
-              )}
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               
               {/* Identifier Input */}
@@ -181,7 +161,7 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                   <input
                     required
                     type="text"
-                    placeholder={loginType === 'college' ? 'student@college.edu' : 'e.g. INS-2026-001 or name@gmail.com'}
+                    placeholder={loginType === 'college' ? 'student@college.edu' : 'e.g. SDLC-KRR-2026-0001 or name@gmail.com'}
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     disabled={isSubmitting}

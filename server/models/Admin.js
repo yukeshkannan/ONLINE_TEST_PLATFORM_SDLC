@@ -22,9 +22,19 @@ const adminSchema = new mongoose.Schema({
     default: 'N/A',
     trim: true
   },
+  courseTrack: {
+    type: String,
+    default: 'N/A',
+    trim: true
+  },
+  categoryMode: {
+    type: String,
+    enum: ['college', 'institute'],
+    default: 'college'
+  },
   role: {
     type: String,
-    default: 'admin'
+    default: 'trainer'
   },
   resetOTP: {
     type: String,
