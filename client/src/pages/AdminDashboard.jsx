@@ -12,67 +12,12 @@ import ProctoringLogs from '../components/admin/ProctoringLogs.jsx';
 import CourseManagement from '../components/admin/CourseManagement.jsx';
 import api from '../utils/api.js';
 import { parsePdfToText } from '../utils/pdfParser.js';
+import { parseTextToQuestions } from '../utils/questionParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
 import { normalizeBatch, normalizeDept } from '../utils/constants.js';
 import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const parseTextToQuestions = (text) => {
-  if (!text) return [];
-  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-  const parsedQuestions = [];
-  let currentQuestion = null;
-  let lastLineWasOption = false;
-
-  for (let line of lines) {
-    const optMatch = line.match(/^([A-Da-d])[\s\.\)]+(.*)$/);
-    
-    if (optMatch) {
-      if (currentQuestion) {
-        const label = optMatch[1].toUpperCase();
-        const optText = optMatch[2].trim();
-        const opt = currentQuestion.options.find(o => o.label === label);
-        if (opt) {
-          opt.text = optText;
-        }
-      }
-      lastLineWasOption = true;
-    } else {
-      const isNewQuestion = lastLineWasOption || !currentQuestion || line.match(/^(Question|Q)?\s*\d+[\s\.\)\-:]+/i) || line.toLowerCase().startsWith('question:');
-      
-      if (isNewQuestion) {
-        if (currentQuestion && currentQuestion.questionText.trim()) {
-          parsedQuestions.push(currentQuestion);
-        }
-        
-        let cleanText = line.replace(/^(Question|Q)?\s*\d+[\s\.\)\-:]+/i, '').replace(/^question:\s*/i, '').trim();
-        currentQuestion = {
-          questionText: cleanText,
-          options: [
-            { label: 'A', text: '' },
-            { label: 'B', text: '' },
-            { label: 'C', text: '' },
-            { label: 'D', text: '' }
-          ],
-          correctAnswer: 'A',
-          marks: 1
-        };
-        lastLineWasOption = false;
-      } else {
-        if (currentQuestion) {
-          currentQuestion.questionText += ' ' + line;
-        }
-      }
-    }
-  }
-
-  if (currentQuestion && currentQuestion.questionText.trim()) {
-    parsedQuestions.push(currentQuestion);
-  }
-
-  return parsedQuestions.filter(q => q.options[0].text !== '' || q.options[1].text !== '');
-};
 
 const AdminDashboard = ({ tab }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -220,21 +165,23 @@ const AdminDashboard = ({ tab }) => {
       return toast.error('No valid questions found to import.');
     }
 
-    for (let i = 0; i < parsedBulkQuestions.length; i++) {
-      const q = parsedBulkQuestions[i];
-      if (!q.questionText.trim()) {
-        return toast.error(`Question #${i + 1} text cannot be empty.`);
-      }
-      if (!q.options[0].text.trim() || !q.options[1].text.trim()) {
-        return toast.error(`Question #${i + 1} must contain at least Option A and Option B.`);
-      }
-      const correctOpt = q.options.find(o => o.label === q.correctAnswer);
-      if (!correctOpt || !correctOpt.text.trim()) {
-        return toast.error(`Question #${i + 1} has option '${q.correctAnswer}' marked as correct, but option text is empty.`);
-      }
+    // Auto-clean: keep only questions that have question text and at least options A & B
+    const validQuestions = parsedBulkQuestions.filter(q => {
+      const hasText = q.questionText && q.questionText.trim().length > 0;
+      const optA = q.options.find(o => o.label === 'A')?.text.trim();
+      const optB = q.options.find(o => o.label === 'B')?.text.trim();
+      return hasText && optA && optB;
+    });
+
+    if (validQuestions.length === 0) {
+      return toast.error('No valid questions found. Every question must contain question text and at least Option A and Option B.');
     }
 
-    const questionsPayload = parsedBulkQuestions.map(q => {
+    if (validQuestions.length < parsedBulkQuestions.length) {
+      toast(`Filtered out ${parsedBulkQuestions.length - validQuestions.length} incomplete question fragments.`, { icon: 'ℹ️' });
+    }
+
+    const questionsPayload = validQuestions.map(q => {
       const options = [
         { label: 'A', text: q.options.find(o => o.label === 'A')?.text.trim() || '' },
         { label: 'B', text: q.options.find(o => o.label === 'B')?.text.trim() || '' }
@@ -243,10 +190,17 @@ const AdminDashboard = ({ tab }) => {
       if (optC) options.push({ label: 'C', text: optC });
       const optD = q.options.find(o => o.label === 'D')?.text.trim();
       if (optD) options.push({ label: 'D', text: optD });
+
+      let correct = q.correctAnswer;
+      const selected = options.find(o => o.label === correct);
+      if (!selected || !selected.text.trim()) {
+        correct = 'A';
+      }
+
       return {
         questionText: q.questionText.trim(),
         options,
-        correctAnswer: q.correctAnswer,
+        correctAnswer: correct,
         marks: 1
       };
     });

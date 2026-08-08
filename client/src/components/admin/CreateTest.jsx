@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api.js';
 import { parsePdfToText } from '../../utils/pdfParser.js';
+import { parseTextToQuestions } from '../../utils/questionParser.js';
 import { 
   FileText, Save, X, Plus, Trash2, Calendar, Clock, BookOpen, AlertCircle, 
   ArrowLeft, Upload, HelpCircle, CheckCircle2, GraduationCap, Building2, 
@@ -8,69 +9,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-
-const parseTextToQuestions = (text) => {
-  if (!text) return [];
-  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-  const parsedQuestions = [];
-  let currentQuestion = null;
-  let lastLineWasOption = false;
-
-  for (let line of lines) {
-    // Detect Answer key line e.g., "Answer: B", "Ans - C", "Correct Answer: D", "Key: A"
-    const ansMatch = line.match(/^(?:Answer|Ans|Correct\s*Answer|Correct|Key)[\s\.\:\-]+([A-Da-d])/i);
-    if (ansMatch && currentQuestion) {
-      currentQuestion.correctAnswer = ansMatch[1].toUpperCase();
-      continue;
-    }
-
-    const optMatch = line.match(/^([A-Da-d])[\s\.\)]+(.*)$/);
-    
-    if (optMatch) {
-      if (currentQuestion) {
-        const label = optMatch[1].toUpperCase();
-        const optText = optMatch[2].trim();
-        const opt = currentQuestion.options.find(o => o.label === label);
-        if (opt) {
-          opt.text = optText;
-        }
-      }
-      lastLineWasOption = true;
-    } else {
-      const isNewQuestion = lastLineWasOption || !currentQuestion || line.match(/^(Question|Q)?\s*\d+[\s\.\)\-:]+/i) || line.toLowerCase().startsWith('question:');
-      
-      if (isNewQuestion) {
-        if (currentQuestion && currentQuestion.questionText.trim()) {
-          parsedQuestions.push(currentQuestion);
-        }
-        
-        let cleanText = line.replace(/^(Question|Q)?\s*\d+[\s\.\)\-:]+/i, '').replace(/^question:\s*/i, '').trim();
-        currentQuestion = {
-          questionText: cleanText,
-          options: [
-            { label: 'A', text: '' },
-            { label: 'B', text: '' },
-            { label: 'C', text: '' },
-            { label: 'D', text: '' }
-          ],
-          correctAnswer: 'A',
-          marks: 1
-        };
-        lastLineWasOption = false;
-      } else {
-        if (currentQuestion) {
-          currentQuestion.questionText += ' ' + line;
-        }
-      }
-    }
-  }
-
-  if (currentQuestion && currentQuestion.questionText.trim()) {
-    parsedQuestions.push(currentQuestion);
-  }
-
-  return parsedQuestions.filter(q => q.options[0].text !== '' || q.options[1].text !== '');
-};
 
 const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const isEditing = !!testToEdit;
@@ -403,34 +341,47 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   };
 
   const handleBulkImportSubmit = () => {
-    let finalQuestions = [];
-
     if (parsedQuestions.length === 0) {
       return toast.error('No valid questions found to import.');
     }
 
-    for (let i = 0; i < parsedQuestions.length; i++) {
-      const q = parsedQuestions[i];
-      if (!q.questionText.trim()) {
-        return toast.error(`Question #${i + 1} text cannot be empty.`);
-      }
-      if (!q.options[0].text.trim() || !q.options[1].text.trim()) {
-        return toast.error(`Question #${i + 1} must contain at least Option A and Option B.`);
-      }
-      const correctOpt = q.options.find(o => o.label === q.correctAnswer);
-      if (!correctOpt || !correctOpt.text.trim()) {
-        return toast.error(`Question #${i + 1} has option '${q.correctAnswer}' marked as correct, but option text is empty.`);
-      }
+    // Auto-clean: keep only questions with question text and at least options A & B
+    const validQuestions = parsedQuestions.filter(q => {
+      const hasText = q.questionText && q.questionText.trim().length > 0;
+      const optA = q.options.find(o => o.label === 'A')?.text.trim();
+      const optB = q.options.find(o => o.label === 'B')?.text.trim();
+      return hasText && optA && optB;
+    });
+
+    if (validQuestions.length === 0) {
+      return toast.error('No valid questions found. Every question must contain question text and at least Option A and Option B.');
     }
 
-    finalQuestions = parsedQuestions.map(q => ({
-      questionText: q.questionText.trim(),
-      optionA: q.options.find(o => o.label === 'A')?.text || '',
-      optionB: q.options.find(o => o.label === 'B')?.text || '',
-      optionC: q.options.find(o => o.label === 'C')?.text || '',
-      optionD: q.options.find(o => o.label === 'D')?.text || '',
-      correctAnswer: q.correctAnswer
-    }));
+    if (validQuestions.length < parsedQuestions.length) {
+      toast(`Filtered out ${parsedQuestions.length - validQuestions.length} incomplete question fragments.`, { icon: 'ℹ️' });
+    }
+
+    const finalQuestions = validQuestions.map(q => {
+      let correct = q.correctAnswer;
+      const optA = q.options.find(o => o.label === 'A')?.text || '';
+      const optB = q.options.find(o => o.label === 'B')?.text || '';
+      const optC = q.options.find(o => o.label === 'C')?.text || '';
+      const optD = q.options.find(o => o.label === 'D')?.text || '';
+
+      const selected = q.options.find(o => o.label === correct);
+      if (!selected || !selected.text.trim()) {
+        correct = 'A';
+      }
+
+      return {
+        questionText: q.questionText.trim(),
+        optionA: optA,
+        optionB: optB,
+        optionC: optC,
+        optionD: optD,
+        correctAnswer: correct
+      };
+    });
 
     if (questions.length === 1 && !questions[0].questionText.trim() && !questions[0].optionA.trim() && !questions[0].optionB.trim()) {
       setQuestions(finalQuestions);
