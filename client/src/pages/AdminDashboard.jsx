@@ -402,7 +402,7 @@ const AdminDashboard = ({ tab }) => {
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         
         {/* Dynamic Header Bar matching mockup */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-slate-100 h-16 w-full px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+        <header className="bg-white/95 backdrop-blur-md border-b border-slate-100 h-16 w-full px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
           <div className="flex items-center space-x-3">
             <span className="h-4.5 w-1.5 bg-[#004f90] rounded-full"></span>
             <h1 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight font-poppins">
@@ -412,17 +412,18 @@ const AdminDashboard = ({ tab }) => {
 
           <div className="flex items-center space-x-4">
             {user?.role === 'admin' ? (
-              <div className="flex items-center gap-2 bg-[#004f90] text-white px-4 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider font-mono shadow-xs">
-                <span>ADMIN</span>
-              </div>
+              <span className="font-extrabold text-sm sm:text-base tracking-widest text-[#004f90] uppercase font-mono select-none">
+                ADMIN
+              </span>
             ) : user?.role === 'trainer' ? (
-              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200/80 text-amber-900 px-4 py-1.5 rounded-xl font-bold text-xs shadow-xs">
-                <span>{user?.name || 'Trainer'} (Trainer)</span>
-              </div>
+              <span className="font-bold text-sm sm:text-base text-slate-800 tracking-tight select-none">
+                <span className="text-[#004f90] font-black">{user?.name || 'Trainer'}</span>{' '}
+                <span className="text-slate-500 font-semibold">(Trainer)</span>
+              </span>
             ) : (
-              <div className="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-1.5 rounded-xl font-bold text-xs shadow-xs">
-                <span>{user?.name} ({user?.role || 'Faculty'})</span>
-              </div>
+              <span className="font-bold text-sm sm:text-base text-slate-800 select-none">
+                {user?.name} ({user?.role || 'Faculty'})
+              </span>
             )}
           </div>
         </header>
@@ -907,21 +908,35 @@ const AdminDashboard = ({ tab }) => {
                     </div>
                   </div>
 
-                  {/* Status Selection */}
-                  <div className="space-y-1.5 flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Status</label>
-                    <div className="relative">
-                      <select
-                        value={bulkStatus}
-                        onChange={(e) => setBulkStatus(e.target.value)}
-                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none shadow-sm"
-                      >
-                        <option value="draft">Draft (In Preparation)</option>
-                        <option value="active">Active (Available for Candidates)</option>
-                        <option value="ended">Ended (Completed/Closed)</option>
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center px-1 text-slate-500">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  {/* Status & Result Visibility */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div className="space-y-1.5 flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Status</label>
+                      <div className="relative flex items-center">
+                        <select
+                          value={bulkStatus}
+                          onChange={(e) => setBulkStatus(e.target.value)}
+                          className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 rounded-xl py-2.5 px-3.5 pr-10 text-slate-800 text-xs font-semibold focus:outline-none transition-all outline-none cursor-pointer appearance-none shadow-2xs"
+                        >
+                          <option value="draft">Draft (In Preparation)</option>
+                          <option value="active">Active (Available for Candidates)</option>
+                          <option value="ended">Ended (Completed/Closed)</option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Result Visibility</label>
+                      <div className="relative flex items-center">
+                        <select
+                          defaultValue="true"
+                          className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 rounded-xl py-2.5 px-3.5 pr-10 text-slate-800 text-xs font-semibold focus:outline-none transition-all outline-none cursor-pointer appearance-none shadow-2xs"
+                        >
+                          <option value="true">Visible to Students</option>
+                          <option value="false">Invisible to Students</option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
                       </div>
                     </div>
                   </div>
@@ -937,7 +952,7 @@ const AdminDashboard = ({ tab }) => {
                       <select
                         value={bulkDept}
                         onChange={(e) => setBulkDept(e.target.value)}
-                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
+                        className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 rounded-xl py-2.5 px-3.5 pr-10 text-slate-800 text-xs font-semibold focus:outline-none transition-all outline-none cursor-pointer appearance-none shadow-2xs"
                       >
                         <option value="All Departments">All Departments (Any Dept)</option>
                         {deptList.map(d => <option key={d} value={d}>{d}</option>)}
@@ -953,7 +968,7 @@ const AdminDashboard = ({ tab }) => {
                       <select
                         value={bulkYear}
                         onChange={(e) => setBulkYear(e.target.value)}
-                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
+                        className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 rounded-xl py-2.5 px-3.5 pr-10 text-slate-800 text-xs font-semibold focus:outline-none transition-all outline-none cursor-pointer appearance-none shadow-2xs"
                       >
                         <option value="All Years">All Years (Any Year)</option>
                         <option value="1st Year">1st Year</option>
@@ -972,7 +987,7 @@ const AdminDashboard = ({ tab }) => {
                       <select
                         value={bulkBatch}
                         onChange={(e) => setBulkBatch(e.target.value)}
-                        className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 pr-10 text-slate-800 text-sm focus:outline-none transition-all outline-none font-bold cursor-pointer appearance-none"
+                        className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 rounded-xl py-2.5 px-3.5 pr-10 text-slate-800 text-xs font-semibold focus:outline-none transition-all outline-none cursor-pointer appearance-none shadow-2xs"
                       >
                         <option value="All Batches">All Batches (Every Student)</option>
                         {batchList.map(b => <option key={b} value={b}>{b}</option>)}

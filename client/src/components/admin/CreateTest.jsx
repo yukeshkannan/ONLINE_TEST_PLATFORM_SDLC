@@ -716,10 +716,10 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                   <select
                     value={showResultsToStudents ? "true" : "false"}
                     onChange={(e) => setShowResultsToStudents(e.target.value === "true")}
-                    className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
+                    className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none shadow-2xs transition-all"
                   >
-                    <option value="false">Manual Release (Hidden until Admin Releases)</option>
-                    <option value="true">Instant Release (Auto Show Results)</option>
+                    <option value="true">Visible to Students</option>
+                    <option value="false">Invisible to Students</option>
                   </select>
                   <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
                 </div>

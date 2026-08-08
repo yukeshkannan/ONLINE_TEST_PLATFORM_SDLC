@@ -354,42 +354,48 @@ const ViewResults = ({ test, onBack }) => {
         </div>
 
         {/* Filter items */}
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           
           {/* Department */}
-          <div className="flex items-center space-x-1.5 text-xs text-softgrey">
-            <Filter className="h-3.5 w-3.5 text-accent shrink-0" />
+          <div className="relative flex items-center">
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none cursor-pointer"
+              className="bg-white border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-semibold rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 cursor-pointer appearance-none shadow-2xs transition-all"
             >
               <option value="ALL">All Departments</option>
               {allDepts.map(dept => <option key={dept} value={dept}>{dept}</option>)}
             </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
 
           {/* Batch */}
-          <select
-            value={selectedBatch}
-            onChange={(e) => setSelectedBatch(e.target.value)}
-            className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none cursor-pointer"
-          >
-            <option value="ALL">All Batches</option>
-            {allBatches.map(batch => <option key={batch} value={batch}>Batch {batch}</option>)}
-          </select>
+          <div className="relative flex items-center">
+            <select
+              value={selectedBatch}
+              onChange={(e) => setSelectedBatch(e.target.value)}
+              className="bg-white border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-semibold rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 cursor-pointer appearance-none shadow-2xs transition-all"
+            >
+              <option value="ALL">All Batches</option>
+              {allBatches.map(batch => <option key={batch} value={batch}>Batch {batch}</option>)}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+          </div>
 
           {/* Result Status (Only for Submitted tab) */}
           {viewTab === 'submitted' && (
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-charcoal-light border border-accent/5 rounded py-1.5 px-2 text-white text-[11px] focus:outline-none cursor-pointer"
-            >
-              <option value="ALL">All Grades</option>
-              <option value="PASS">Passes Only</option>
-              <option value="FAIL">Fails Only</option>
-            </select>
+            <div className="relative flex items-center">
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="bg-white border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-semibold rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 cursor-pointer appearance-none shadow-2xs transition-all"
+              >
+                <option value="ALL">All Grades</option>
+                <option value="PASS">Passes Only</option>
+                <option value="FAIL">Fails Only</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+            </div>
           )}
         </div>
       </div>
