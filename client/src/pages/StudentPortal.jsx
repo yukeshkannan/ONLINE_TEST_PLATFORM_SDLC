@@ -24,6 +24,7 @@ const StudentPortal = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [activeResultId, setActiveResultId] = useState(initialResultId);
   const [loadingInitialData, setLoadingInitialData] = useState(false);
+  const [navigatingToTest, setNavigatingToTest] = useState(false);
 
   useEffect(() => {
     const view = searchParams.get('view') || 'dashboard';
@@ -48,10 +49,14 @@ const StudentPortal = () => {
     }
   }, [searchParams]);
 
-  if (loading || loadingInitialData) {
+  if (loading || loadingInitialData || navigatingToTest) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-        <ClockLoader size="lg" color="#004f90" text="Securing connection tunnel..." />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 font-sans">
+        <ClockLoader 
+          size="lg" 
+          color="#004f90" 
+          text={navigatingToTest ? "Securing assessment environment & starting exam session..." : "Securing connection tunnel..."} 
+        />
       </div>
     );
   }
@@ -61,9 +66,13 @@ const StudentPortal = () => {
   }
 
   const handleStartTest = (testObj) => {
-    setSelectedTest(testObj);
-    setActiveScreen('test');
-    setSearchParams({ view: 'test', testId: testObj._id });
+    setNavigatingToTest(true);
+    setTimeout(() => {
+      setSelectedTest(testObj);
+      setActiveScreen('test');
+      setSearchParams({ view: 'test', testId: testObj._id });
+      setNavigatingToTest(false);
+    }, 600);
   };
 
   const handleViewResult = (resultId) => {

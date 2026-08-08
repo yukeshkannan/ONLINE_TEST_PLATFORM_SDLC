@@ -507,13 +507,13 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     setCustomPassMark(String(val));
   };
 
-  if (loadingInitialData || loadingQuestions) {
+  if (loadingQuestions) {
     return (
       <div className="flex flex-col items-center justify-center py-32 font-sans">
         <ClockLoader 
           size="lg" 
           color="#004f90" 
-          text={isEditing ? "Loading assessment details and question paper..." : "Preparing assessment creator and cohort targets..."} 
+          text="Loading assessment details and question paper..." 
         />
       </div>
     );
