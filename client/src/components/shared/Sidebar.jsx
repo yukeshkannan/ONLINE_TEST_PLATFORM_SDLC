@@ -68,15 +68,10 @@ const Sidebar = () => {
                   }
                 >
                   {({ isActive }) => (
-                    <>
-                      <div className="flex items-center space-x-3">
-                        <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                        <span className={isActive ? 'text-white font-bold' : 'text-slate-600'}>{item.name}</span>
-                      </div>
-                      {isActive && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#F7931A] shadow-xs" />
-                      )}
-                    </>
+                    <div className="flex items-center space-x-3">
+                      <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      <span className={isActive ? 'text-white font-bold' : 'text-slate-600'}>{item.name}</span>
+                    </div>
                   )}
                 </NavLink>
               );
