@@ -4,7 +4,6 @@ const batchTrackSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
     trim: true
   },
   code: {
@@ -38,6 +37,8 @@ const batchTrackSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+batchTrackSchema.index({ category: 1, department: 1, name: 1 }, { unique: true });
 
 const BatchTrack = mongoose.model('BatchTrack', batchTrackSchema);
 export default BatchTrack;

@@ -129,6 +129,9 @@ export const getBatches = async (req, res, next) => {
   }
 };
 
+// Attempt to drop legacy global name_1 index if present
+BatchTrack.collection.dropIndex('name_1').catch(() => {});
+
 const escapeRegex = (str) => (str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const createBatch = async (req, res, next) => {
@@ -139,19 +142,27 @@ export const createBatch = async (req, res, next) => {
   }
 
   try {
+    const targetCategory = category === 'college' ? 'college' : 'institute';
+    const targetDept = targetCategory === 'college' ? (department ? department.trim() : 'All Departments') : 'All Departments';
     const escapedName = escapeRegex(name.trim());
-    const existing = await BatchTrack.findOne({ 
-      name: { $regex: new RegExp(`^${escapedName}$`, 'i') } 
+
+    // Check if course already exists in the same category & department
+    const existing = await BatchTrack.findOne({
+      category: targetCategory,
+      department: targetDept,
+      name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
     });
     if (existing) {
-      return res.status(400).json({ message: `Course track '${name.trim()}' already exists in the catalog.` });
+      return res.status(400).json({
+        message: `Course track '${name.trim()}' already exists in ${targetCategory === 'college' ? `College (${targetDept})` : 'SDLC Institute'}.`
+      });
     }
 
     const newBatch = new BatchTrack({
       name: name.trim(),
       code: code ? code.toUpperCase().trim() : '',
-      category: category === 'college' ? 'college' : 'institute',
-      department: department ? department.trim() : 'All Departments',
+      category: targetCategory,
+      department: targetDept,
       description: description ? description.trim() : ''
     });
 
@@ -159,7 +170,7 @@ export const createBatch = async (req, res, next) => {
     res.status(201).json(saved);
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ message: `Course track '${name.trim()}' already exists.` });
+      return res.status(400).json({ message: `Course track '${name.trim()}' already exists in this category.` });
     }
     next(error);
   }
@@ -175,16 +186,40 @@ export const updateBatch = async (req, res, next) => {
       return res.status(404).json({ message: 'Course track not found.' });
     }
 
-    if (name !== undefined) batch.name = name.trim();
+    const targetCategory = category !== undefined ? (category === 'college' ? 'college' : 'institute') : batch.category;
+    const targetDept = targetCategory === 'college' 
+      ? (department !== undefined ? department.trim() : batch.department)
+      : 'All Departments';
+    const targetName = name !== undefined ? name.trim() : batch.name;
+
+    if (name !== undefined || category !== undefined || department !== undefined) {
+      const escapedName = escapeRegex(targetName);
+      const duplicate = await BatchTrack.findOne({
+        _id: { $ne: id },
+        category: targetCategory,
+        department: targetDept,
+        name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
+      });
+      if (duplicate) {
+        return res.status(400).json({
+          message: `Course track '${targetName}' already exists in ${targetCategory === 'college' ? `College (${targetDept})` : 'SDLC Institute'}.`
+        });
+      }
+    }
+
+    if (name !== undefined) batch.name = targetName;
     if (code !== undefined) batch.code = code.toUpperCase().trim();
-    if (category !== undefined) batch.category = category === 'college' ? 'college' : 'institute';
-    if (department !== undefined) batch.department = department.trim();
+    if (category !== undefined) batch.category = targetCategory;
+    if (department !== undefined) batch.department = targetDept;
     if (description !== undefined) batch.description = description.trim();
     if (isActive !== undefined) batch.isActive = Boolean(isActive);
 
     const updated = await batch.save();
     res.status(200).json(updated);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: `Course track with this name already exists in this category.` });
+    }
     next(error);
   }
 };
