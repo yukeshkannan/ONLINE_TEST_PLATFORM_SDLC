@@ -88,9 +88,15 @@ export const useTest = (questions = [], testId = null) => {
   };
 
   const getSubmissionPayload = () => {
+    let saved = {};
+    if (testId) {
+      try {
+        saved = JSON.parse(localStorage.getItem(`assessment_answers_${testId}`) || '{}');
+      } catch (e) {}
+    }
     return questions.map(q => ({
       questionId: q._id,
-      selectedOption: answers[q._id] || ''
+      selectedOption: answers[q._id] || saved[q._id] || ''
     }));
   };
 

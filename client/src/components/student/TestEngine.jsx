@@ -89,6 +89,9 @@ const TestEngine = ({ test, onFinish }) => {
     timeTaken
   } = useTest(questions, test._id);
 
+  const [fullscreenWarningCountdown, setFullscreenWarningCountdown] = useState(null);
+  const fullscreenWarningTimer = useRef(null);
+
   const handleSubmit = async (isAuto = false, subReason = 'manual') => {
     if (submitLock.current) return;
     
@@ -98,15 +101,23 @@ const TestEngine = ({ test, onFinish }) => {
 
     submitLock.current = true;
     setSubmitting(true);
+    if (fullscreenWarningTimer.current) clearInterval(fullscreenWarningTimer.current);
+    setFullscreenWarningCountdown(null);
+
     const toastMsg = subReason === 'timer_expired' 
       ? 'Time limit reached. Submitting examination automatically...' 
       : subReason === 'security_violation'
-      ? 'Security breach detected. Submitting examination responses...'
+      ? 'Security violation recorded. Submitting examination responses...'
       : 'Submitting examination responses securely...';
     toast.loading(toastMsg, { id: 'submit-exam' });
     
     try {
-      const payload = getSubmissionPayload();
+      const savedAnswers = JSON.parse(localStorage.getItem(`assessment_answers_${test._id}`) || '{}');
+      const payload = questions.map(q => ({
+        questionId: q._id,
+        selectedOption: answers[q._id] || savedAnswers[q._id] || ''
+      }));
+
       const maxSeconds = test.duration * 60;
       const secondsSpent = Math.max(0, maxSeconds - timeRemaining);
 
@@ -133,7 +144,7 @@ const TestEngine = ({ test, onFinish }) => {
       onFinish(data.result._id);
     } catch (err) {
       submitLock.current = false;
-      toast.error(err.response?.data?.message || 'Submission failed. Please check your internet connection and try again.', { id: 'submit-exam' });
+      toast.error(err.response?.data?.message || 'Submission failed. Please check your connection and try again.', { id: 'submit-exam' });
     } finally {
       setSubmitting(false);
     }
@@ -168,9 +179,15 @@ const TestEngine = ({ test, onFinish }) => {
 
   const triggerFullscreen = () => {
     const docEl = document.documentElement;
-    if (docEl.requestFullscreen) docEl.requestFullscreen();
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
     else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
     else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+
+    setTimeout(() => {
+      hasStartedExam.current = true;
+      if (fullscreenWarningTimer.current) clearInterval(fullscreenWarningTimer.current);
+      setFullscreenWarningCountdown(null);
+    }, 1500);
   };
 
   useEffect(() => {
@@ -181,28 +198,34 @@ const TestEngine = ({ test, onFinish }) => {
       if (submitLock.current) return;
 
       if (isFull) {
-        hasStartedExam.current = true;
+        if (fullscreenWarningTimer.current) clearInterval(fullscreenWarningTimer.current);
+        setFullscreenWarningCountdown(null);
       } else if (hasStartedExam.current) {
-        // Delay check to see if this fullscreen exit was caused by a page reload/exit prompt
-        setTimeout(() => {
-          if (submitLock.current) return;
-          if (isAttemptingPageExit.current) {
-            console.log('Fullscreen exit ignored because page reload/unload confirmation is active.');
-            return;
+        if (isAttemptingPageExit.current) return;
+
+        // Start 5-second countdown warning before forced auto-submit
+        let count = 5;
+        setFullscreenWarningCountdown(count);
+        if (fullscreenWarningTimer.current) clearInterval(fullscreenWarningTimer.current);
+
+        fullscreenWarningTimer.current = setInterval(() => {
+          count -= 1;
+          if (count <= 0) {
+            clearInterval(fullscreenWarningTimer.current);
+            setFullscreenWarningCountdown(null);
+            if (!submitLock.current) {
+              toast.error('SECURITY VIOLATION: Fullscreen exit / ESC key triggered. Automatic submission initiated.', { duration: 6000 });
+              api.post('/violations/log', {
+                testId: test._id,
+                violationType: 'fullscreen_exit',
+                autoSubmitted: true
+              }).catch(() => {});
+              autoSubmitRef.current(true, 'security_violation');
+            }
+          } else {
+            setFullscreenWarningCountdown(count);
           }
-
-          toast.error('SECURITY VIOLATION: Fullscreen mode exited / ESC triggered. Automatic exam submission initiated.', { duration: 6000 });
-
-          api.post('/violations/log', {
-            testId: test._id,
-            violationType: 'fullscreen_exit',
-            autoSubmitted: true
-          }).catch(() => {});
-
-          setTimeout(() => {
-            autoSubmitRef.current(true, 'security_violation');
-          }, 500);
-        }, 300);
+        }, 1000);
       }
     };
 
@@ -210,18 +233,17 @@ const TestEngine = ({ test, onFinish }) => {
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     
-    toast('Please enter fullscreen mode to begin your assessment.', { icon: '🖥️' });
-    
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      if (fullscreenWarningTimer.current) clearInterval(fullscreenWarningTimer.current);
     };
   }, [test._id]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (submitLock.current) return;
+      if (submitLock.current || !hasStartedExam.current) return;
       if (document.hidden) {
         setTabSwitches(prev => prev + 1);
       }
@@ -235,10 +257,8 @@ const TestEngine = ({ test, onFinish }) => {
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (!submitLock.current) {
+      if (!submitLock.current && hasStartedExam.current) {
         isAttemptingPageExit.current = true;
-        
-        // Reset the flag after a short delay in case the user cancels and stays on the page
         setTimeout(() => {
           isAttemptingPageExit.current = false;
         }, 3000);
@@ -255,7 +275,7 @@ const TestEngine = ({ test, onFinish }) => {
   }, []);
 
   useEffect(() => {
-    if (tabSwitches === 0 || submitLock.current) return;
+    if (tabSwitches === 0 || submitLock.current || !hasStartedExam.current) return;
 
     const isAutoSubmit = tabSwitches >= 3;
 
@@ -272,7 +292,7 @@ const TestEngine = ({ test, onFinish }) => {
       }, 500);
     } else {
       toast.error(
-        `SECURITY WARNING: Tab switch detected (${tabSwitches}/3). Further attempts will result in automatic submission.`,
+        `SECURITY WARNING: Tab switch detected (${tabSwitches}/3). Reaching 3 tab switches will automatically submit your exam.`,
         { duration: 6000 }
       );
     }
@@ -578,6 +598,39 @@ const TestEngine = ({ test, onFinish }) => {
                 Yes, Submit
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Fullscreen Warning Countdown Modal Overlay */}
+      {fullscreenWarningCountdown !== null && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-md px-4">
+          <div className="bg-white max-w-md w-full rounded-3xl p-7 shadow-2xl border border-rose-200 text-center space-y-5 animate-pulse">
+            <div className="h-16 w-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center border border-rose-200 mx-auto">
+              <AlertTriangle className="h-8 w-8 text-rose-600" />
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="text-xl font-black text-slate-900 font-poppins">Fullscreen Mode Exited!</h4>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Security violation detected. Please return to full-screen mode immediately to continue your assessment.
+              </p>
+              <div className="py-2">
+                <span className="text-3xl font-black text-rose-600 font-mono">
+                  {fullscreenWarningCountdown}s
+                </span>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+                  Automatic submission will trigger if not re-engaged
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={triggerFullscreen}
+              className="w-full bg-[#004f90] hover:bg-[#003c6e] text-white font-extrabold py-3.5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center space-x-2"
+            >
+              <Maximize className="h-4 w-4" />
+              <span>Return to Fullscreen Mode Now</span>
+            </button>
           </div>
         </div>
       )}
