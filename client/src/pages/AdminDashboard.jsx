@@ -40,13 +40,13 @@ const AdminDashboard = ({ tab }) => {
   const [bulkYear, setBulkYear] = useState('All Years');
   const [bulkBatch, setBulkBatch] = useState('Web Design');
   const [bulkNotepadText, setBulkNotepadText] = useState('');
-  const [bulkStatus, setBulkStatus] = useState('draft');
+  const [bulkStatus, setBulkStatus] = useState('active');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
   const [deptList, setDeptList] = useState([]);
   const [batchList, setBatchList] = useState([]);
 
   const getTodayStr = () => new Date().toISOString().split('T')[0];
-  const getTomorrowStr = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const getTomorrowStr = () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const [bulkStartDate, setBulkStartDate] = useState(getTodayStr);
   const [bulkStartHour, setBulkStartHour] = useState('09');

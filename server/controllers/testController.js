@@ -34,10 +34,14 @@ export const getTests = async (req, res, next) => {
         return res.status(404).json({ message: 'Student not found' });
       }
 
+      const isInstitute = student.studentType === 'institute';
+
       const deptMatches = [
         student.department,
         student.courseTrack,
+        isInstitute ? student.center : null,
         'All Departments',
+        'All Tracks',
         'ALL',
         ''
       ].filter(Boolean);
@@ -59,16 +63,22 @@ export const getTests = async (req, res, next) => {
 
       const filter = {
         $or: [
+          { assignedTo: { $exists: false } },
+          { assignedTo: { $size: 0 } },
+          { 'assignedTo.department': { $in: deptMatches } },
+          { 'assignedTo.batch': { $in: batchMatches } },
+          { 'assignedTo.year': { $in: yearMatches } },
           {
             assignedTo: {
               $elemMatch: {
-                department: { $in: deptMatches },
-                batch: { $in: batchMatches },
-                year: { $in: yearMatches }
+                $or: [
+                  { department: { $in: deptMatches } },
+                  { batch: { $in: batchMatches } },
+                  { year: { $in: yearMatches } }
+                ]
               }
             }
-          },
-          { assignedTo: { $size: 0 } }
+          }
         ]
       };
 
@@ -76,10 +86,11 @@ export const getTests = async (req, res, next) => {
         .sort({ startTime: -1 })
         .lean();
 
-      // Compute dynamic status and filter out draft tests for students
-      const studentVisibleTests = tests
-        .map(t => ({ ...t, status: computeTestStatus(t, now) }))
-        .filter(t => t.status === 'active' || t.status === 'ended');
+      // For students, deliver all assigned tests (active, upcoming, or ended)
+      const studentVisibleTests = tests.map(t => ({
+        ...t,
+        status: computeTestStatus(t, now)
+      }));
 
       const studentResults = await Result.find({ studentId: req.user.id })
         .select('testId score passed percentage _id')

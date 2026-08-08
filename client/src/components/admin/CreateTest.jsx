@@ -17,20 +17,23 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
+  const getTodayDateStr = () => new Date().toISOString().split('T')[0];
+  const getNextMonthDateStr = () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
   const [instructions, setInstructions] = useState('');
-  const [duration, setDuration] = useState('');
-  const [status, setStatus] = useState('draft'); // draft | active | ended
+  const [duration, setDuration] = useState('30');
+  const [status, setStatus] = useState(testToEdit ? testToEdit.status : 'active'); // draft | active | ended
   const [showResultsToStudents, setShowResultsToStudents] = useState(true);
 
   // Custom 12-hour AM/PM Time States
-  const [startDate, setStartDate] = useState('');
-  const [startHour, setStartHour] = useState('10');
+  const [startDate, setStartDate] = useState(getTodayDateStr);
+  const [startHour, setStartHour] = useState('09');
   const [startMinute, setStartMinute] = useState('00');
   const [startAmpm, setStartAmpm] = useState('AM');
 
-  const [endDate, setEndDate] = useState('');
-  const [endHour, setEndHour] = useState('05');
-  const [endMinute, setEndMinute] = useState('00');
+  const [endDate, setEndDate] = useState(getNextMonthDateStr);
+  const [endHour, setEndHour] = useState('11');
+  const [endMinute, setEndMinute] = useState('59');
   const [endAmpm, setEndAmpm] = useState('PM');
 
   // Category Mode & Cohort targeting controls ('college' | 'institute')

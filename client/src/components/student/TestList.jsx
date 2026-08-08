@@ -54,18 +54,19 @@ const TestList = ({ onStartTest, onViewResult }) => {
 
   const now = new Date();
   
+  // Active / Available Assessments for the candidate:
   const activeTests = tests.filter((t) => {
-    const isStatusActive = t.status === 'active';
-    const isWithinWindow = now >= new Date(t.startTime) && now <= new Date(t.endTime);
-    return isStatusActive && isWithinWindow && !t.attempted;
+    if (t.attempted) return false;
+    const isPastEnd = t.endTime && now > new Date(t.endTime);
+    if (isPastEnd && t.status !== 'active') return false;
+    return true;
   });
   
   const completedTests = tests.filter((t) => t.attempted);
   
   const endedTests = tests.filter((t) => {
-    const hasEndedStatus = t.status === 'ended';
-    const isPastWindow = now > new Date(t.endTime);
-    return (hasEndedStatus || isPastWindow) && !t.attempted;
+    const isPastEnd = t.endTime && now > new Date(t.endTime);
+    return !t.attempted && (t.status === 'ended' || isPastEnd) && !activeTests.some(a => a._id === t._id);
   });
 
   return (
