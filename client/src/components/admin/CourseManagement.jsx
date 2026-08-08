@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import ClockLoader from '../shared/ClockLoader.jsx';
 
 const CourseManagement = () => {
   // Category Tab: 'college' | 'institute'
@@ -69,6 +70,14 @@ const CourseManagement = () => {
   useEffect(() => {
     fetchAllCatalogData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32">
+        <ClockLoader size="lg" color="#004f90" text="Loading course catalog & tracks..." />
+      </div>
+    );
+  }
 
   // Department Handlers
   const handleOpenDeptModal = (dept = null) => {
