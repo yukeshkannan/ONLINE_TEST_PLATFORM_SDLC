@@ -330,12 +330,13 @@ const ProctoringLogs = () => {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 flex-wrap">
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1 flex-wrap">
+                              <BookOpen className="w-3.5 h-3.5 text-[#004f90] shrink-0" />
                               <span className="font-semibold text-slate-700 truncate max-w-xs">
-                                📝 {log.testId?.title || 'Assessment Paper'}
+                                {log.testId?.title || 'Assessment Paper'}
                               </span>
                               {log.testId?.subject && (
-                                <span className="text-[11px] text-slate-400">({log.testId.subject})</span>
+                                <span className="text-[11px] text-slate-400 font-medium">({log.testId.subject})</span>
                               )}
                             </div>
                           </div>

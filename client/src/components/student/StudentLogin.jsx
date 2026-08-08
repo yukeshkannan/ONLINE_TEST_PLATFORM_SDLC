@@ -206,7 +206,7 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                 </label>
                 <button 
                   type="button"
-                  onClick={() => toast("Please contact your institute center or college administrator to reset your credentials.", { icon: 'ℹ️' })}
+                  onClick={() => toast("Please contact your institute center or college administrator to reset your credentials.")}
                   className="font-bold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left"
                 >
                   Forgot Password?

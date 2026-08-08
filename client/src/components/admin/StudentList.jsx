@@ -1285,7 +1285,7 @@ const StudentList = () => {
                         />
                         {dobError && (
                           <p className="text-[11px] font-semibold text-rose-600 mt-1">
-                            ⚠️ Letters not supported. Numbers only.
+                            Letters not supported. Numbers only.
                           </p>
                         )}
                       </div>
@@ -1517,7 +1517,7 @@ const StudentList = () => {
                         />
                         {editDobError && (
                           <p className="text-[11px] font-semibold text-rose-600 mt-1">
-                            ⚠️ Letters not supported. Numbers only.
+                            Letters not supported. Numbers only.
                           </p>
                         )}
                       </div>

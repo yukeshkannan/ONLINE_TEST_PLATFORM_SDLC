@@ -659,9 +659,9 @@ const Dashboard = () => {
                       onChange={(e) => setExportTestId(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                     >
-                      <option value="all">📊 All Test Assessments (Combined)</option>
+                      <option value="all">All Test Assessments (Combined)</option>
                       {allTestsList.map(t => (
-                        <option key={t._id} value={t._id}>📝 {t.title} ({t.subject})</option>
+                        <option key={t._id} value={t._id}>{t.title} ({t.subject})</option>
                       ))}
                     </select>
                     <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
@@ -734,9 +734,9 @@ const Dashboard = () => {
                       onChange={(e) => setExportStudentCategory(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                     >
-                      <option value="all">👥 All Enrolled Candidates</option>
-                      <option value="college">🎓 College Students Only</option>
-                      <option value="institute">🚀 SDLC Institute Students Only</option>
+                      <option value="all">All Enrolled Candidates</option>
+                      <option value="college">College Students Only</option>
+                      <option value="institute">SDLC Institute Students Only</option>
                     </select>
                     <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
                   </div>

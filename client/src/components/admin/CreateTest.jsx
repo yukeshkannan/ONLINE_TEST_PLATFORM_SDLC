@@ -365,7 +365,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     }
 
     if (validQuestions.length < parsedQuestions.length) {
-      toast(`Filtered out ${parsedQuestions.length - validQuestions.length} incomplete question fragments.`, { icon: 'ℹ️' });
+      toast(`Filtered out ${parsedQuestions.length - validQuestions.length} incomplete question fragments.`);
     }
 
     const finalQuestions = validQuestions.map(q => {

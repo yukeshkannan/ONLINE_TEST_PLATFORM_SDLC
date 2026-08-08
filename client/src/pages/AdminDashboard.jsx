@@ -179,7 +179,7 @@ const AdminDashboard = ({ tab }) => {
     }
 
     if (validQuestions.length < parsedBulkQuestions.length) {
-      toast(`Filtered out ${parsedBulkQuestions.length - validQuestions.length} incomplete question fragments.`, { icon: 'ℹ️' });
+      toast(`Filtered out ${parsedBulkQuestions.length - validQuestions.length} incomplete question fragments.`);
     }
 
     const questionsPayload = validQuestions.map(q => {

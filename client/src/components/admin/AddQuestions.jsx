@@ -110,7 +110,7 @@ const AddQuestions = ({ test, onFinished }) => {
     }
 
     if (validQuestions.length < parsedQuestions.length) {
-      toast(`Filtered out ${parsedQuestions.length - validQuestions.length} incomplete question fragments.`, { icon: 'ℹ️' });
+      toast(`Filtered out ${parsedQuestions.length - validQuestions.length} incomplete question fragments.`);
     }
 
     const finalPayload = validQuestions.map((q, idx) => {
