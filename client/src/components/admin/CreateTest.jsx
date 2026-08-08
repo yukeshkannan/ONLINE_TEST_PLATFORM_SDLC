@@ -67,6 +67,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   ]);
 
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [loadingInitialData, setLoadingInitialData] = useState(true);
 
   // Bulk Import state
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -74,29 +75,26 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [parsedQuestions, setParsedQuestions] = useState([]);
 
   useEffect(() => {
-    api.get('/cohorts/departments')
-      .then(({ data }) => {
-        if (Array.isArray(data)) {
-          setDeptList(data.filter(d => d.isActive !== false).map(d => d.code));
+    Promise.all([
+      api.get('/cohorts/departments'),
+      api.get('/cohorts/batches'),
+      api.get('/cohorts/centers')
+    ])
+      .then(([deptRes, batchRes, centerRes]) => {
+        if (Array.isArray(deptRes.data)) {
+          setDeptList(deptRes.data.filter(d => d.isActive !== false).map(d => d.code));
+        }
+        if (Array.isArray(batchRes.data)) {
+          setAllBatches(batchRes.data.filter(b => b.isActive !== false));
+        }
+        if (Array.isArray(centerRes.data)) {
+          setCenterList(centerRes.data.filter(c => c.isActive !== false).map(c => c.name));
         }
       })
-      .catch(() => {});
-
-    api.get('/cohorts/batches')
-      .then(({ data }) => {
-        if (Array.isArray(data)) {
-          setAllBatches(data.filter(b => b.isActive !== false));
-        }
-      })
-      .catch(() => {});
-
-    api.get('/cohorts/centers')
-      .then(({ data }) => {
-        if (Array.isArray(data)) {
-          setCenterList(data.filter(c => c.isActive !== false).map(c => c.name));
-        }
-      })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        setLoadingInitialData(false);
+      });
   }, []);
 
   // Compute dynamic batch list filtering by categoryMode
@@ -509,10 +507,14 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     setCustomPassMark(String(val));
   };
 
-  if (loadingQuestions) {
+  if (loadingInitialData || loadingQuestions) {
     return (
-      <div className="flex flex-col items-center justify-center py-32">
-        <ClockLoader size="lg" color="#004f90" text="Loading assessment questions..." />
+      <div className="flex flex-col items-center justify-center py-32 font-sans">
+        <ClockLoader 
+          size="lg" 
+          color="#004f90" 
+          text={isEditing ? "Loading assessment details and question paper..." : "Preparing assessment creator and cohort targets..."} 
+        />
       </div>
     );
   }
