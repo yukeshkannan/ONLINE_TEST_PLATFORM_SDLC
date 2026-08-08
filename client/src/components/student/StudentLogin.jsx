@@ -58,10 +58,6 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
         transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
         className="md:w-1/2 w-full min-h-[45vh] md:min-h-screen bg-[#f3f6fa] flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200/60 relative overflow-hidden text-center"
       >
-        {/* Background Radial Accents */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-        
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -70,7 +66,7 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
         >
           <img 
             alt="Assessment Platform Logo" 
-            className="w-60 sm:w-72 h-auto object-contain animate-float-slow" 
+            className="w-60 sm:w-72 h-auto object-contain" 
             src="/logo.png" 
           />
           <div className="space-y-3">
@@ -80,7 +76,6 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
             <p className="text-xs text-slate-500 font-medium">
               Unified testing portal for College Academic Programs & Institute Specialization Tracks.
             </p>
-            <div className="w-24 h-1 mx-auto rounded-full bg-[#004f90]/80"></div>
           </div>
         </motion.div>
       </motion.div>

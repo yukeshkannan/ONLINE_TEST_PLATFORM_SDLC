@@ -148,10 +148,6 @@ const AdminLogin = () => {
         transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
         className="md:w-1/2 w-full min-h-[45vh] md:min-h-screen bg-[#f3f6fa] flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200/60 relative overflow-hidden"
       >
-        {/* Soft Background Radial Accents */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#F7931A]/5 rounded-full blur-[100px] pointer-events-none"></div>
-        
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -160,14 +156,13 @@ const AdminLogin = () => {
         >
           <img 
             alt="SDLC Logo" 
-            className="w-60 sm:w-72 h-auto object-contain animate-float-slow" 
+            className="w-60 sm:w-72 h-auto object-contain" 
             src="/logo.png" 
           />
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#004f90] tracking-tight leading-tight font-poppins">
               Skill Development<br/>Learning Centre
             </h2>
-            <div className="w-24 h-1 bg-[#F7931A] mx-auto rounded-full"></div>
           </div>
         </motion.div>
       </motion.div>

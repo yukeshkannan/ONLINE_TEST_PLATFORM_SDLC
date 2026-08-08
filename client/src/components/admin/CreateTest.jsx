@@ -5,7 +5,7 @@ import { parseTextToQuestions } from '../../utils/questionParser.js';
 import { 
   FileText, Save, X, Plus, Trash2, Calendar, Clock, BookOpen, AlertCircle, 
   ArrowLeft, Upload, HelpCircle, CheckCircle2, GraduationCap, Building2, 
-  Layers, Check, FileSpreadsheet, Send, ChevronDown
+  Layers, Check, FileSpreadsheet, Send, ChevronDown, Award
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
