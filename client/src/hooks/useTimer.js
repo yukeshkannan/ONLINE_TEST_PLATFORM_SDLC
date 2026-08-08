@@ -1,17 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
 
 export const useTimer = (initialSeconds, onTimeUp) => {
-  const [timeRemaining, setTimeRemaining] = useState(initialSeconds);
+  const duration = Number(initialSeconds) > 0 ? Number(initialSeconds) : 1800;
+  const [timeRemaining, setTimeRemaining] = useState(duration);
   const [isActive, setIsActive] = useState(true);
   const onTimeUpRef = useRef(onTimeUp);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
 
   useEffect(() => {
-    if (!isActive || timeRemaining <= 0) {
-      if (timeRemaining <= 0 && onTimeUpRef.current) {
+    if (Number(initialSeconds) > 0 && !hasInitialized.current) {
+      setTimeRemaining(Number(initialSeconds));
+      hasInitialized.current = true;
+    }
+  }, [initialSeconds]);
+
+  useEffect(() => {
+    if (!isActive || !hasInitialized.current) return;
+
+    if (timeRemaining <= 0) {
+      if (onTimeUpRef.current) {
         onTimeUpRef.current();
       }
       return;

@@ -155,11 +155,13 @@ const TestEngine = ({ test, onFinish }) => {
     autoSubmitRef.current = handleSubmit;
   });
 
-  const { timeRemaining, formatTime } = useTimer(test.duration * 60, () => {
+  const testDurationMinutes = Number(test?.duration) > 0 ? Number(test.duration) : 30;
+
+  const { timeRemaining, formatTime } = useTimer(testDurationMinutes * 60, () => {
     autoSubmitRef.current(true, 'timer_expired');
   });
 
-  const maxSeconds = test.duration * 60;
+  const maxSeconds = testDurationMinutes * 60;
   const secondsSpent = Math.max(0, maxSeconds - timeRemaining);
   const minSecondsRequired = Math.ceil(maxSeconds * 0.5);
   const lockSecondsRemaining = Math.max(0, minSecondsRequired - secondsSpent);
