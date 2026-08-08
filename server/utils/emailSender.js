@@ -1,7 +1,8 @@
 export const sendCredentialsEmail = async (email, name, rollNumber) => {
   const apiKey = (process.env.BREVO_API_KEY || '').trim();
   const senderEmail = (process.env.SENDER_EMAIL || 'yukesh785.in@gmail.com').trim();
-  const logoUrl = process.env.LOGO_URL || (process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/logo.png` : 'https://raw.githubusercontent.com/sdlcskills/assets/main/logo.png');
+  const logoUrl = process.env.LOGO_URL || 'https://raw.githubusercontent.com/yukeshkannan/ONLINE_TEST_PLATFORM_SDLC/main/client/public/logo.png';
+  const clientPortalUrl = process.env.CLIENT_URL || 'http://localhost:5173';
 
   if (!apiKey) {
     console.error('SERVER_ERROR: BREVO_API_KEY environment variable is missing.');
@@ -45,8 +46,10 @@ export const sendCredentialsEmail = async (email, name, rollNumber) => {
               <table cellpadding="0" cellspacing="0" border="0" class="main-card" style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0, 79, 144, 0.03); width: 100%; border-collapse: collapse;">
                 <!-- Header Section -->
                 <tr>
-                  <td class="header-cell" style="background-color: #ffffff; padding: 32px 40px; text-align: center; border-bottom: 1px solid #eef2f6;">
-                    <img src="${logoUrl}" alt="SDLC Platform" style="height: 48px; max-width: 100%; display: inline-block; border: 0; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 24px; font-weight: 800; color: #004f90;" />
+                  <td class="header-cell" style="background-color: #ffffff; padding: 28px 40px; text-align: center; border-bottom: 1px solid #eef2f6;">
+                    <a href="${clientPortalUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
+                      <img src="${logoUrl}" alt="SDLC Skill Platform" style="height: 48px; max-height: 48px; width: auto; max-width: 220px; display: inline-block; border: 0; outline: none; text-decoration: none;" />
+                    </a>
                   </td>
                 </tr>
 
@@ -123,7 +126,8 @@ export const sendCredentialsEmail = async (email, name, rollNumber) => {
 export const sendOTPEmail = async (email, name, otp) => {
   const apiKey = (process.env.BREVO_API_KEY || '').trim();
   const senderEmail = (process.env.SENDER_EMAIL || 'yukesh785.in@gmail.com').trim();
-  const logoUrl = process.env.LOGO_URL || (process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/logo.png` : 'https://raw.githubusercontent.com/sdlcskills/assets/main/logo.png');
+  const logoUrl = process.env.LOGO_URL || 'https://raw.githubusercontent.com/yukeshkannan/ONLINE_TEST_PLATFORM_SDLC/main/client/public/logo.png';
+  const clientPortalUrl = process.env.CLIENT_URL || 'http://localhost:5173';
 
   if (!apiKey) {
     console.error('SERVER_ERROR: BREVO_API_KEY environment variable is missing.');
@@ -167,8 +171,10 @@ export const sendOTPEmail = async (email, name, otp) => {
               <table cellpadding="0" cellspacing="0" border="0" class="main-card" style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0, 79, 144, 0.03); width: 100%; border-collapse: collapse;">
                 <!-- Header Section -->
                 <tr>
-                  <td class="header-cell" style="background-color: #ffffff; padding: 32px 40px; text-align: center; border-bottom: 1px solid #eef2f6;">
-                    <img src="${logoUrl}" alt="SDLC Platform" style="height: 48px; max-width: 100%; display: inline-block; border: 0; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 24px; font-weight: 800; color: #004f90;" />
+                  <td class="header-cell" style="background-color: #ffffff; padding: 28px 40px; text-align: center; border-bottom: 1px solid #eef2f6;">
+                    <a href="${clientPortalUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
+                      <img src="${logoUrl}" alt="SDLC Skill Platform" style="height: 48px; max-height: 48px; width: auto; max-width: 220px; display: inline-block; border: 0; outline: none; text-decoration: none;" />
+                    </a>
                   </td>
                 </tr>
 
