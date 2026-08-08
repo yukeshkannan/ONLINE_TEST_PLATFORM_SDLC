@@ -111,6 +111,25 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [allBatches, setAllBatches] = useState([]);
   const [centerList, setCenterList] = useState([]);
 
+  // Questions state
+  const [questions, setQuestions] = useState([
+    {
+      questionText: '',
+      optionA: '',
+      optionB: '',
+      optionC: '',
+      optionD: '',
+      correctAnswer: 'A'
+    }
+  ]);
+
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+  // Bulk Import state
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [notepadText, setNotepadText] = useState('');
+  const [parsedQuestions, setParsedQuestions] = useState([]);
+
   useEffect(() => {
     api.get('/cohorts/departments')
       .then(({ data }) => {
@@ -207,25 +226,6 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     if (updated.length === 0) updated = ['All Branches'];
     setSelectedCenters(updated);
   };
-
-  // Questions state
-  const [questions, setQuestions] = useState([
-    {
-      questionText: '',
-      optionA: '',
-      optionB: '',
-      optionC: '',
-      optionD: '',
-      correctAnswer: 'A'
-    }
-  ]);
-
-  const [loadingQuestions, setLoadingQuestions] = useState(false);
-
-  // Bulk Import state
-  const [showBulkModal, setShowBulkModal] = useState(false);
-  const [notepadText, setNotepadText] = useState('');
-  const [parsedQuestions, setParsedQuestions] = useState([]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];

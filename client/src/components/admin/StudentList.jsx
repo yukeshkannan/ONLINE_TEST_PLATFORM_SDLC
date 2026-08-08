@@ -32,12 +32,61 @@ const StudentList = () => {
   const [centerFilter, setCenterFilter] = useState('All');
   
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSendConfirm, setShowSendConfirm] = useState(false);
+  const [showSendAllConfirm, setShowSendAllConfirm] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+
+  const [dobError, setDobError] = useState('');
+  const [editDobError, setEditDobError] = useState('');
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   const [deptList, setDeptList] = useState([]);
   const [courseTracksList, setCourseTracksList] = useState([]);
   const [centersList, setCentersList] = useState(INSTITUTE_CENTERS);
+
+  const [studentToDelete, setStudentToDelete] = useState(null);
+  const [studentForCredentials, setStudentForCredentials] = useState(null);
+  const [studentToEdit, setStudentToEdit] = useState(null);
+
+  // Add Form state
+  const [addStudentType, setAddStudentType] = useState('college');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    dob: '',
+    rollNumber: '',
+    department: '',
+    batch: '2023-2027',
+    year: '3rd Year',
+    enrollmentId: '',
+    courseTrack: '',
+    center: 'Karur'
+  });
+
+  // Edit Form state
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    dob: '',
+    studentType: 'college',
+    rollNumber: '',
+    department: '',
+    batch: '2023-2027',
+    year: '3rd Year',
+    enrollmentId: '',
+    courseTrack: '',
+    center: 'Karur'
+  });
+
+  // Bulk Upload states
+  const [bulkStudentType, setBulkStudentType] = useState('college');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [parsedStudents, setParsedStudents] = useState([]);
 
   const fetchMetadataCatalog = () => {
     Promise.all([
@@ -63,62 +112,6 @@ const StudentList = () => {
       .catch(() => {});
   };
 
-  useEffect(() => {
-    fetchMetadataCatalog();
-  }, []);
-
-  useEffect(() => {
-    if (showAddModal || showEditModal) {
-      fetchMetadataCatalog();
-    }
-  }, [showAddModal, showEditModal]);
-
-  // Confirmation dialog states
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState(null);
-  const [showSendConfirm, setShowSendConfirm] = useState(false);
-  const [studentForCredentials, setStudentForCredentials] = useState(null);
-  const [showSendAllConfirm, setShowSendAllConfirm] = useState(false);
-  const [sendingEmail, setSendingEmail] = useState(false);
-
-  // Add Form state
-  const [addStudentType, setAddStudentType] = useState('college');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    dob: '',
-    rollNumber: '',
-    department: '',
-    batch: '2023-2027',
-    year: '3rd Year',
-    enrollmentId: '',
-    courseTrack: '',
-    center: 'Karur'
-  });
-
-  // Edit Form state
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [studentToEdit, setStudentToEdit] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    name: '',
-    email: '',
-    dob: '',
-    studentType: 'college',
-    rollNumber: '',
-    department: '',
-    batch: '2023-2027',
-    year: '3rd Year',
-    enrollmentId: '',
-    courseTrack: '',
-    center: 'Karur'
-  });
-
-  // Bulk Upload states
-  const [showBulkModal, setShowBulkModal] = useState(false);
-  const [bulkStudentType, setBulkStudentType] = useState('college');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [parsedStudents, setParsedStudents] = useState([]);
-
   // Fetch student roster from server
   const fetchStudents = async () => {
     setLoading(true);
@@ -133,8 +126,15 @@ const StudentList = () => {
   };
 
   useEffect(() => {
+    fetchMetadataCatalog();
     fetchStudents();
   }, []);
+
+  useEffect(() => {
+    if (showAddModal || showEditModal) {
+      fetchMetadataCatalog();
+    }
+  }, [showAddModal, showEditModal]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -204,10 +204,6 @@ const StudentList = () => {
     });
     setShowEditModal(true);
   };
-
-  // DOB validation states
-  const [dobError, setDobError] = useState('');
-  const [editDobError, setEditDobError] = useState('');
 
   const handleEditDobChange = (newDob) => {
     const isInstitute = editFormData.studentType === 'institute';

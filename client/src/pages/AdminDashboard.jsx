@@ -100,6 +100,19 @@ const AdminDashboard = ({ tab }) => {
   const [deptList, setDeptList] = useState([]);
   const [batchList, setBatchList] = useState([]);
 
+  const getTodayStr = () => new Date().toISOString().split('T')[0];
+  const getTomorrowStr = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+  const [bulkStartDate, setBulkStartDate] = useState(getTodayStr);
+  const [bulkStartHour, setBulkStartHour] = useState('09');
+  const [bulkStartMinute, setBulkStartMinute] = useState('00');
+  const [bulkStartAmpm, setBulkStartAmpm] = useState('AM');
+
+  const [bulkEndDate, setBulkEndDate] = useState(getTomorrowStr);
+  const [bulkEndHour, setBulkEndHour] = useState('11');
+  const [bulkEndMinute, setBulkEndMinute] = useState('59');
+  const [bulkEndAmpm, setBulkEndAmpm] = useState('PM');
+
   useEffect(() => {
     api.get('/cohorts/departments')
       .then(({ data }) => {
@@ -117,19 +130,6 @@ const AdminDashboard = ({ tab }) => {
       })
       .catch(() => {});
   }, []);
-
-  const getTodayStr = () => new Date().toISOString().split('T')[0];
-  const getTomorrowStr = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-  const [bulkStartDate, setBulkStartDate] = useState(getTodayStr);
-  const [bulkStartHour, setBulkStartHour] = useState('09');
-  const [bulkStartMinute, setBulkStartMinute] = useState('00');
-  const [bulkStartAmpm, setBulkStartAmpm] = useState('AM');
-
-  const [bulkEndDate, setBulkEndDate] = useState(getTomorrowStr);
-  const [bulkEndHour, setBulkEndHour] = useState('11');
-  const [bulkEndMinute, setBulkEndMinute] = useState('59');
-  const [bulkEndAmpm, setBulkEndAmpm] = useState('PM');
 
   const hourOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   const minuteOptions = ['00', '15', '30', '45', '59'];
