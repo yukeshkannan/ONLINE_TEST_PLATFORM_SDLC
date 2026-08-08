@@ -8,6 +8,12 @@ export const getDashboardStats = async (req, res, next) => {
     const totalTests = await Test.countDocuments();
     const totalStudents = await Student.countDocuments();
 
+    // Category Counts
+    const collegeTests = await Test.countDocuments({ categoryMode: 'college' });
+    const instituteTests = await Test.countDocuments({ categoryMode: { $ne: 'college' } });
+    const collegeStudents = await Student.countDocuments({ studentType: { $ne: 'institute' } });
+    const instituteStudents = await Student.countDocuments({ studentType: 'institute' });
+
     // Today's Attempts
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
@@ -22,10 +28,35 @@ export const getDashboardStats = async (req, res, next) => {
       ? Number(((passedAttempts / totalAttempts) * 100).toFixed(1)) 
       : 0;
 
-    // Subject-wise average scores (using Mongoose data mapping)
-    const allResults = await Result.find().populate('testId', 'subject title');
+    // Fetch all populated results for granular category calculations
+    const allResults = await Result.find()
+      .populate('studentId', 'name rollNumber enrollmentId department courseTrack batch year email studentType center')
+      .populate('testId', 'title subject categoryMode totalMarks passMark duration')
+      .sort({ submittedAt: -1 });
+
+    const validResults = allResults.filter(r => r.studentId && r.testId);
+
+    // College vs Institute Submissions & Pass Rates
+    const collegeResults = validResults.filter(r => r.studentId?.studentType !== 'institute');
+    const instituteResults = validResults.filter(r => r.studentId?.studentType === 'institute');
+
+    const collegePassed = collegeResults.filter(r => r.passed).length;
+    const institutePassed = instituteResults.filter(r => r.passed).length;
+
+    const collegePassRate = collegeResults.length > 0 
+      ? Number(((collegePassed / collegeResults.length) * 100).toFixed(1)) 
+      : 0;
+
+    const institutePassRate = instituteResults.length > 0 
+      ? Number(((institutePassed / instituteResults.length) * 100).toFixed(1)) 
+      : 0;
+
+    const collegeToday = collegeResults.filter(r => new Date(r.submittedAt) >= startOfToday).length;
+    const instituteToday = instituteResults.filter(r => new Date(r.submittedAt) >= startOfToday).length;
+
+    // Subject-wise average scores
     const subjectGroups = {};
-    allResults.forEach(r => {
+    validResults.forEach(r => {
       if (r.testId && r.testId.subject) {
         const sub = r.testId.subject;
         if (!subjectGroups[sub]) {
@@ -42,32 +73,14 @@ export const getDashboardStats = async (req, res, next) => {
     }));
 
     // Pass vs Fail counts
-    const passCount = passedAttempts;
-    const failCount = totalAttempts - passedAttempts;
     const passFailRatio = [
-      { name: 'Pass', value: passCount },
-      { name: 'Fail', value: failCount }
+      { name: 'Pass', value: passedAttempts },
+      { name: 'Fail', value: Math.max(0, totalAttempts - passedAttempts) }
     ];
 
-    // Recent activity table (last 5 valid submissions — skip orphaned records)
-    const rawActivity = await Result.find()
-      .populate('studentId', 'name rollNumber department')
-      .populate('testId', 'title subject')
-      .sort({ submittedAt: -1 })
-      .limit(20);
+    // Recent activity table (latest valid submissions)
+    const recentActivity = validResults.slice(0, 10);
 
-    // Auto-cleanup: permanently delete orphaned records (student or test was deleted)
-    const orphanIds = rawActivity
-      .filter(r => !r.studentId || !r.testId)
-      .map(r => r._id);
-    if (orphanIds.length > 0) {
-      await Result.deleteMany({ _id: { $in: orphanIds } });
-    }
-
-    // Keep only valid records, show latest 5
-    const recentActivity = rawActivity
-      .filter(r => r.studentId && r.testId)
-      .slice(0, 5);
     res.status(200).json({
       stats: {
         totalTests,
@@ -75,6 +88,20 @@ export const getDashboardStats = async (req, res, next) => {
         todaysAttempts,
         totalSubmissions: totalAttempts,
         overallPassRate
+      },
+      collegeStats: {
+        totalTests: collegeTests,
+        totalStudents: collegeStudents,
+        todaysAttempts: collegeToday,
+        totalSubmissions: collegeResults.length,
+        overallPassRate: collegePassRate
+      },
+      instituteStats: {
+        totalTests: instituteTests,
+        totalStudents: instituteStudents,
+        todaysAttempts: instituteToday,
+        totalSubmissions: instituteResults.length,
+        overallPassRate: institutePassRate
       },
       charts: {
         subjectAverages,
@@ -90,8 +117,8 @@ export const getDashboardStats = async (req, res, next) => {
 export const getAllSubmissions = async (req, res, next) => {
   try {
     const submissions = await Result.find()
-      .populate('studentId', 'name rollNumber department batch year email')
-      .populate('testId', 'title subject totalMarks passMark duration')
+      .populate('studentId', 'name rollNumber enrollmentId department courseTrack batch year email studentType center')
+      .populate('testId', 'title subject totalMarks passMark duration categoryMode')
       .sort({ submittedAt: -1 });
 
     const validSubmissions = submissions.filter(r => r.studentId && r.testId);

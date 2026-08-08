@@ -31,7 +31,7 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
 
     setIsSubmitting(true);
     try {
-      await loginStudent(identifier.trim(), password, rememberMe);
+      await loginStudent(identifier.trim(), password, rememberMe, loginType);
       toast.success('Authentication successful. Loading student portal...');
       navigate('/student/dashboard');
     } catch (err) {

@@ -34,8 +34,9 @@ export const adminLogin = async (req, res, next) => {
 };
 
 export const studentLogin = async (req, res, next) => {
-  const { identifier, email, password, rememberMe } = req.body;
+  const { identifier, email, password, rememberMe, loginType, studentType } = req.body;
   const loginId = (identifier || email || '').trim();
+  const portalType = loginType || studentType; // 'college' or 'institute'
 
   try {
     if (!loginId || !password) {
@@ -53,6 +54,21 @@ export const studentLogin = async (req, res, next) => {
 
     if (!student) {
       return res.status(401).json({ message: 'Invalid credentials. Student account not found.' });
+    }
+
+    // Strict Portal Access Verification: Prevent College students from logging in via SDLC portal and vice-versa
+    if (portalType) {
+      const studentCat = student.studentType || 'college';
+      if (portalType === 'institute' && studentCat === 'college') {
+        return res.status(403).json({
+          message: 'Access Denied: This is a College Student account. Please log in through the College Portal tab.'
+        });
+      }
+      if (portalType === 'college' && studentCat === 'institute') {
+        return res.status(403).json({
+          message: 'Access Denied: This is an SDLC Institute account. Please log in through the SDLC Portal tab.'
+        });
+      }
     }
 
     const isMatch = await bcrypt.compare(password, student.password);
