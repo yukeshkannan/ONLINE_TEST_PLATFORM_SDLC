@@ -518,7 +518,9 @@ const AdminDashboard = ({ tab }) => {
               {/* Tests list table inside beautiful white card */}
               <div className="bg-white border border-slate-100 shadow-md shadow-slate-100/50 rounded-[24px] p-6">
                 {loadingTests ? (
-                  <div className="py-20 text-center text-xs text-slate-400 font-semibold">Updating exam registries...</div>
+                  <div className="py-20 text-center flex flex-col items-center justify-center">
+                    <ClockLoader size="lg" color="#004f90" text="Loading assessments & examination schedule..." />
+                  </div>
                 ) : tests.length === 0 ? (
                   <div className="py-16 text-center text-xs text-slate-400 space-y-2">
                     <AlertCircle className="h-10 w-10 text-slate-300 mx-auto" />
