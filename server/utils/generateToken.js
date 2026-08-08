@@ -6,13 +6,13 @@ export const sendTokens = (res, user, rememberMe = false) => {
   const accessToken = jwt.sign(
     { id: user._id, role },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: '24h' }
   );
 
   const refreshToken = jwt.sign(
     { id: user._id, role, rememberMe },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: rememberMe ? '7d' : '1d' }
+    { expiresIn: '7d' }
   );
 
   // Configure cookie options
