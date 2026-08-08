@@ -402,28 +402,28 @@ const AdminDashboard = ({ tab }) => {
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         
         {/* Dynamic Header Bar matching mockup */}
-        <header className="bg-white border-b border-slate-100 h-16 w-full px-8 flex items-center justify-between shrink-0">
-          <h3 className="text-base font-extrabold text-[#004f90] tracking-tight font-poppins capitalize">
-            {getHeaderTitle()}
-          </h3>
+        <header className="bg-white/90 backdrop-blur-md border-b border-slate-100 h-16 w-full px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center space-x-3">
+            <span className="h-4.5 w-1.5 bg-[#004f90] rounded-full"></span>
+            <h1 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight font-poppins">
+              {getHeaderTitle()}
+            </h1>
+          </div>
 
-          <div className="flex items-center space-x-6">
-            {/* Profile avatar with Dynamic Initials */}
-            <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-[#004f90] to-blue-500 text-white font-extrabold text-sm flex items-center justify-center border border-white shadow-sm shrink-0">
-                {user?.name 
-                  ? user.name.charAt(0).toUpperCase() 
-                  : (user?.role === 'admin' ? 'A' : user?.role === 'trainer' ? 'T' : 'U')}
+          <div className="flex items-center space-x-4">
+            {user?.role === 'admin' ? (
+              <div className="flex items-center gap-2 bg-[#004f90] text-white px-4 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider font-mono shadow-xs">
+                <span>ADMIN</span>
               </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-xs font-bold text-slate-800 leading-none">
-                  {user?.name || (user?.role === 'admin' ? 'Admin' : user?.role === 'trainer' ? 'Trainer' : 'Faculty')}
-                </p>
-                <p className="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase leading-none">
-                  {user?.role === 'admin' ? 'Admin' : user?.role === 'trainer' ? 'Trainer' : 'Faculty'}
-                </p>
+            ) : user?.role === 'trainer' ? (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200/80 text-amber-900 px-4 py-1.5 rounded-xl font-bold text-xs shadow-xs">
+                <span>{user?.name || 'Trainer'} (Trainer)</span>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-1.5 rounded-xl font-bold text-xs shadow-xs">
+                <span>{user?.name} ({user?.role || 'Faculty'})</span>
+              </div>
+            )}
           </div>
         </header>
 
