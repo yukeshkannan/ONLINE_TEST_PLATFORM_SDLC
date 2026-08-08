@@ -98,12 +98,10 @@ const StudentList = () => {
         if (Array.isArray(deptRes.data)) {
           const dCodes = deptRes.data.filter(d => d.isActive !== false).map(d => d.code);
           setDeptList(dCodes);
-          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || 'CSE') }));
+          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || '') }));
         }
         if (Array.isArray(batchRes.data)) {
-          const bNames = batchRes.data
-            .filter(b => b.isActive !== false && b.category !== 'college')
-            .map(b => b.name);
+          const bNames = batchRes.data.filter(b => b.isActive !== false).map(b => b.name);
           setCourseTracksList(bNames);
           setFormData(prev => ({ ...prev, courseTrack: bNames.includes(prev.courseTrack) ? prev.courseTrack : (bNames[0] || '') }));
         }
@@ -270,10 +268,10 @@ const StudentList = () => {
           center: editFormData.center || 'Karur'
         } : {
           rollNumber: editFormData.rollNumber.trim().toUpperCase(),
-          department: editFormData.department || 'CSE',
+          department: editFormData.department,
           batch: editFormData.batch ? editFormData.batch.trim() : '2023-2027',
-          year: editFormData.year || '3rd Year',
-          courseTrack: ''
+          year: editFormData.year,
+          courseTrack: editFormData.courseTrack
         })
       };
 
@@ -382,14 +380,14 @@ const StudentList = () => {
         dob: formData.dob ? formData.dob.trim() : '',
         ...(isInstitute ? {
           enrollmentId: formData.enrollmentId ? formData.enrollmentId.trim().toUpperCase() : '',
-          courseTrack: formData.courseTrack || (courseTracksList[0] || ''),
+          courseTrack: formData.courseTrack,
           center: formData.center || 'Karur'
         } : {
           rollNumber: formData.rollNumber.trim().toUpperCase(),
-          department: formData.department || (deptList[0] || 'CSE'),
+          department: formData.department,
           batch: formData.batch ? formData.batch.trim() : '2023-2027',
-          year: formData.year || '3rd Year',
-          courseTrack: ''
+          year: formData.year,
+          courseTrack: formData.courseTrack
         })
       };
 
@@ -401,11 +399,11 @@ const StudentList = () => {
         email: '',
         dob: '',
         rollNumber: '',
-        department: deptList[0] || 'CSE',
+        department: 'CSE',
         batch: '2023-2027',
         year: '3rd Year',
         enrollmentId: '',
-        courseTrack: courseTracksList[0] || '',
+        courseTrack: 'Full Stack Web Dev (MERN)',
         center: 'Karur'
       });
       fetchStudents();
@@ -568,7 +566,7 @@ const StudentList = () => {
             department,
             batch,
             year,
-            courseTrack: ''
+            courseTrack
           });
         }
       } else {
@@ -674,9 +672,9 @@ const StudentList = () => {
     let content = '';
     let filename = '';
     if (type === 'college') {
-      content = 'Student Name,Roll Number,Email,Department,Batch,Year\n' +
-                'Jane Doe,21CS001,jane.doe@example.com,CSE,2023-2027,3rd Year\n' +
-                'John Smith,21ME002,john.smith@example.com,MECH,2022-2026,4th Year';
+      content = 'Student Name,Roll Number,Email,Department,Year,Course\n' +
+                'Jane Doe,21CS001,jane.doe@example.com,CSE,3rd Year,Full Stack Web Dev (MERN)\n' +
+                'John Smith,21ME002,john.smith@example.com,MECH,4th Year,SolidWorks';
       filename = 'college_students_template.csv';
     } else {
       content = 'Student Name,Date of Birth (DOB),Email,District Center,Course\n' +
@@ -904,8 +902,8 @@ const StudentList = () => {
                     <>
                       <th className="py-3 px-4">DEPARTMENT</th>
                       <th className="py-3 px-4">ROLL NUMBER</th>
-                      <th className="py-3 px-4">ACADEMIC BATCH</th>
                       <th className="py-3 px-4">YEAR</th>
+                      <th className="py-3 px-4">COURSE</th>
                     </>
                   ) : (
                     <>
@@ -923,7 +921,7 @@ const StudentList = () => {
                   const serialNo = indexOfFirstStudent + index + 1;
                   const isInstitute = student.studentType === 'institute';
                   const identifier = isInstitute ? (student.enrollmentId || student.rollNumber) : student.rollNumber;
-                  const trackDisplay = isInstitute ? (student.courseTrack || student.department) : '';
+                  const trackDisplay = isInstitute ? (student.courseTrack || student.department) : getCollegeCourseTrack(student);
 
                   return (
                     <tr key={student._id} className="hover:bg-slate-50 transition-colors">
@@ -950,7 +948,7 @@ const StudentList = () => {
                           {/* Department */}
                           <td className="py-3 px-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-[#004f90] border border-blue-100">
-                              {student.department || 'CSE'}
+                              {student.department}
                             </span>
                           </td>
 
@@ -959,14 +957,14 @@ const StudentList = () => {
                             {student.rollNumber || 'N/A'}
                           </td>
 
-                          {/* Academic Batch */}
-                          <td className="py-3 px-4 font-mono text-xs font-medium text-slate-600">
-                            {student.batch || '2023-2027'}
-                          </td>
-
                           {/* Year */}
                           <td className="py-3 px-4 text-xs font-medium text-slate-700">
-                            {student.year || '3rd Year'}
+                            {student.year || '4th Year'}
+                          </td>
+
+                          {/* Course */}
+                          <td className="py-3 px-4 font-semibold text-slate-800">
+                            {trackDisplay}
                           </td>
                         </>
                       ) : (
@@ -1213,7 +1211,7 @@ const StudentList = () => {
                               className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                             >
                               {deptList.length === 0 ? (
-                                <option value="">-- No Departments Added (Add in Course Catalog) --</option>
+                                <option value="">-- No Departments Added Yet (Add in Course Catalog) --</option>
                               ) : (
                                 deptList.map(d => (
                                   <option key={d} value={d}>{d}</option>
@@ -1225,29 +1223,35 @@ const StudentList = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Academic Batch</label>
-                          <input
-                            type="text"
-                            value={formData.batch}
-                            onChange={(e) => setFormData({ ...formData, batch: e.target.value })}
-                            placeholder="e.g. 2023-2027"
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono text-slate-800 outline-none"
-                          />
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Year</label>
+                          <div className="relative flex items-center">
+                            <select
+                              value={formData.year}
+                              onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                              className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
+                            >
+                              <option value="1st Year">1st Year</option>
+                              <option value="2nd Year">2nd Year</option>
+                              <option value="3rd Year">3rd Year</option>
+                              <option value="4th Year">4th Year</option>
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
+                          </div>
                         </div>
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Year</label>
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track *</label>
                         <div className="relative flex items-center">
                           <select
-                            value={formData.year}
-                            onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                            value={formData.courseTrack || ''}
+                            onChange={(e) => setFormData({ ...formData, courseTrack: e.target.value })}
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
-                            <option value="1st Year">1st Year</option>
-                            <option value="2nd Year">2nd Year</option>
-                            <option value="3rd Year">3rd Year</option>
-                            <option value="4th Year">4th Year</option>
+                            <option value="">-- None / Standard Department --</option>
+                            {courseTracksList.map(ct => (
+                              <option key={ct} value={ct}>{ct}</option>
+                            ))}
                           </select>
                           <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                         </div>
@@ -1438,38 +1442,48 @@ const StudentList = () => {
                               onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
                               className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                             >
-                              {deptList.map(d => (
-                                <option key={d} value={d}>{d}</option>
-                              ))}
+                              {deptList.length === 0 ? (
+                                <option value="">-- No Departments Added Yet --</option>
+                              ) : (
+                                deptList.map(d => (
+                                  <option key={d} value={d}>{d}</option>
+                                ))
+                              )}
                             </select>
                             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                           </div>
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Academic Batch</label>
-                          <input
-                            type="text"
-                            value={editFormData.batch}
-                            onChange={(e) => setEditFormData({ ...editFormData, batch: e.target.value })}
-                            placeholder="e.g. 2023-2027"
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono text-slate-800 outline-none"
-                          />
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Year</label>
+                          <div className="relative flex items-center">
+                            <select
+                              value={editFormData.year}
+                              onChange={(e) => setEditFormData({ ...editFormData, year: e.target.value })}
+                              className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
+                            >
+                              <option value="1st Year">1st Year</option>
+                              <option value="2nd Year">2nd Year</option>
+                              <option value="3rd Year">3rd Year</option>
+                              <option value="4th Year">4th Year</option>
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
+                          </div>
                         </div>
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Year</label>
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track *</label>
                         <div className="relative flex items-center">
                           <select
-                            value={editFormData.year}
-                            onChange={(e) => setEditFormData({ ...editFormData, year: e.target.value })}
+                            value={editFormData.courseTrack || ''}
+                            onChange={(e) => setEditFormData({ ...editFormData, courseTrack: e.target.value })}
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
-                            <option value="1st Year">1st Year</option>
-                            <option value="2nd Year">2nd Year</option>
-                            <option value="3rd Year">3rd Year</option>
-                            <option value="4th Year">4th Year</option>
+                            <option value="">-- None / Standard Department --</option>
+                            {courseTracksList.map(ct => (
+                              <option key={ct} value={ct}>{ct}</option>
+                            ))}
                           </select>
                           <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
                         </div>
