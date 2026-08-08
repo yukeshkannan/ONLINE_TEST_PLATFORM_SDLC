@@ -258,6 +258,7 @@ const Dashboard = () => {
   }
 
   const now = new Date();
+  const { recentActivity = [] } = data || {};
 
   // Helper to compute dynamic test status in real-time
   const computeLiveStatus = (t) => {
