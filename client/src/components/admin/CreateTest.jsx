@@ -22,6 +22,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
 
   const [instructions, setInstructions] = useState('');
   const [duration, setDuration] = useState('30');
+  const [customPassMark, setCustomPassMark] = useState(testToEdit?.passMark !== undefined ? String(testToEdit.passMark) : '');
   const [status, setStatus] = useState(testToEdit ? testToEdit.status : 'active'); // draft | active | ended
   const [showResultsToStudents, setShowResultsToStudents] = useState(true);
 
@@ -245,6 +246,9 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       setSubject(testToEdit.subject || '');
       setDescription(testToEdit.description || '');
       setInstructions(testToEdit.instructions || '');
+      if (testToEdit.passMark !== undefined) {
+        setCustomPassMark(String(testToEdit.passMark));
+      }
       setStatus(testToEdit.status || 'draft');
       setShowResultsToStudents(testToEdit.showResultsToStudents !== undefined ? testToEdit.showResultsToStudents : true);
 
@@ -427,7 +431,9 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     }
 
     const calculatedTotalMarks = questions.length;
-    const calculatedPassMark = Math.ceil(calculatedTotalMarks * 0.4);
+    const finalPassMark = customPassMark !== '' && !isNaN(Number(customPassMark))
+      ? Math.max(1, Math.min(calculatedTotalMarks, Number(customPassMark)))
+      : Math.ceil(calculatedTotalMarks * 0.4);
 
     const assignedCombinations = [];
     const deptsToAssign = selectedDepts.length > 0 ? selectedDepts : ['All Departments'];
@@ -449,7 +455,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       instructions: instructions.trim(),
       duration: Number(duration),
       totalMarks: calculatedTotalMarks,
-      passMark: calculatedPassMark,
+      passMark: finalPassMark,
       startTime: startDateTime,
       endTime: endDateTime,
       status: status,
@@ -485,18 +491,27 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
 
       await api.post(`/questions/sync/${testId}`, questionsPayload);
 
-      toast.success(isEditing ? 'Assessment paper updated successfully.' : 'Assessment paper published successfully.', { id: toastId });
+      toast.success(isEditing ? 'Assessment updated successfully.' : 'Assessment created successfully.', { id: toastId });
       onSave();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to save assessment configurations.', { id: toastId });
+      toast.error(err.response?.data?.message || 'Failed to save assessment.', { id: toastId });
     }
+  };
+
+  const currentPassMark = customPassMark !== '' && !isNaN(Number(customPassMark))
+    ? Number(customPassMark)
+    : Math.ceil(questions.length * 0.4);
+
+  const applyPassPercent = (pct) => {
+    const val = Math.ceil(questions.length * (pct / 100));
+    setCustomPassMark(String(val));
   };
 
   if (loadingQuestions) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-4 font-sans">
-        <div className="h-10 w-10 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <div className="flex flex-col items-center justify-center py-32 space-y-4">
+        <div className="h-8 w-8 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-sm text-slate-500 font-semibold">Loading assessment questions...</p>
       </div>
     );
@@ -559,7 +574,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                 <FileText className="w-4 h-4 text-[#004f90]" />
                 <span>1. General Test Information</span>
               </h3>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">Define core test metadata, evaluation duration, and availability status.</p>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">Define core test metadata, evaluation duration, passing criteria, and availability status.</p>
             </div>
           </div>
 
@@ -597,7 +612,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
               
               {/* Test Duration */}
               <div className="space-y-1.5">
@@ -615,6 +630,61 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none"
                   />
                   <Clock className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Manual Pass Mark Input & Presets */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Pass Mark *
+                  </label>
+                  <span className="text-[10px] font-extrabold text-[#004f90] bg-[#004f90]/10 px-1.5 py-0.5 rounded">
+                    {questions.length > 0 ? `${Math.round((currentPassMark / questions.length) * 100)}%` : '40%'}
+                  </span>
+                </div>
+                <div className="relative flex items-center">
+                  <input
+                    type="number"
+                    min="1"
+                    max={questions.length || 999}
+                    placeholder={`e.g. ${Math.ceil(questions.length * 0.4)}`}
+                    value={customPassMark}
+                    onChange={(e) => setCustomPassMark(e.target.value)}
+                    className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3.5 pr-10 text-xs font-extrabold text-[#004f90] outline-none"
+                  />
+                  <Award className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                </div>
+                {/* Quick 1-click presets */}
+                <div className="flex items-center gap-1 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => applyPassPercent(35)}
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
+                  >
+                    35%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPassPercent(40)}
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
+                  >
+                    40% (Std)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPassPercent(50)}
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
+                  >
+                    50%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPassPercent(60)}
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
+                  >
+                    60%
+                  </button>
                 </div>
               </div>
 
@@ -638,7 +708,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
               </div>
 
               {/* Result Visibility Dropdown */}
-              <div className="space-y-1.5 sm:col-span-2 md:col-span-1">
+              <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   Result Visibility
                 </label>
@@ -649,7 +719,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                   >
                     <option value="false">Manual Release (Hidden until Admin Releases)</option>
-                    <option value="true">Instant Release (Auto Show Results to Students)</option>
+                    <option value="true">Instant Release (Auto Show Results)</option>
                   </select>
                   <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
                 </div>
@@ -1146,15 +1216,21 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
             {/* Header stats bar */}
             <div className="flex flex-wrap items-center justify-between bg-slate-50 border border-slate-200/80 px-4 py-3 rounded-xl text-xs text-slate-700 font-semibold gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-medium">Total Questions Configured:</span>
+                <span className="text-slate-500 font-medium">Total Questions:</span>
                 <span className="bg-[#004f90]/10 text-[#004f90] px-2.5 py-0.5 rounded-full font-bold font-mono">
                   {questions.length} {questions.length === 1 ? 'Question' : 'Questions'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-medium">Total Evaluation Score:</span>
+                <span className="text-slate-500 font-medium">Total Score:</span>
                 <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-0.5 rounded-full font-bold font-mono">
-                  {questions.length} Marks (1 Mark / Question)
+                  {questions.length} Marks
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500 font-medium">Passing Threshold:</span>
+                <span className="bg-amber-50 text-amber-800 border border-amber-200/80 px-2.5 py-0.5 rounded-full font-bold font-mono">
+                  {currentPassMark} Marks ({questions.length > 0 ? Math.round((currentPassMark / questions.length) * 100) : 40}%)
                 </span>
               </div>
             </div>

@@ -41,6 +41,7 @@ const AdminDashboard = ({ tab }) => {
   const [bulkBatch, setBulkBatch] = useState('Web Design');
   const [bulkNotepadText, setBulkNotepadText] = useState('');
   const [bulkStatus, setBulkStatus] = useState('active');
+  const [bulkPassMark, setBulkPassMark] = useState('');
   const [parsedBulkQuestions, setParsedBulkQuestions] = useState([]);
   const [deptList, setDeptList] = useState([]);
   const [batchList, setBatchList] = useState([]);
@@ -206,7 +207,9 @@ const AdminDashboard = ({ tab }) => {
     });
 
     const calculatedTotalMarks = questionsPayload.length;
-    const calculatedPassMark = Math.ceil(calculatedTotalMarks * 0.4);
+    const calculatedPassMark = bulkPassMark !== '' && !isNaN(Number(bulkPassMark))
+      ? Math.max(1, Math.min(calculatedTotalMarks, Number(bulkPassMark)))
+      : Math.ceil(calculatedTotalMarks * 0.4);
 
     const startTime = constructDateTime(bulkStartDate, bulkStartHour, bulkStartMinute, bulkStartAmpm);
     const endTime = constructDateTime(bulkEndDate, bulkEndHour, bulkEndMinute, bulkEndAmpm);
@@ -867,6 +870,41 @@ const AdminDashboard = ({ tab }) => {
                       onChange={(e) => setBulkDuration(e.target.value)}
                       className="w-full bg-white border border-slate-200 hover:border-slate-355 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-slate-805 text-sm focus:outline-none transition-all outline-none font-semibold shadow-sm"
                     />
+                  </div>
+
+                  {/* Pass Mark Threshold Input & Presets */}
+                  <div className="space-y-1.5 flex flex-col">
+                    <div className="flex items-center justify-between pl-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pass Mark Threshold</label>
+                      <span className="text-[10px] font-extrabold text-[#004f90] bg-[#004f90]/10 px-1.5 py-0.5 rounded">
+                        {parsedBulkQuestions.length > 0
+                          ? `${Math.round(((bulkPassMark !== '' ? Number(bulkPassMark) : Math.ceil(parsedBulkQuestions.length * 0.4)) / parsedBulkQuestions.length) * 100)}%`
+                          : '40%'}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder={`e.g. ${Math.ceil(parsedBulkQuestions.length * 0.4) || 40}`}
+                      value={bulkPassMark}
+                      onChange={(e) => setBulkPassMark(e.target.value)}
+                      className="w-full bg-white border border-slate-200 hover:border-slate-350 focus:border-[#004f90] rounded-xl py-2.5 px-4 text-[#004f90] text-sm focus:outline-none transition-all outline-none font-extrabold shadow-sm"
+                    />
+                    <div className="flex items-center gap-1 pt-0.5">
+                      {[35, 40, 50, 60].map(pct => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => {
+                            const val = Math.ceil((parsedBulkQuestions.length || 100) * (pct / 100));
+                            setBulkPassMark(String(val));
+                          }}
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
+                        >
+                          {pct}%
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Status Selection */}
