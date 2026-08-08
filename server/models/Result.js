@@ -48,6 +48,11 @@ const resultSchema = new mongoose.Schema({
     type: Number, // in seconds
     required: true
   },
+  submissionType: {
+    type: String,
+    enum: ['manual', 'timer_expired', 'security_violation'],
+    default: 'manual'
+  },
   submittedAt: {
     type: Date,
     default: Date.now

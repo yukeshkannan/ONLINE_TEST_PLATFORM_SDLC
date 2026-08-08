@@ -89,7 +89,7 @@ const TestEngine = ({ test, onFinish }) => {
     timeTaken
   } = useTest(questions, test._id);
 
-  const handleSubmit = async (isAuto = false) => {
+  const handleSubmit = async (isAuto = false, subReason = 'manual') => {
     if (submitLock.current) return;
     
     if (!isAuto && isSubmitLocked) {
@@ -98,17 +98,25 @@ const TestEngine = ({ test, onFinish }) => {
 
     submitLock.current = true;
     setSubmitting(true);
-    toast.loading(isAuto ? 'Time limit reached. Submitting examination automatically...' : 'Submitting examination responses securely...', { id: 'submit-exam' });
+    const toastMsg = subReason === 'timer_expired' 
+      ? 'Time limit reached. Submitting examination automatically...' 
+      : subReason === 'security_violation'
+      ? 'Security breach detected. Submitting examination responses...'
+      : 'Submitting examination responses securely...';
+    toast.loading(toastMsg, { id: 'submit-exam' });
     
     try {
       const payload = getSubmissionPayload();
       const maxSeconds = test.duration * 60;
       const secondsSpent = Math.max(0, maxSeconds - timeRemaining);
 
+      const finalSubType = subReason || (isAuto ? 'timer_expired' : 'manual');
+
       const { data } = await api.post('/results/submit', {
         testId: test._id,
         answers: payload,
-        timeTaken: secondsSpent
+        timeTaken: secondsSpent,
+        submissionType: finalSubType
       });
 
       toast.success('Assessment submitted and evaluated successfully.', { id: 'submit-exam' });
@@ -137,7 +145,7 @@ const TestEngine = ({ test, onFinish }) => {
   });
 
   const { timeRemaining, formatTime } = useTimer(test.duration * 60, () => {
-    autoSubmitRef.current(true);
+    autoSubmitRef.current(true, 'timer_expired');
   });
 
   const maxSeconds = test.duration * 60;
@@ -183,7 +191,7 @@ const TestEngine = ({ test, onFinish }) => {
             return;
           }
 
-          toast.error('SECURITY VIOLATION: Fullscreen mode exited. Automatic exam submission initiated.', { duration: 6000 });
+          toast.error('SECURITY VIOLATION: Fullscreen mode exited / ESC triggered. Automatic exam submission initiated.', { duration: 6000 });
 
           api.post('/violations/log', {
             testId: test._id,
@@ -192,7 +200,7 @@ const TestEngine = ({ test, onFinish }) => {
           }).catch(() => {});
 
           setTimeout(() => {
-            autoSubmitRef.current(true);
+            autoSubmitRef.current(true, 'security_violation');
           }, 500);
         }, 300);
       }
@@ -260,7 +268,7 @@ const TestEngine = ({ test, onFinish }) => {
     if (isAutoSubmit) {
       toast.error('SECURITY VIOLATION: Maximum allowed tab switch limit reached. Exam submitted automatically.', { duration: 5000 });
       setTimeout(() => {
-        autoSubmitRef.current(true);
+        autoSubmitRef.current(true, 'security_violation');
       }, 500);
     } else {
       toast.error(

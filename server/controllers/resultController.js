@@ -80,6 +80,8 @@ export const submitTest = async (req, res, next) => {
     const percentage = Number(((score / totalMarks) * 100).toFixed(2));
     const passed = score >= test.passMark;
 
+    const subType = req.body.submissionType || (req.body.isAutoSubmit ? 'security_violation' : 'manual');
+
     const newResult = new Result({
       studentId,
       testId,
@@ -89,6 +91,7 @@ export const submitTest = async (req, res, next) => {
       percentage,
       passed,
       timeTaken: timeTaken || 0,
+      submissionType: subType,
       submittedAt: now
     });
 

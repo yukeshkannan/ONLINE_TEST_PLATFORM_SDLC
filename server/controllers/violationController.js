@@ -1,6 +1,7 @@
 import ViolationLog from '../models/ViolationLog.js';
 import Student from '../models/Student.js';
 import Test from '../models/Test.js';
+import Result from '../models/Result.js';
 
 export const logViolation = async (req, res, next) => {
   const { testId, violationType = 'tab_switch', autoSubmitted = false } = req.body;
@@ -55,8 +56,8 @@ export const markAutoSubmitted = async (req, res, next) => {
 export const getAllViolations = async (req, res, next) => {
   try {
     const logs = await ViolationLog.find()
-      .populate('studentId', 'name rollNumber department batch year')
-      .populate('testId', 'title subject')
+      .populate('studentId', 'name rollNumber department batch year email')
+      .populate('testId', 'title subject duration totalMarks passMark')
       .sort({ updatedAt: -1 });
 
     // Clean up orphaned logs where the student was deleted
@@ -67,7 +68,42 @@ export const getAllViolations = async (req, res, next) => {
     }
 
     const validLogs = logs.filter(log => log.studentId);
-    res.status(200).json(validLogs);
+    
+    // Attach associated Result evaluations
+    const studentIds = validLogs.map(l => l.studentId?._id).filter(Boolean);
+    const testIds = validLogs.map(l => l.testId?._id).filter(Boolean);
+
+    const results = await Result.find({
+      studentId: { $in: studentIds },
+      testId: { $in: testIds }
+    }).lean();
+
+    const resultMap = new Map();
+    results.forEach(r => {
+      resultMap.set(`${r.studentId.toString()}_${r.testId.toString()}`, r);
+    });
+
+    const enrichedLogs = validLogs.map(log => {
+      const logObj = log.toObject();
+      const sId = log.studentId?._id?.toString();
+      const tId = log.testId?._id?.toString();
+      const resData = resultMap.get(`${sId}_${tId}`);
+      if (resData) {
+        logObj.result = {
+          score: resData.score,
+          totalMarks: resData.totalMarks,
+          percentage: resData.percentage,
+          passed: resData.passed,
+          timeTaken: resData.timeTaken,
+          submittedAt: resData.submittedAt,
+          submissionType: resData.submissionType || (logObj.autoSubmitted ? 'security_violation' : 'manual'),
+          answeredCount: resData.answers ? resData.answers.filter(a => a.selectedOption).length : 0
+        };
+      }
+      return logObj;
+    });
+
+    res.status(200).json(enrichedLogs);
   } catch (error) {
     next(error);
   }
