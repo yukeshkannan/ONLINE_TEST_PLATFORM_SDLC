@@ -6,6 +6,7 @@ import {
   ChevronDown, Check, GraduationCap, BookOpen, FileSpreadsheet, Eye, 
   Search, ChevronLeft, ChevronRight, Filter, RefreshCw
 } from 'lucide-react';
+import ClockLoader from '../shared/ClockLoader.jsx';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -250,9 +251,8 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-4 font-sans">
-        <div className="h-8 w-8 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs text-slate-500 font-semibold">Loading platform telemetry...</p>
+      <div className="flex flex-col items-center justify-center py-32 font-sans">
+        <ClockLoader size="lg" color="#004f90" text="Loading platform telemetry..." />
       </div>
     );
   }

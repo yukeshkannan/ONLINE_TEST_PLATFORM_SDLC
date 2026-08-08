@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, Download, ChevronLeft, ChevronRight, X, UserPlus, Check, Trash2, Key, 
-  Upload, Mail, Edit3, ChevronDown, GraduationCap, Building2, FileText, CheckCircle2
+  Users, UserPlus, Search, Filter, Trash2, Edit3, CheckCircle2, 
+  XCircle, ChevronDown, Check, GraduationCap, Building2, Upload, 
+  FileSpreadsheet, RefreshCw, Send, X, Award, Eye, KeyRound, Copy
 } from 'lucide-react';
+import ClockLoader from '../shared/ClockLoader.jsx';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
@@ -896,9 +898,8 @@ const StudentList = () => {
         {/* Data Table */}
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="py-16 text-center space-y-3">
-              <div className="h-7 w-7 border-2 border-[#004f90] border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-xs text-slate-500 font-medium">Loading roster data...</p>
+            <div className="py-16 text-center">
+              <ClockLoader size="md" color="#004f90" text="Loading roster data..." />
             </div>
           ) : currentStudents.length === 0 ? (
             <div className="py-14 text-center space-y-1.5 px-4">

@@ -5,6 +5,8 @@ import { Calendar, Clock, Award, BookOpen, AlertCircle, RefreshCw, ArrowRight, C
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
+import ClockLoader from '../shared/ClockLoader.jsx';
+
 const TestList = ({ onStartTest, onViewResult }) => {
   const { user, isAuthenticated } = useAuth();
   const [tests, setTests] = useState([]);
@@ -45,9 +47,8 @@ const TestList = ({ onStartTest, onViewResult }) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-5">
-        <div className="h-14 w-14 border-4 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-base text-slate-500 font-bold font-sans">Loading assessment schedule...</p>
+      <div className="flex flex-col items-center justify-center py-32">
+        <ClockLoader size="lg" color="#004f90" text="Loading assessment schedule..." />
       </div>
     );
   }

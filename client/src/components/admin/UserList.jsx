@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight, X, UserPlus, Check, Trash2, Shield, Mail, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ClockLoader from '../shared/ClockLoader.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
 
@@ -193,9 +194,8 @@ const UserList = () => {
         {/* Table */}
         <div className="overflow-x-auto border border-slate-200/80 rounded-lg">
           {loading ? (
-            <div className="py-16 text-center space-y-3">
-              <div className="h-8 w-8 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-xs text-slate-400 font-semibold">Loading staff directory...</p>
+            <div className="py-16 text-center">
+              <ClockLoader size="md" color="#004f90" text="Loading staff directory..." />
             </div>
           ) : (
             <table className="w-full text-left border-collapse text-xs">

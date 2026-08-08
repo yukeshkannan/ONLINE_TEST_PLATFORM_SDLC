@@ -8,6 +8,7 @@ import QuestionCard from '../shared/QuestionCard.jsx';
 import Timer from '../shared/Timer.jsx';
 import { ShieldAlert, AlertTriangle, ChevronLeft, ChevronRight, Bookmark, CheckCircle2, Maximize, Lock, LayoutGrid } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ClockLoader from '../shared/ClockLoader.jsx';
 
 const TestEngine = ({ test, onFinish }) => {
   const { user } = useAuth();
@@ -302,9 +303,8 @@ const TestEngine = ({ test, onFinish }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-charcoal space-y-4">
-        <div className="h-12 w-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm text-softgrey">Downloading assessment paper securely...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+        <ClockLoader size="lg" color="#004f90" text="Downloading assessment paper securely..." />
       </div>
     );
   }

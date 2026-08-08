@@ -18,6 +18,7 @@ import { normalizeBatch, normalizeDept } from '../utils/constants.js';
 import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import ClockLoader from '../components/shared/ClockLoader.jsx';
 
 const AdminDashboard = ({ tab }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -359,9 +360,8 @@ const AdminDashboard = ({ tab }) => {
 
   if (loading || !isAuthenticated || (user?.role !== 'admin' && user?.role !== 'trainer')) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] space-y-4">
-        <div className="h-12 w-12 border-4 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm text-slate-400 font-medium font-sans">Securing faculty credentials...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+        <ClockLoader size="lg" color="#004f90" text="Securing faculty credentials..." />
       </div>
     );
   }

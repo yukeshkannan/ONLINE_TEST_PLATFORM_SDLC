@@ -411,3 +411,17 @@ circle.stroke-charcoal-light {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
   border-bottom: 1px solid #e1e2e9 !important;
 }
+
+@keyframes clock-hand-spin {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+.animate-clock-smooth {
+  transform-origin: bottom center;
+  animation: clock-hand-spin 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

@@ -3,6 +3,7 @@ import api, { getAccessToken } from '../../utils/api.js';
 import { Award, Clock, CheckCircle, XCircle, AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import ClockLoader from '../shared/ClockLoader.jsx';
 
 const ResultScreen = ({ resultId, onBack }) => {
   const [result, setResult] = useState(null);
@@ -29,9 +30,8 @@ const ResultScreen = ({ resultId, onBack }) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 space-y-4">
-        <div className="h-12 w-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm text-softgrey">Analyzing scorecard metrics...</p>
+      <div className="flex flex-col items-center justify-center py-24">
+        <ClockLoader size="lg" color="#004f90" text="Analyzing scorecard metrics..." />
       </div>
     );
   }

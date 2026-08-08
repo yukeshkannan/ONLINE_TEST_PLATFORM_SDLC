@@ -7,6 +7,7 @@ import {
   ArrowLeft, Upload, HelpCircle, CheckCircle2, GraduationCap, Building2, 
   Layers, Check, FileSpreadsheet, Send, ChevronDown, Award
 } from 'lucide-react';
+import ClockLoader from '../shared/ClockLoader.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -510,9 +511,8 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
 
   if (loadingQuestions) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-4">
-        <div className="h-8 w-8 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm text-slate-500 font-semibold">Loading assessment questions...</p>
+      <div className="flex flex-col items-center justify-center py-32">
+        <ClockLoader size="lg" color="#004f90" text="Loading assessment questions..." />
       </div>
     );
   }

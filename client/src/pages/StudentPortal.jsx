@@ -9,6 +9,8 @@ import { motion } from 'framer-motion';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
 
+import ClockLoader from '../components/shared/ClockLoader.jsx';
+
 const StudentPortal = () => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
@@ -48,9 +50,8 @@ const StudentPortal = () => {
 
   if (loading || loadingInitialData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-charcoal space-y-4">
-        <div className="h-12 w-12 border-4 border-success border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm text-softgrey">Securing connection tunnel...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+        <ClockLoader size="lg" color="#004f90" text="Securing connection tunnel..." />
       </div>
     );
   }

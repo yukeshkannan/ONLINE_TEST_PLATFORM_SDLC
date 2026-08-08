@@ -5,6 +5,7 @@ import {
   Wifi, Layers, Maximize, CheckCircle, XCircle, Award, ArrowRight, ChevronDown, 
   RotateCcw, Sparkles, FileText, Check, Shield
 } from 'lucide-react';
+import ClockLoader from '../shared/ClockLoader.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -252,9 +253,8 @@ const ProctoringLogs = () => {
       {/* Main Audit Feed List */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
         {loading ? (
-          <div className="py-24 text-center space-y-3">
-            <div className="h-9 w-9 border-3 border-[#004f90] border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 font-semibold">Synchronizing proctoring audit logs...</p>
+          <div className="py-24 text-center">
+            <ClockLoader size="lg" color="#004f90" text="Synchronizing proctoring audit logs..." />
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="py-20 text-center space-y-3">
