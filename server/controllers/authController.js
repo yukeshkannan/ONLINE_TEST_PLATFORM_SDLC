@@ -608,7 +608,8 @@ export const sendStudentCredentials = async (req, res, next) => {
       return res.status(404).json({ message: 'Student profile not found.' });
     }
 
-    await sendCredentialsEmail(student.email, student.name, student.rollNumber);
+    const passwordToSend = student.rollNumber || student.enrollmentId || 'Student123';
+    await sendCredentialsEmail(student.email, student.name, passwordToSend);
 
     res.status(200).json({ success: true, message: `Login credentials dispatched to ${student.email}` });
   } catch (error) {
@@ -632,7 +633,8 @@ export const sendAllStudentsCredentials = async (req, res, next) => {
 
     for (const student of students) {
       try {
-        await sendCredentialsEmail(student.email, student.name, student.rollNumber);
+        const passwordToSend = student.rollNumber || student.enrollmentId || 'Student123';
+        await sendCredentialsEmail(student.email, student.name, passwordToSend);
         successCount++;
       } catch (err) {
         failureCount++;

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, GraduationCap, Building2, UserCheck, ShieldCheck, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import ClockLoader from '../shared/ClockLoader.jsx';
 
 const StudentLogin = ({ onClose, onAdminRedirect }) => {
   const { loginStudent } = useAuth();
@@ -224,9 +225,9 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                 }`}
               >
                 {isSubmitting ? (
-                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <ClockLoader size="xs" color="#ffffff" />
                 ) : (
-                  <span>Log In to {loginType === 'college' ? 'College Portal' : 'Course Portal'}</span>
+                  <span>Log In to {loginType === 'college' ? 'College Portal' : 'SDLC Portal'}</span>
                 )}
               </button>
 

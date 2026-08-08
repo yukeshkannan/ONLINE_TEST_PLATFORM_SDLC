@@ -19,9 +19,9 @@ router.get('/students', authMiddleware, roleMiddleware('admin'), getAllStudents)
 router.post('/students', authMiddleware, roleMiddleware('admin'), createStudent);
 router.post('/students/bulk', authMiddleware, roleMiddleware('admin'), bulkCreateStudents);
 router.put('/students/:id', authMiddleware, roleMiddleware('admin'), updateStudent);
-router.delete('/students/:id', authMiddleware, roleMiddleware('admin'), deleteStudent);
 router.post('/students/:id/send-credentials', authMiddleware, roleMiddleware('admin'), sendStudentCredentials);
 router.post('/students/send-credentials/all', authMiddleware, roleMiddleware('admin'), sendAllStudentsCredentials);
+router.post('/students/send-credentials-bulk', authMiddleware, roleMiddleware('admin'), sendAllStudentsCredentials);
 
 // Protected admin routes (Admins/Trainers CRUD)
 router.get('/admins', authMiddleware, roleMiddleware('admin'), getAllAdmins);

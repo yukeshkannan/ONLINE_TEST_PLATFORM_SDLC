@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import { 
   Users, UserPlus, Search, Filter, Trash2, Edit3, CheckCircle2, 
   XCircle, ChevronDown, Check, GraduationCap, Building2, Upload, 
-  FileSpreadsheet, RefreshCw, Send, X, Award, Eye, KeyRound, Copy
+  FileSpreadsheet, RefreshCw, Send, X, Award, Eye, KeyRound, Copy, Mail
 } from 'lucide-react';
 import ClockLoader from '../shared/ClockLoader.jsx';
 import toast from 'react-hot-toast';
