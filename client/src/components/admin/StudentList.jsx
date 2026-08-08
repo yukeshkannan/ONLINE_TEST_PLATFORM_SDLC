@@ -46,7 +46,7 @@ const StudentList = () => {
   const itemsPerPage = 8;
 
   const [deptList, setDeptList] = useState([]);
-  const [courseTracksList, setCourseTracksList] = useState([]);
+  const [allBatches, setAllBatches] = useState([]);
   const [centersList, setCentersList] = useState(INSTITUTE_CENTERS);
 
   const [studentToDelete, setStudentToDelete] = useState(null);
@@ -60,7 +60,7 @@ const StudentList = () => {
     email: '',
     dob: '',
     rollNumber: '',
-    department: '',
+    department: 'CSE',
     batch: '2023-2027',
     year: '3rd Year',
     enrollmentId: '',
@@ -75,7 +75,7 @@ const StudentList = () => {
     dob: '',
     studentType: 'college',
     rollNumber: '',
-    department: '',
+    department: 'CSE',
     batch: '2023-2027',
     year: '3rd Year',
     enrollmentId: '',
@@ -98,12 +98,11 @@ const StudentList = () => {
         if (Array.isArray(deptRes.data)) {
           const dCodes = deptRes.data.filter(d => d.isActive !== false).map(d => d.code);
           setDeptList(dCodes);
-          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || '') }));
+          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || 'CSE') }));
         }
         if (Array.isArray(batchRes.data)) {
-          const bNames = batchRes.data.filter(b => b.isActive !== false).map(b => b.name);
-          setCourseTracksList(bNames);
-          setFormData(prev => ({ ...prev, courseTrack: bNames.includes(prev.courseTrack) ? prev.courseTrack : (bNames[0] || '') }));
+          const activeBatches = batchRes.data.filter(b => b.isActive !== false);
+          setAllBatches(activeBatches);
         }
         if (Array.isArray(centerRes.data) && centerRes.data.length > 0) {
           setCentersList(centerRes.data.filter(c => c.isActive !== false).map(c => ({ name: c.name, code: c.code })));
@@ -111,6 +110,20 @@ const StudentList = () => {
       })
       .catch(() => {});
   };
+
+  // Specialized College Tracks (strictly category === 'college')
+  const collegeCourseTracks = allBatches
+    .filter(b => b.category === 'college' && (b.department === 'All Departments' || !formData.department || b.department === formData.department))
+    .map(b => b.name);
+
+  const collegeEditCourseTracks = allBatches
+    .filter(b => b.category === 'college' && (b.department === 'All Departments' || !editFormData.department || b.department === editFormData.department))
+    .map(b => b.name);
+
+  // SDLC Institute Courses (category === 'institute' or default)
+  const instituteCourseTracks = allBatches
+    .filter(b => b.category !== 'college')
+    .map(b => b.name);
 
   // Fetch student roster from server
   const fetchStudents = async () => {
@@ -868,7 +881,7 @@ const StudentList = () => {
                       className="bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg pl-3 pr-8 h-9 focus:outline-none focus:border-[#004f90] cursor-pointer appearance-none"
                     >
                       <option value="All">All Courses</option>
-                      {courseTracksList.map(track => (
+                      {instituteCourseTracks.map(track => (
                         <option key={track} value={track}>{track}</option>
                       ))}
                     </select>
@@ -1241,7 +1254,7 @@ const StudentList = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track *</label>
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track</label>
                         <div className="relative flex items-center">
                           <select
                             value={formData.courseTrack || ''}
@@ -1249,7 +1262,7 @@ const StudentList = () => {
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
                             <option value="">-- None / Standard Department --</option>
-                            {courseTracksList.map(ct => (
+                            {collegeCourseTracks.map(ct => (
                               <option key={ct} value={ct}>{ct}</option>
                             ))}
                           </select>
@@ -1299,7 +1312,7 @@ const StudentList = () => {
                           type="text"
                           value={formData.enrollmentId}
                           onChange={(e) => setFormData({ ...formData, enrollmentId: e.target.value })}
-                          placeholder={`Auto: ${getLiveSdclIdPreview(formData.center, formData.dob)}`}
+                          placeholder="Auto-generated e.g. SDLC-KRR-04092003"
                           className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono uppercase text-slate-800 outline-none"
                         />
                       </div>
@@ -1312,10 +1325,10 @@ const StudentList = () => {
                             onChange={(e) => setFormData({ ...formData, courseTrack: e.target.value })}
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
-                            {courseTracksList.length === 0 ? (
+                            {instituteCourseTracks.length === 0 ? (
                               <option value="">-- No SDLC Courses Added Yet (Add in Course Catalog) --</option>
                             ) : (
-                              courseTracksList.map(ct => (
+                              instituteCourseTracks.map(ct => (
                                 <option key={ct} value={ct}>{ct}</option>
                               ))
                             )}
@@ -1473,7 +1486,7 @@ const StudentList = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track *</label>
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track</label>
                         <div className="relative flex items-center">
                           <select
                             value={editFormData.courseTrack || ''}
@@ -1481,7 +1494,7 @@ const StudentList = () => {
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
                             <option value="">-- None / Standard Department --</option>
-                            {courseTracksList.map(ct => (
+                            {collegeEditCourseTracks.map(ct => (
                               <option key={ct} value={ct}>{ct}</option>
                             ))}
                           </select>
@@ -1543,10 +1556,10 @@ const StudentList = () => {
                             onChange={(e) => setEditFormData({ ...editFormData, courseTrack: e.target.value })}
                             className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                           >
-                            {courseTracksList.length === 0 ? (
+                            {instituteCourseTracks.length === 0 ? (
                               <option value="">-- No SDLC Courses Added Yet --</option>
                             ) : (
-                              courseTracksList.map(ct => (
+                              instituteCourseTracks.map(ct => (
                                 <option key={ct} value={ct}>{ct}</option>
                               ))
                             )}
