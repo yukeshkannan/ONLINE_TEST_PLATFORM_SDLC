@@ -257,15 +257,34 @@ const Dashboard = () => {
     );
   }
 
-  const { recentActivity = [] } = data || {};
+  const now = new Date();
+
+  // Helper to compute dynamic test status in real-time
+  const computeLiveStatus = (t) => {
+    if (!t) return 'draft';
+    if (t.status === 'draft') return 'draft';
+    if (t.status === 'ended') return 'ended';
+    if (t.endTime && now > new Date(t.endTime)) return 'ended';
+    return 'active';
+  };
+
+  const activeAllTests = allTestsList.filter(t => computeLiveStatus(t) === 'active');
+  const activeCollegeTests = activeAllTests.filter(t => t.categoryMode === 'college');
+  const activeInstituteTests = activeAllTests.filter(t => t.categoryMode !== 'college');
 
   // Dynamic metrics computed based on selectedTrack
   const currentMetrics = {
-    totalTests: selectedTrack === 'college' 
-      ? (data?.collegeStats?.totalTests ?? 0) 
-      : selectedTrack === 'institute' 
-      ? (data?.instituteStats?.totalTests ?? 0) 
-      : (data?.stats?.totalTests ?? 0),
+    totalTests: allTestsList.length > 0
+      ? (selectedTrack === 'college' 
+          ? activeCollegeTests.length 
+          : selectedTrack === 'institute' 
+          ? activeInstituteTests.length 
+          : activeAllTests.length)
+      : (selectedTrack === 'college' 
+          ? (data?.collegeStats?.totalTests ?? 0) 
+          : selectedTrack === 'institute' 
+          ? (data?.instituteStats?.totalTests ?? 0) 
+          : (data?.stats?.totalTests ?? 0)),
     totalStudents: selectedTrack === 'college' 
       ? (data?.collegeStats?.totalStudents ?? 0) 
       : selectedTrack === 'institute' 

@@ -5,12 +5,31 @@ import { generateExcelReport } from '../utils/excelGenerator.js';
 
 export const getDashboardStats = async (req, res, next) => {
   try {
-    const totalTests = await Test.countDocuments();
+    const now = new Date();
+    const allTests = await Test.find().lean();
     const totalStudents = await Student.countDocuments();
 
-    // Category Counts
-    const collegeTests = await Test.countDocuments({ categoryMode: 'college' });
-    const instituteTests = await Test.countDocuments({ categoryMode: { $ne: 'college' } });
+    // Helper to compute dynamic test status in real-time
+    const computeStatus = (t) => {
+      if (!t) return 'draft';
+      if (t.status === 'draft') return 'draft';
+      if (t.status === 'ended') return 'ended';
+      const endTime = new Date(t.endTime);
+      if (now > endTime) return 'ended';
+      return 'active';
+    };
+
+    // Filter only currently live / active assessments
+    const activeAllTests = allTests.filter(t => computeStatus(t) === 'active');
+    const activeCollegeTests = activeAllTests.filter(t => t.categoryMode === 'college');
+    const activeInstituteTests = activeAllTests.filter(t => t.categoryMode !== 'college');
+
+    const totalTests = activeAllTests.length;
+    const collegeTests = activeCollegeTests.length;
+    const instituteTests = activeInstituteTests.length;
+    const allCreatedTests = allTests.length;
+
+    // Student counts
     const collegeStudents = await Student.countDocuments({ studentType: { $ne: 'institute' } });
     const instituteStudents = await Student.countDocuments({ studentType: 'institute' });
 
