@@ -55,83 +55,45 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
     >
       
       {/* ========================================================================= */}
-      {/* LEFT PANE: Premium Corporate Branding & Identity Panel                   */}
+      {/* LEFT PANE: Minimalist Animated Logo Showcase                              */}
       {/* ========================================================================= */}
-      <div className="lg:w-[48%] xl:w-[46%] w-full bg-gradient-to-b from-[#003866] via-[#004f90] to-[#002b50] text-white flex flex-col justify-between p-8 sm:p-12 lg:p-14 relative overflow-hidden">
+      <div className="lg:w-[48%] xl:w-[46%] w-full min-h-[35vh] lg:min-h-screen bg-gradient-to-b from-[#003866] via-[#004f90] to-[#002b50] flex items-center justify-center p-8 sm:p-12 relative overflow-hidden">
         
-        {/* Subtle geometric background grid line overlay (Clean architectural style) */}
+        {/* Subtle geometric background grid line overlay */}
         <div 
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{
             backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
             backgroundSize: '48px 48px'
           }}
         />
 
-        {/* Ambient subtle glow for depth */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient subtle soft glows for depth */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Top: Logo & System Badge */}
-        <div className="relative z-10 space-y-6">
-          <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-bold tracking-wider text-slate-100 uppercase">Assessment Suite v2.4</span>
-          </div>
-
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl shadow-black/10 inline-block border border-white/40">
-            <img 
-              alt="SDLC Skill Development Learning Centre" 
-              className="h-10 sm:h-12 w-auto object-contain" 
-              src="/logo.png" 
-            />
-          </div>
-        </div>
-
-        {/* Middle: Core Headline & Key Pillars */}
-        <div className="relative z-10 my-10 lg:my-0 space-y-8 max-w-lg">
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-snug font-poppins">
-              Secure Assessment &<br/>Skills Evaluation Portal
-            </h1>
-            <p className="text-sm text-slate-200/90 leading-relaxed font-normal">
-              A high-precision testing environment designed for university academic cohorts and specialized SDLC industry programs.
-            </p>
-          </div>
-
-          {/* Minimalist, Clean Pillar Highlights */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/[0.07] border border-white/10 backdrop-blur-xs transition-colors hover:bg-white/[0.12]">
-              <div className="w-1.5 h-1.5 rounded-full bg-sky-300 mt-2 shrink-0" />
-              <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Automated Real-Time Proctoring</h4>
-                <p className="text-[11px] text-slate-300 mt-0.5">Strict multi-tab and active fullscreen monitoring for maximum examination integrity.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/[0.07] border border-white/10 backdrop-blur-xs transition-colors hover:bg-white/[0.12]">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
-              <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Instantaneous Item Analysis</h4>
-                <p className="text-[11px] text-slate-300 mt-0.5">Automated scoring algorithms and item difficulty distractor breakdowns upon submission.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/[0.07] border border-white/10 backdrop-blur-xs transition-colors hover:bg-white/[0.12]">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-              <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Dedicated Cohort Routing</h4>
-                <p className="text-[11px] text-slate-300 mt-0.5">Seamless separation for College semester curriculum and SDLC branch center tracks.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom: Institutional Footer note */}
-        <div className="relative z-10 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-300 font-medium">
-          <span>Skill Development Learning Centre</span>
-          <span>© {new Date().getFullYear()} All Rights Reserved</span>
-        </div>
+        {/* Centered Animated Logo Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.85, y: 20 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1, 
+            y: [0, -8, 0] 
+          }}
+          transition={{ 
+            opacity: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+            scale: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 4.5, repeat: Infinity, ease: 'easeInOut' }
+          }}
+          whileHover={{ scale: 1.04 }}
+          className="relative z-10 bg-white/95 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/25 border border-white/50 flex items-center justify-center max-w-[320px] sm:max-w-[360px] cursor-default transition-shadow hover:shadow-sky-900/30"
+        >
+          <img 
+            alt="SDLC Skill Development Learning Centre" 
+            className="w-56 sm:w-64 h-auto object-contain select-none" 
+            src="/logo.png" 
+          />
+        </motion.div>
 
       </div>
 
