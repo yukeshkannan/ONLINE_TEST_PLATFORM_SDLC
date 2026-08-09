@@ -134,7 +134,7 @@ export const getTestById = async (req, res, next) => {
 };
 
 export const createTest = async (req, res, next) => {
-  const { title, subject, description, duration, totalMarks, passMark, instructions, assignedTo, startTime, endTime, status, showResultsToStudents } = req.body;
+  const { title, subject, description, duration, totalMarks, passMark, instructions, assignedTo, startTime, endTime, status, categoryMode, showResultsToStudents } = req.body;
 
   try {
     const now = new Date();
@@ -154,6 +154,7 @@ export const createTest = async (req, res, next) => {
       startTime: sTime,
       endTime: eTime,
       status: status || 'draft',
+      categoryMode: categoryMode === 'institute' ? 'institute' : 'college',
       showResultsToStudents: showResultsToStudents !== undefined ? showResultsToStudents : true
     });
 
@@ -174,7 +175,7 @@ export const updateTest = async (req, res, next) => {
       return res.status(404).json({ message: 'Test not found' });
     }
 
-    const { title, subject, description, duration, totalMarks, passMark, instructions, assignedTo, startTime, endTime, status, showResultsToStudents } = req.body;
+    const { title, subject, description, duration, totalMarks, passMark, instructions, assignedTo, startTime, endTime, status, categoryMode, showResultsToStudents } = req.body;
 
     test.title = title !== undefined ? title : test.title;
     test.subject = subject !== undefined ? subject : test.subject;
@@ -185,6 +186,9 @@ export const updateTest = async (req, res, next) => {
     test.instructions = instructions !== undefined ? instructions : test.instructions;
     test.assignedTo = assignedTo !== undefined ? assignedTo : test.assignedTo;
     test.showResultsToStudents = showResultsToStudents !== undefined ? showResultsToStudents : test.showResultsToStudents;
+    if (categoryMode) {
+      test.categoryMode = categoryMode === 'institute' ? 'institute' : 'college';
+    }
     
     if (startTime) test.startTime = new Date(startTime);
     if (endTime) test.endTime = new Date(endTime);
@@ -241,6 +245,7 @@ export const duplicateTest = async (req, res, next) => {
       startTime: sourceTest.startTime,
       endTime: sourceTest.endTime,
       status: 'draft', // Set duplicated tests as draft by default
+      categoryMode: sourceTest.categoryMode || 'college',
       showResultsToStudents: sourceTest.showResultsToStudents
     });
 

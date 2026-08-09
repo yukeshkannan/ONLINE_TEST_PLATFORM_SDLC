@@ -269,18 +269,31 @@ const Dashboard = () => {
     return 'active';
   };
 
-  const activeAllTests = allTestsList.filter(t => computeLiveStatus(t) === 'active');
-  const activeCollegeTests = activeAllTests.filter(t => t.categoryMode === 'college');
-  const activeInstituteTests = activeAllTests.filter(t => t.categoryMode !== 'college');
+  // Helper to reliably identify College vs SDLC Institute tests
+  const isCollegeTest = (t) => {
+    if (t.categoryMode === 'college') return true;
+    if (t.categoryMode === 'institute') return false;
+    if (t.assignedTo && t.assignedTo.length > 0) {
+      const hasInstituteSpecific = t.assignedTo.some(a => 
+        (a.batch && !/\d{4}/.test(a.batch) && !['All Batches'].includes(a.batch)) || 
+        (a.department && !['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS', 'All Departments'].includes(a.department))
+      );
+      return !hasInstituteSpecific;
+    }
+    return true;
+  };
+
+  const collegeTestsList = allTestsList.filter(isCollegeTest);
+  const instituteTestsList = allTestsList.filter(t => !isCollegeTest(t));
 
   // Dynamic metrics computed based on selectedTrack
   const currentMetrics = {
     totalTests: allTestsList.length > 0
       ? (selectedTrack === 'college' 
-          ? activeCollegeTests.length 
+          ? collegeTestsList.length 
           : selectedTrack === 'institute' 
-          ? activeInstituteTests.length 
-          : activeAllTests.length)
+          ? instituteTestsList.length 
+          : allTestsList.length)
       : (selectedTrack === 'college' 
           ? (data?.collegeStats?.totalTests ?? 0) 
           : selectedTrack === 'institute' 

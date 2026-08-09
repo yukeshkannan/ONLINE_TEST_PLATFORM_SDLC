@@ -458,6 +458,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       startTime: startDateTime,
       endTime: endDateTime,
       status: status,
+      categoryMode: categoryMode || 'college',
       showResultsToStudents: showResultsToStudents,
       assignedTo: assignedCombinations
     };

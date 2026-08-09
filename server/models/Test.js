@@ -57,6 +57,11 @@ const testSchema = new mongoose.Schema({
     enum: ['draft', 'active', 'ended'],
     default: 'draft'
   },
+  categoryMode: {
+    type: String,
+    enum: ['college', 'institute'],
+    default: 'college'
+  },
   showResultsToStudents: {
     type: Boolean,
     default: true

@@ -19,15 +19,27 @@ export const getDashboardStats = async (req, res, next) => {
       return 'active';
     };
 
-    // Filter only currently live / active assessments
-    const activeAllTests = allTests.filter(t => computeStatus(t) === 'active');
-    const activeCollegeTests = activeAllTests.filter(t => t.categoryMode === 'college');
-    const activeInstituteTests = activeAllTests.filter(t => t.categoryMode !== 'college');
+    // Helper to identify College vs Institute tests reliably
+    const isCollegeTest = (t) => {
+      if (t.categoryMode === 'college') return true;
+      if (t.categoryMode === 'institute') return false;
+      if (t.assignedTo && t.assignedTo.length > 0) {
+        const hasInstituteSpecific = t.assignedTo.some(a => 
+          (a.batch && !/\d{4}/.test(a.batch) && !['All Batches'].includes(a.batch)) || 
+          (a.department && !['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS', 'All Departments'].includes(a.department))
+        );
+        return !hasInstituteSpecific;
+      }
+      return true;
+    };
 
-    const totalTests = activeAllTests.length;
-    const collegeTests = activeCollegeTests.length;
-    const instituteTests = activeInstituteTests.length;
-    const allCreatedTests = allTests.length;
+    // Filter assessments by category
+    const collegeTests = allTests.filter(isCollegeTest);
+    const instituteTests = allTests.filter(t => !isCollegeTest(t));
+
+    const totalTests = allTests.length;
+    const totalCollegeTests = collegeTests.length;
+    const totalInstituteTests = instituteTests.length;
 
     // Student counts
     const collegeStudents = await Student.countDocuments({ studentType: { $ne: 'institute' } });
@@ -109,14 +121,14 @@ export const getDashboardStats = async (req, res, next) => {
         overallPassRate
       },
       collegeStats: {
-        totalTests: collegeTests,
+        totalTests: totalCollegeTests,
         totalStudents: collegeStudents,
         todaysAttempts: collegeToday,
         totalSubmissions: collegeResults.length,
         overallPassRate: collegePassRate
       },
       instituteStats: {
-        totalTests: instituteTests,
+        totalTests: totalInstituteTests,
         totalStudents: instituteStudents,
         todaysAttempts: instituteToday,
         totalSubmissions: instituteResults.length,

@@ -240,6 +240,7 @@ const AdminDashboard = ({ tab }) => {
       startTime,
       endTime,
       status: bulkStatus,
+      categoryMode: 'college',
       showResultsToStudents: true
     };
 
