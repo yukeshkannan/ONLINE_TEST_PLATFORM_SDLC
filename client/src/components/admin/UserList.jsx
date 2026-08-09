@@ -157,7 +157,7 @@ const UserList = () => {
       </div>
 
       {/* Top Stat Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Trainers</span>
@@ -175,19 +175,6 @@ const UserList = () => {
           </div>
           <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100">
             <ShieldCheck className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Default Access Role</span>
-            <p className="text-sm font-extrabold text-[#F7931A] font-poppins mt-1.5 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#F7931A]"></span>
-              <span>SDLC Faculty Staff</span>
-            </p>
-          </div>
-          <div className="h-10 w-10 bg-orange-50 text-[#F7931A] rounded-xl flex items-center justify-center border border-orange-100">
-            <Shield className="h-5 w-5" />
           </div>
         </div>
       </div>
