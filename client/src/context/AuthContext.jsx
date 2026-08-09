@@ -115,23 +115,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
   const logout = async () => {
-    setIsLoggingOut(true);
     try {
       await api.post('/auth/logout');
     } catch (err) {
       console.error('Logout request failed:', err);
     }
     
-    // 0.85s smooth branded transition with official SDLC logo
-    await new Promise(resolve => setTimeout(resolve, 850));
     setAccessToken('');
     setUser(null);
     localStorage.removeItem('auth_user');
     setIsAuthenticated(false);
-    setIsLoggingOut(false);
     setLoading(false);
   };
 
@@ -141,50 +135,12 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated,
         loading,
-        isLoggingOut,
         loginAdmin,
         loginStudent,
         logout,
         setUser
       }}
     >
-      {/* SDLC Professional Branded Logout Screen */}
-      {isLoggingOut && (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 backdrop-blur-md select-none transition-all duration-300 animate-fadeIn">
-          <div className="flex flex-col items-center justify-center space-y-6 max-w-sm px-6 text-center">
-            {/* Official SDLC Logo with subtle glow pulse */}
-            <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl shadow-sm animate-pulse">
-              <img 
-                src="/logo.png" 
-                alt="SDLC Platform" 
-                className="h-12 sm:h-14 w-auto object-contain"
-              />
-            </div>
-
-            {/* Rotating Clock Spinner */}
-            <div className="pt-2">
-              <div className="relative w-8 h-8 rounded-full border-2 border-slate-200 flex items-center justify-center">
-                <div 
-                  className="absolute bottom-1/2 left-1/2 -translate-x-1/2 w-[2px] h-3 rounded-full bg-[#004f90] animate-clock-smooth"
-                  style={{ transformOrigin: 'bottom center' }}
-                />
-                <div className="w-1.5 h-1.5 rounded-full bg-[#004f90]" />
-              </div>
-            </div>
-
-            {/* Status text */}
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-800 tracking-tight font-poppins">
-                Signing out securely...
-              </h3>
-              <p className="text-xs text-slate-400 font-medium">
-                Ending session and clearing local security tokens.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {children}
     </AuthContext.Provider>
   );
