@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldAlert, X } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import ClockLoader from '../components/shared/ClockLoader.jsx';
 
 const AdminLogin = () => {
   const { loginAdmin } = useAuth();
@@ -16,6 +17,7 @@ const AdminLogin = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Forgot password flow states
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -136,127 +138,135 @@ const AdminLogin = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      className="w-full min-h-screen flex flex-col md:flex-row bg-white relative font-sans"
+      transition={{ duration: 0.35 }}
+      className="w-full min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] text-slate-900 font-sans selection:bg-[#004f90]/10 selection:text-[#004f90]"
     >
       
-      {/* LEFT PANE: Branding, Logo, and Accent Background */}
-      <motion.div 
-        initial={{ opacity: 0, x: -80 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -80 }}
-        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-        className="md:w-1/2 w-full min-h-[45vh] md:min-h-screen bg-[#f3f6fa] flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200/60 relative overflow-hidden"
-      >
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
-          className="z-10 flex flex-col items-center text-center space-y-6"
+      {/* ========================================================================= */}
+      {/* LEFT PANE: Minimalist Animated Logo Showcase (Matches Student Login)      */}
+      {/* ========================================================================= */}
+      <div className="lg:w-[48%] xl:w-[46%] w-full min-h-[35vh] lg:min-h-screen bg-gradient-to-b from-[#003866] via-[#004f90] to-[#002b50] flex items-center justify-center p-8 sm:p-12 relative overflow-hidden">
+        
+        {/* Subtle geometric background grid line overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
+            backgroundSize: '48px 48px'
+          }}
+        />
+
+        {/* Ambient subtle soft glows for depth */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Centered Animated Logo Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.85, y: 20 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1, 
+            y: [0, -8, 0] 
+          }}
+          transition={{ 
+            opacity: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+            scale: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 4.5, repeat: Infinity, ease: 'easeInOut' }
+          }}
+          whileHover={{ scale: 1.04 }}
+          className="relative z-10 bg-white/95 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/25 border border-white/50 flex items-center justify-center max-w-[320px] sm:max-w-[360px] cursor-default transition-shadow hover:shadow-sky-900/30"
         >
           <img 
-            alt="SDLC Logo" 
-            className="w-60 sm:w-72 h-auto object-contain" 
+            alt="SDLC Skill Development Learning Centre" 
+            className="w-56 sm:w-64 h-auto object-contain select-none" 
             src="/logo.png" 
           />
-          <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#004f90] tracking-tight leading-tight font-poppins">
-              Skill Development<br/>Learning Centre
-            </h2>
-          </div>
         </motion.div>
-      </motion.div>
 
-      {/* RIGHT PANE: Card Container & Login Form */}
-      <motion.div 
-        initial={{ opacity: 0, x: 80 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 80 }}
-        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-        className="md:w-1/2 w-full min-h-[55vh] md:min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 md:p-16 bg-white overflow-y-auto"
-      >
-        <div className="w-full max-w-[460px] flex flex-col justify-center space-y-8 py-8 my-auto">
+      </div>
+
+      {/* ========================================================================= */}
+      {/* RIGHT PANE: Modern High-End Authentication Card                           */}
+      {/* ========================================================================= */}
+      <div className="lg:w-[52%] xl:w-[54%] w-full flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 bg-[#f8fafc] overflow-y-auto">
+        
+        <div className="w-full max-w-[440px] space-y-7 my-auto">
           
-          {/* Welcome Text */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-          >
-            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1 font-poppins">
-              Welcome Back, Faculty
-            </h3>
-            <p className="text-sm text-slate-500 font-medium">
-              Login to access your test design & analytics engine
+          {/* Header Title */}
+          <div className="space-y-1.5">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 font-poppins tracking-tight">
+              Faculty & Admin Portal
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Enter your credentials to access test management & analytics.
             </p>
-          </motion.div>
+          </div>
 
-          {/* Login Card wrapper */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
-            className="bg-white border border-slate-100 shadow-2xl shadow-slate-100 rounded-[28px] p-6 sm:p-8 space-y-6"
-          >
-            <form onSubmit={handleSubmit} className="space-y-5">
+          {/* AUTHENTICATION FORM CARD */}
+          <div className="bg-white border border-slate-200/90 shadow-xl shadow-slate-200/50 rounded-3xl p-6 sm:p-8 space-y-6">
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Email Input */}
+              {/* Field 1: Email Address */}
               <div className="space-y-1.5 flex flex-col">
-                <label className="text-sm font-semibold text-slate-700">
-                  Faculty Email Address
+                <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">
+                  Faculty / Admin Email Address *
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                    <Mail className="h-5 w-5" />
+                    <Mail className="h-4 w-4" />
                   </span>
                   <input
                     required
                     type="email"
-                    placeholder="name@college.edu"
+                    placeholder="faculty@college.edu or admin@sdlc.in"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/5 transition-all outline-none"
+                    autoComplete="email"
+                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                   />
                 </div>
               </div>
 
-              {/* Password Input */}
+              {/* Field 2: Password */}
               <div className="space-y-1.5 flex flex-col">
-                <label className="text-sm font-semibold text-slate-700">
-                  Password
+                <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">
+                  Password *
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                    <Lock className="h-5 w-5" />
+                    <Lock className="h-4 w-4" />
                   </span>
                   <input
                     required
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-11 pr-11 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/5 transition-all outline-none"
+                    autoComplete="current-password"
+                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-10 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between text-sm pt-1">
-                <label className="flex items-center gap-2 text-slate-500 font-medium cursor-pointer select-none">
+              {/* Remember Me & Forgot Password Row */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center gap-2 text-slate-600 font-medium cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-[#004f90] focus:ring-[#004f90] h-4 w-4"
+                    className="rounded border-slate-300 text-[#004f90] focus:ring-[#004f90] h-4 w-4 cursor-pointer"
                   />
                   <span>Remember Me</span>
                 </label>
@@ -270,22 +280,22 @@ const AdminLogin = () => {
                     setConfirmNewPassword('');
                     setShowForgotModal(true); 
                   }}
-                  className="font-semibold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left"
+                  className="font-bold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left text-xs"
                 >
                   Forgot Password?
                 </button>
               </div>
 
-              {/* Login Button */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full !bg-[#F7931A] hover:!bg-[#e08210] text-white py-2.5 rounded-xl font-semibold shadow-md shadow-[#F7931A]/20 transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md shadow-[#004f90]/20 transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center space-x-2"
               >
                 {isSubmitting ? (
-                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <ClockLoader size="xs" color="#ffffff" />
                 ) : (
-                  <span>Login</span>
+                  <span>Log In to Faculty Portal</span>
                 )}
               </button>
 
@@ -293,34 +303,31 @@ const AdminLogin = () => {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="w-full border border-[#004f90] text-[#004f90] hover:bg-slate-50 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Home</span>
               </button>
 
             </form>
-          </motion.div>
 
-          {/* Secure Login Footer */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-            className="flex flex-col items-center space-y-2"
-          >
-            {/* Student Switcher Link */}
+          </div>
+
+          {/* Student Switcher Link */}
+          <div className="text-center pt-1">
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-sm font-bold text-[#004f90] hover:underline cursor-pointer transition-all"
+              className="text-xs font-bold text-[#004f90] hover:underline cursor-pointer transition-all inline-flex items-center gap-1"
             >
-              Are you a Student? Access Candidate Portal here &rarr;
+              <span>Are you a Student?</span>
+              <span className="font-extrabold">Access Candidate Portal here &rarr;</span>
             </button>
-          </motion.div>
+          </div>
 
         </div>
-      </motion.div>
+
+      </div>
 
       {/* Forgot Password Modal */}
       <AnimatePresence>
@@ -340,7 +347,7 @@ const AdminLogin = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-              className="fixed inset-0 m-auto max-w-[440px] h-fit bg-white rounded-3xl p-7 shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col space-y-5 z-[2100] text-left font-sans"
+              className="fixed inset-0 m-auto max-w-[440px] w-[92%] h-fit bg-white rounded-3xl p-7 shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col space-y-5 z-[2100] text-left font-sans"
             >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h4 className="text-xl font-bold text-slate-900 tracking-tight font-poppins">Reset Password</h4>
@@ -355,14 +362,14 @@ const AdminLogin = () => {
               {/* Step 1: Input Email */}
               {forgotStep === 1 && (
                 <form onSubmit={handleSendOTP} className="space-y-4">
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
                     Enter your registered faculty email address. We will send a 6-digit verification code to reset your password.
                   </p>
                   <div className="space-y-1.5 flex flex-col">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-0.5">Email Address</label>
+                    <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">Email Address</label>
                     <div className="relative flex items-center">
                       <span className="absolute left-3 text-slate-400 pointer-events-none">
-                        <Mail className="h-5 w-5" />
+                        <Mail className="h-4 w-4" />
                       </span>
                       <input
                         required
@@ -371,17 +378,17 @@ const AdminLogin = () => {
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         disabled={otpLoading}
-                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#004f90] transition-all outline-none"
+                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="w-full bg-[#004f90] hover:bg-[#003c6e] text-white py-3 rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
                   >
                     {otpLoading ? (
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <ClockLoader size="xs" color="#ffffff" />
                     ) : (
                       <span>Send Verification Code</span>
                     )}
@@ -392,14 +399,14 @@ const AdminLogin = () => {
               {/* Step 2: Verify OTP */}
               {forgotStep === 2 && (
                 <form onSubmit={handleVerifyOTP} className="space-y-4">
-                  <p className="text-sm text-slate-550 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
                     A verification code has been sent to <span className="font-bold text-slate-800">{forgotEmail}</span>. Enter the 6-digit code below.
                   </p>
                   <div className="space-y-1.5 flex flex-col">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-0.5">Verification Code (OTP)</label>
+                    <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">Verification Code (OTP)</label>
                     <div className="relative flex items-center">
                       <span className="absolute left-3 text-slate-400 pointer-events-none">
-                        <Lock className="h-5 w-5" />
+                        <Lock className="h-4 w-4" />
                       </span>
                       <input
                         required
@@ -409,17 +416,17 @@ const AdminLogin = () => {
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                         disabled={otpLoading}
-                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#004f90] tracking-widest text-center font-bold font-mono focus:ring-2 focus:ring-[#004f90]/5 transition-all outline-none"
+                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#004f90] tracking-widest text-center font-bold font-mono focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="w-full bg-[#004f90] hover:bg-[#003c6e] text-white py-3 rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
                   >
                     {otpLoading ? (
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <ClockLoader size="xs" color="#ffffff" />
                     ) : (
                       <span>Verify Code</span>
                     )}
@@ -428,7 +435,7 @@ const AdminLogin = () => {
                     type="button"
                     onClick={() => setForgotStep(1)}
                     disabled={otpLoading}
-                    className="w-full border border-slate-200 text-slate-550 hover:bg-slate-50 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer"
+                    className="w-full border border-slate-200 text-slate-600 hover:bg-slate-50 py-2.5 rounded-xl font-semibold text-xs transition-all cursor-pointer"
                   >
                     Back to Email
                   </button>
@@ -438,16 +445,16 @@ const AdminLogin = () => {
               {/* Step 3: New Password */}
               {forgotStep === 3 && (
                 <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
-                  <p className="text-sm text-slate-550 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
                     Identity verified! You can now set your new password.
                   </p>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {/* New Password */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-0.5">New Password</label>
+                      <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">New Password</label>
                       <div className="relative flex items-center">
                         <span className="absolute left-3 text-slate-400 pointer-events-none">
-                          <Lock className="h-5 w-5" />
+                          <Lock className="h-4 w-4" />
                         </span>
                         <input
                           required
@@ -456,23 +463,23 @@ const AdminLogin = () => {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           disabled={otpLoading}
-                          className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-10 pr-10 text-slate-900 text-sm focus:outline-none focus:border-[#004f90] transition-all outline-none"
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-10 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                         />
                         <button
                           type="button"
                           onClick={() => setForgotShowPassword(!forgotShowPassword)}
-                          className="absolute right-3 text-slate-400 hover:text-slate-655 cursor-pointer border-none bg-none"
+                          className="absolute right-3 text-slate-400 hover:text-slate-600 cursor-pointer border-none bg-none"
                         >
-                          {forgotShowPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          {forgotShowPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
                     </div>
                     {/* Confirm Password */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-0.5">Confirm New Password</label>
+                      <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">Confirm New Password</label>
                       <div className="relative flex items-center">
                         <span className="absolute left-3 text-slate-400 pointer-events-none">
-                          <Lock className="h-5 w-5" />
+                          <Lock className="h-4 w-4" />
                         </span>
                         <input
                           required
@@ -481,7 +488,7 @@ const AdminLogin = () => {
                           value={confirmNewPassword}
                           onChange={(e) => setConfirmNewPassword(e.target.value)}
                           disabled={otpLoading}
-                          className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#004f90] transition-all outline-none"
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                         />
                       </div>
                     </div>
@@ -489,10 +496,10 @@ const AdminLogin = () => {
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="w-full bg-[#004f90] hover:bg-[#003c6e] text-white py-3 rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
                   >
                     {otpLoading ? (
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <ClockLoader size="xs" color="#ffffff" />
                     ) : (
                       <span>Reset Password</span>
                     )}
