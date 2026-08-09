@@ -103,15 +103,12 @@ const AdminDashboard = ({ tab }) => {
   const [deptList, setDeptList] = useState([]);
   const [batchList, setBatchList] = useState([]);
 
-  const getTodayStr = () => new Date().toISOString().split('T')[0];
-  const getTomorrowStr = () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-  const [bulkStartDate, setBulkStartDate] = useState(getTodayStr);
+  const [bulkStartDate, setBulkStartDate] = useState('');
   const [bulkStartHour, setBulkStartHour] = useState('00');
   const [bulkStartMinute, setBulkStartMinute] = useState('00');
   const [bulkStartAmpm, setBulkStartAmpm] = useState('AM');
 
-  const [bulkEndDate, setBulkEndDate] = useState(getTomorrowStr);
+  const [bulkEndDate, setBulkEndDate] = useState('');
   const [bulkEndHour, setBulkEndHour] = useState('00');
   const [bulkEndMinute, setBulkEndMinute] = useState('00');
   const [bulkEndAmpm, setBulkEndAmpm] = useState('AM');

@@ -18,9 +18,6 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
-  const getTodayDateStr = () => new Date().toISOString().split('T')[0];
-  const getNextMonthDateStr = () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
   const [instructions, setInstructions] = useState('');
   const [duration, setDuration] = useState('30');
   const [customPassMark, setCustomPassMark] = useState(testToEdit?.passMark !== undefined ? String(testToEdit.passMark) : '');
@@ -28,12 +25,12 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const [showResultsToStudents, setShowResultsToStudents] = useState(true);
 
   // Custom 12-hour AM/PM Time States
-  const [startDate, setStartDate] = useState(getTodayDateStr);
+  const [startDate, setStartDate] = useState('');
   const [startHour, setStartHour] = useState('00');
   const [startMinute, setStartMinute] = useState('00');
   const [startAmpm, setStartAmpm] = useState('AM');
 
-  const [endDate, setEndDate] = useState(getNextMonthDateStr);
+  const [endDate, setEndDate] = useState('');
   const [endHour, setEndHour] = useState('00');
   const [endMinute, setEndMinute] = useState('00');
   const [endAmpm, setEndAmpm] = useState('AM');
@@ -539,11 +536,6 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     ? Number(customPassMark)
     : Math.ceil(questions.length * 0.4);
 
-  const applyPassPercent = (pct) => {
-    const val = Math.ceil(questions.length * (pct / 100));
-    setCustomPassMark(String(val));
-  };
-
   if (loadingQuestions) {
     return (
       <div className="flex flex-col items-center justify-center py-32 font-sans">
@@ -693,37 +685,6 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
                     className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3.5 pr-10 text-xs font-extrabold text-[#004f90] outline-none"
                   />
                   <Award className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
-                </div>
-                {/* Quick 1-click presets */}
-                <div className="flex items-center gap-1 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => applyPassPercent(35)}
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
-                  >
-                    35%
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPassPercent(40)}
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
-                  >
-                    40% (Std)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPassPercent(50)}
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
-                  >
-                    50%
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPassPercent(60)}
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#004f90]/10 hover:text-[#004f90] text-slate-600 transition cursor-pointer"
-                  >
-                    60%
-                  </button>
                 </div>
               </div>
 
