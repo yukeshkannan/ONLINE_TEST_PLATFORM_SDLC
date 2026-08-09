@@ -15,7 +15,7 @@ import { parsePdfToText } from '../utils/pdfParser.js';
 import { parseTextToQuestions } from '../utils/questionParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
 import { normalizeBatch, normalizeDept } from '../utils/constants.js';
-import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, BookOpen, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
+import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, BookOpen, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown, Search, Filter, CheckCircle2, Layers, Award, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClockLoader from '../components/shared/ClockLoader.jsx';
@@ -30,6 +30,28 @@ const AdminDashboard = ({ tab }) => {
   const [loadingTests, setLoadingTests] = useState(false);
   const [selectedTest, setSelectedTest] = useState(null);
   const [testsTrackFilter, setTestsTrackFilter] = useState('all'); // 'all' | 'college' | 'institute'
+  const [testsSearch, setTestsSearch] = useState('');
+  const [testsStatusFilter, setTestsStatusFilter] = useState('all');
+  const [testsPage, setTestsPage] = useState(1);
+  const testsPerPage = 8;
+
+  // Helper to format short date times cleanly
+  const formatDateTimeShort = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'N/A';
+    return `${d.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+  };
+
+  // Helper to compute live test status
+  const computeLiveTestStatus = (t) => {
+    if (!t) return 'draft';
+    if (t.status === 'draft') return 'draft';
+    if (t.status === 'ended') return 'ended';
+    const now = new Date();
+    if (t.endTime && now > new Date(t.endTime)) return 'ended';
+    return 'active';
+  };
 
   // Helper to identify College vs SDLC tests
   const isCollegeTest = (t) => {
@@ -507,248 +529,415 @@ const AdminDashboard = ({ tab }) => {
             <ProctoringLogs />
           )}
 
-          {activeTab === 'tests' && (
-            <div className="space-y-6 animate-fadeIn">
-              
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight font-poppins">
-                    Manage Assessments
-                  </h2>
-                  <p className="text-sm text-slate-500 font-medium">
-                    Create, edit, duplicate, or configure exam papers and question cards.
-                  </p>
-                </div>
+          {activeTab === 'tests' && (() => {
+            const collegeCount = tests.filter(isCollegeTest).length;
+            const instituteCount = tests.filter(t => !isCollegeTest(t)).length;
+
+            const filteredTests = tests.filter(test => {
+              if (testsTrackFilter === 'college' && !isCollegeTest(test)) return false;
+              if (testsTrackFilter === 'institute' && isCollegeTest(test)) return false;
+
+              const liveStatus = computeLiveTestStatus(test);
+              if (testsStatusFilter !== 'all' && liveStatus !== testsStatusFilter) return false;
+
+              if (testsSearch.trim()) {
+                const q = testsSearch.toLowerCase();
+                const titleMatch = (test.title || '').toLowerCase().includes(q);
+                const subjectMatch = (test.subject || '').toLowerCase().includes(q);
+                const cohortMatch = (test.assignedTo || []).some(a => 
+                  (a.department || '').toLowerCase().includes(q) ||
+                  (a.batch || '').toLowerCase().includes(q) ||
+                  (a.year || '').toLowerCase().includes(q)
+                );
+                return titleMatch || subjectMatch || cohortMatch;
+              }
+              return true;
+            });
+
+            const totalTestPages = Math.ceil(filteredTests.length / testsPerPage) || 1;
+            const currentPageTests = filteredTests.slice((testsPage - 1) * testsPerPage, testsPage * testsPerPage);
+
+            return (
+              <div className="space-y-5 animate-fadeIn font-sans text-left pb-10">
                 
-                <div className="flex items-center space-x-3 shrink-0">
-                  <button
-                    onClick={fetchTestsList}
-                    className="border border-slate-200 text-slate-600 p-3 rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
-                    title="Refresh Tests List"
-                  >
-                    <RefreshCw className="h-4.5 w-4.5" />
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setSelectedTest(null);
-                      setActiveTab('create');
-                    }}
-                    className="bg-[#004f90] hover:bg-[#003c6e] text-white font-bold px-5 py-3 rounded-xl text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <PlusCircle className="h-4.5 w-4.5" />
-                    <span>Create Test</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Segmented Filter Bar: All / College / SDLC */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="bg-slate-100/80 p-1 rounded-xl border border-slate-200 flex items-center gap-1">
-                  <button
-                    onClick={() => setTestsTrackFilter('all')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      testsTrackFilter === 'all'
-                        ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    All Assessments ({tests.length})
-                  </button>
-                  <button
-                    onClick={() => setTestsTrackFilter('college')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                      testsTrackFilter === 'college'
-                        ? 'bg-[#004f90] text-white shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <GraduationCap className="w-3.5 h-3.5" />
-                    <span>College ({tests.filter(isCollegeTest).length})</span>
-                  </button>
-                  <button
-                    onClick={() => setTestsTrackFilter('institute')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                      testsTrackFilter === 'institute'
-                        ? 'bg-[#F7931A] text-white shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>SDLC ({tests.filter(t => !isCollegeTest(t)).length})</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Tests list table inside beautiful white card */}
-              <div className="bg-white border border-slate-100 shadow-md shadow-slate-100/50 rounded-[24px] p-6">
-                {loadingTests ? (
-                  <div className="py-20 text-center flex flex-col items-center justify-center">
-                    <ClockLoader size="lg" color="#004f90" text="Loading assessments & examination schedule..." />
+                {/* Clean Header Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight font-poppins flex items-center gap-2">
+                      <span>Manage Assessments</span>
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                      Create, configure, schedule, and evaluate exam papers for College and SDLC candidates.
+                    </p>
                   </div>
-                ) : tests.length === 0 ? (
-                  <div className="py-16 text-center text-xs text-slate-400 space-y-2">
-                    <AlertCircle className="h-10 w-10 text-slate-300 mx-auto" />
-                    <p className="font-extrabold text-slate-800">Empty assessment catalog.</p>
-                    <p className="text-[10px] text-slate-400 font-medium">Click "Create Test" above to build your first examination paper.</p>
+                  
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <button
+                      onClick={fetchTestsList}
+                      className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 p-2.5 rounded-xl transition cursor-pointer shadow-2xs"
+                      title="Refresh Assessments List"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedTest(null);
+                        setActiveTab('create');
+                      }}
+                      className="bg-[#004f90] hover:bg-[#003c6e] text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-2xs hover:shadow-xs transition active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      <span>Create Test</span>
+                    </button>
                   </div>
-                ) : (
-                  <div className="overflow-x-auto border border-slate-100 rounded-2xl">
-                    <table className="w-full text-left text-base border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm uppercase font-bold tracking-wider">
-                          <th className="py-6 px-6">Subject</th>
-                          <th className="py-6 px-6">Classification</th>
-                          <th className="py-6 px-6">Assessment Title</th>
-                          <th className="py-6 px-6">Target Cohort</th>
-                          <th className="py-6 px-6 text-center">Duration</th>
-                          <th className="py-6 px-6 text-center">Marks</th>
-                          <th className="py-6 px-6 text-center">Status</th>
-                          <th className="py-6 px-6 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {tests
-                          .filter(test => {
-                            if (testsTrackFilter === 'college') return isCollegeTest(test);
-                            if (testsTrackFilter === 'institute') return !isCollegeTest(test);
-                            return true;
-                          })
-                          .map((test) => (
-                          <tr key={test._id} className="hover:bg-slate-50/30 transition-colors">
-                            {/* Subject badge */}
-                            <td className="py-6 px-6">
-                              <span className="inline-block bg-blue-50 border border-blue-150 text-[#004f90] font-extrabold px-3.5 py-1.5 rounded-xl text-xs uppercase tracking-wider">
-                                {test.subject}
-                              </span>
-                            </td>
-                            {/* Classification Badge (College / SDLC) */}
-                            <td className="py-6 px-6">
-                              {isCollegeTest(test) ? (
-                                <span className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200/80 text-[#004f90] font-bold px-3 py-1.5 rounded-xl text-xs uppercase tracking-wider">
-                                  <GraduationCap className="w-3.5 h-3.5" />
-                                  <span>College</span>
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-[#F7931A] font-bold px-3 py-1.5 rounded-xl text-xs uppercase tracking-wider">
-                                  <BookOpen className="w-3.5 h-3.5" />
-                                  <span>SDLC</span>
-                                </span>
-                              )}
-                            </td>
-                            {/* Title & Timing Window */}
-                            <td className="py-6 px-6">
-                              <p className="font-extrabold text-slate-800 text-lg tracking-tight leading-snug">{test.title}</p>
-                              <p className="text-xs text-slate-500 font-semibold mt-1.5 flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                                <span>Window: {new Date(test.startTime).toLocaleDateString()} {new Date(test.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - {new Date(test.endTime).toLocaleDateString()} {new Date(test.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
-                              </p>
-                            </td>
-                            {/* Assigned Cohorts */}
-                            <td className="py-6 px-6">
-                              {test.assignedTo?.length > 0 ? (
-                                <div className="flex flex-col gap-1.5 max-w-[280px]">
-                                  {test.assignedTo.map((item, idx) => (
-                                    <span key={idx} className="inline-block bg-slate-50 border border-slate-200/60 text-slate-655 font-bold text-xs px-3 py-1 rounded-lg shrink-0">
-                                      {item.department === 'SDLC' 
-                                        ? `${item.batch} (${item.year})` 
-                                        : `${item.department} (${item.year}, Batch ${item.batch})`}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-red-500 font-bold text-xs uppercase tracking-wider">Unassigned</span>
-                              )}
-                            </td>
-                            {/* Duration */}
-                            <td className="py-6 px-6 text-center text-slate-700 font-bold text-base">{test.duration} min</td>
-                            {/* Marks */}
-                            <td className="py-6 px-6 text-center text-slate-850 font-extrabold text-base">
-                              {test.totalMarks} <span className="text-xs text-slate-400 font-semibold block mt-0.5">({test.passMark} pass)</span>
-                            </td>
-                            {/* Status */}
-                            <td className="py-6 px-6 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border uppercase ${
-                                test.status === 'active'
-                                  ? 'bg-emerald-50 border-emerald-150 text-emerald-700'
-                                  : test.status === 'ended'
-                                  ? 'bg-red-50 border-red-150 text-red-700'
-                                  : 'bg-amber-50 border-amber-150 text-amber-700'
-                              }`}>
-                                {test.status}
-                              </span>
-                            </td>
-                            {/* Actions circular buttons */}
-                            <td className="py-6 px-6 text-right">
-                              <div className="flex items-center justify-end space-x-1.5">
-                                {/* Manage Questions */}
-                                <button
-                                  onClick={() => {
-                                    setSelectedTest(test);
-                                    setActiveTab('questions');
-                                    setSearchParams({ subTab: 'questions', testId: test._id });
-                                  }}
-                                  title="Manage Exam Questions"
-                                  className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors border border-transparent hover:border-emerald-100 cursor-pointer"
-                                >
-                                  <HelpCircle className="h-5 w-5" />
-                                </button>
-                                
-                                {/* View Results */}
-                                <button
-                                  onClick={() => {
-                                    setSelectedTest(test);
-                                    setActiveTab('results');
-                                    setSearchParams({ subTab: 'results', testId: test._id });
-                                  }}
-                                  title="Review Submission Analytics"
-                                  className="p-2.5 text-slate-400 hover:text-blue-650 hover:bg-blue-50 rounded-full transition-colors border border-transparent hover:border-blue-100 cursor-pointer"
-                                >
-                                  <Eye className="h-5 w-5" />
-                                </button>
+                </div>
 
-                                {/* Edit */}
-                                <button
-                                  onClick={() => {
-                                    setSelectedTest(test);
-                                    setActiveTab('edit');
-                                    setSearchParams({ subTab: 'edit', testId: test._id });
-                                  }}
-                                  title="Modify Details"
-                                  className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors border border-transparent hover:border-slate-200 cursor-pointer"
-                                >
-                                  <Edit3 className="h-5 w-5" />
-                                </button>
+                {/* Quick Telemetry Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Tests</span>
+                      <p className="text-2xl font-extrabold text-slate-900 font-poppins mt-0.5">{tests.length}</p>
+                    </div>
+                    <div className="h-10 w-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center border border-slate-100">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                  </div>
 
-                                {/* Duplicate */}
-                                <button
-                                  onClick={() => handleDuplicate(test._id)}
-                                  title="Clone Test"
-                                  className="p-2.5 text-slate-400 hover:text-purple-650 hover:bg-purple-50 rounded-full transition-colors border border-transparent hover:border-purple-100 cursor-pointer"
-                                >
-                                  <Copy className="h-5 w-5" />
-                                </button>
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">College Exams</span>
+                      <p className="text-2xl font-extrabold text-[#004f90] font-poppins mt-0.5">{collegeCount}</p>
+                    </div>
+                    <div className="h-10 w-10 bg-blue-50 text-[#004f90] rounded-xl flex items-center justify-center border border-blue-100">
+                      <GraduationCap className="h-5 w-5" />
+                    </div>
+                  </div>
 
-                                {/* Delete */}
-                                <button
-                                  onClick={() => handleDelete(test._id)}
-                                  title="Delete Assessment"
-                                  className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors border border-transparent hover:border-red-100 cursor-pointer"
-                                >
-                                  <Trash2 className="h-5 w-5" />
-                                </button>
-                              </div>
-                            </td>
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SDLC Exams</span>
+                      <p className="text-2xl font-extrabold text-[#F7931A] font-poppins mt-0.5">{instituteCount}</p>
+                    </div>
+                    <div className="h-10 w-10 bg-orange-50 text-[#F7931A] rounded-xl flex items-center justify-center border border-orange-100">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Search & Filter Toolbar */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  {/* Track Segmented Pills */}
+                  <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 shrink-0 overflow-x-auto">
+                    <button
+                      onClick={() => { setTestsTrackFilter('all'); setTestsPage(1); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shrink-0 ${
+                        testsTrackFilter === 'all'
+                          ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      All ({tests.length})
+                    </button>
+                    <button
+                      onClick={() => { setTestsTrackFilter('college'); setTestsPage(1); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                        testsTrackFilter === 'college'
+                          ? 'bg-[#004f90] text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <GraduationCap className="w-3.5 h-3.5" />
+                      <span>College ({collegeCount})</span>
+                    </button>
+                    <button
+                      onClick={() => { setTestsTrackFilter('institute'); setTestsPage(1); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                        testsTrackFilter === 'institute'
+                          ? 'bg-[#F7931A] text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>SDLC ({instituteCount})</span>
+                    </button>
+                  </div>
+
+                  {/* Search and Status filter */}
+                  <div className="flex items-center gap-2.5 flex-1 max-w-xl">
+                    <div className="relative flex-1">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={testsSearch}
+                        onChange={(e) => { setTestsSearch(e.target.value); setTestsPage(1); }}
+                        placeholder="Search assessments by title, subject, cohort..."
+                        className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 focus:border-[#004f90] focus:bg-white rounded-xl text-xs font-medium text-slate-800 outline-none transition"
+                      />
+                      {testsSearch && (
+                        <button
+                          onClick={() => setTestsSearch('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="relative shrink-0">
+                      <select
+                        value={testsStatusFilter}
+                        onChange={(e) => { setTestsStatusFilter(e.target.value); setTestsPage(1); }}
+                        className="bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl h-9 pl-3 pr-8 text-xs font-semibold text-slate-700 outline-none cursor-pointer appearance-none"
+                      >
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="draft">Draft</option>
+                        <option value="ended">Ended</option>
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Table Container */}
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
+                  {loadingTests ? (
+                    <div className="py-24 text-center flex flex-col items-center justify-center">
+                      <ClockLoader size="lg" color="#004f90" text="Loading assessments schedule..." />
+                    </div>
+                  ) : tests.length === 0 ? (
+                    <div className="py-20 text-center text-xs text-slate-400 space-y-3">
+                      <AlertCircle className="h-10 w-10 text-slate-300 mx-auto" />
+                      <p className="font-bold text-slate-800 text-sm">No assessments found.</p>
+                      <p className="text-xs text-slate-400">Click "Create Test" above to build your first examination paper.</p>
+                    </div>
+                  ) : filteredTests.length === 0 ? (
+                    <div className="py-16 text-center text-xs text-slate-400 space-y-2">
+                      <Search className="h-8 w-8 text-slate-300 mx-auto" />
+                      <p className="font-bold text-slate-700">No assessments match your active filter.</p>
+                      <button
+                        onClick={() => { setTestsSearch(''); setTestsTrackFilter('all'); setTestsStatusFilter('all'); }}
+                        className="text-xs font-semibold text-[#004f90] hover:underline cursor-pointer"
+                      >
+                        Clear Search & Filters
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                            <th className="py-3 px-4">Assessment Details</th>
+                            <th className="py-3 px-4">Target Cohort</th>
+                            <th className="py-3 px-4 text-center">Specs</th>
+                            <th className="py-3 px-4 text-center">Status</th>
+                            <th className="py-3 px-4 text-right">Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                          {currentPageTests.map((test) => {
+                            const isCollege = isCollegeTest(test);
+                            const liveStatus = computeLiveTestStatus(test);
+
+                            return (
+                              <tr key={test._id} className="hover:bg-slate-50/60 transition-colors group">
+                                
+                                {/* Assessment Title, Subject & Time window */}
+                                <td className="py-3.5 px-4">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      {/* Subject badge */}
+                                      <span className="inline-block bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                        {test.subject}
+                                      </span>
+
+                                      {/* Track Classification badge */}
+                                      {isCollege ? (
+                                        <span className="inline-flex items-center gap-1 bg-blue-50 border border-blue-200/80 text-[#004f90] font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                          <GraduationCap className="w-3 h-3" />
+                                          <span>College</span>
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 bg-orange-50 border border-orange-200/80 text-[#F7931A] font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                          <BookOpen className="w-3 h-3" />
+                                          <span>SDLC</span>
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <h4 className="font-bold text-slate-900 text-sm leading-snug group-hover:text-[#004f90] transition">
+                                      {test.title}
+                                    </h4>
+
+                                    <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                                      <Clock className="h-3 w-3 text-slate-400 shrink-0" />
+                                      <span>Window: {formatDateTimeShort(test.startTime)} – {formatDateTimeShort(test.endTime)}</span>
+                                    </p>
+                                  </div>
+                                </td>
+
+                                {/* Target Cohorts */}
+                                <td className="py-3.5 px-4">
+                                  {test.assignedTo?.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1 max-w-[280px]">
+                                      {test.assignedTo.slice(0, 3).map((item, idx) => (
+                                        <span 
+                                          key={idx} 
+                                          className="inline-block bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-semibold px-2 py-0.5 rounded-md"
+                                        >
+                                          {item.department === 'SDLC' 
+                                            ? `${item.batch} (${item.year})` 
+                                            : `${item.department} (${item.year})`}
+                                        </span>
+                                      ))}
+                                      {test.assignedTo.length > 3 && (
+                                        <span className="inline-block bg-slate-100 text-slate-500 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                          +{test.assignedTo.length - 3} more
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-amber-600 text-[11px] font-semibold">Unassigned</span>
+                                  )}
+                                </td>
+
+                                {/* Specs: Duration & Marks */}
+                                <td className="py-3.5 px-4 text-center">
+                                  <div className="space-y-0.5">
+                                    <span className="font-bold text-slate-800 text-xs">{test.duration} mins</span>
+                                    <p className="text-[11px] text-slate-400 font-medium">
+                                      {test.totalMarks} pts <span className="text-slate-400">({test.passMark} pass)</span>
+                                    </p>
+                                  </div>
+                                </td>
+
+                                {/* Status Pill */}
+                                <td className="py-3.5 px-4 text-center">
+                                  {liveStatus === 'active' ? (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                      <span>Active</span>
+                                    </span>
+                                  ) : liveStatus === 'draft' ? (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                      <span>Draft</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                      <span>Ended</span>
+                                    </span>
+                                  )}
+                                </td>
+
+                                {/* Action Buttons */}
+                                <td className="py-3.5 px-4 text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    {/* Questions */}
+                                    <button
+                                      onClick={() => {
+                                        setSelectedTest(test);
+                                        setActiveTab('questions');
+                                        setSearchParams({ subTab: 'questions', testId: test._id });
+                                      }}
+                                      title="Manage Questions"
+                                      className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition border border-transparent hover:border-emerald-100 cursor-pointer"
+                                    >
+                                      <HelpCircle className="h-4 w-4" />
+                                    </button>
+                                    
+                                    {/* Results / Analytics */}
+                                    <button
+                                      onClick={() => {
+                                        setSelectedTest(test);
+                                        setActiveTab('results');
+                                        setSearchParams({ subTab: 'results', testId: test._id });
+                                      }}
+                                      title="View Candidate Submissions"
+                                      className="p-1.5 text-slate-400 hover:text-[#004f90] hover:bg-blue-50 rounded-lg transition border border-transparent hover:border-blue-100 cursor-pointer"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </button>
+
+                                    {/* Edit */}
+                                    <button
+                                      onClick={() => {
+                                        setSelectedTest(test);
+                                        setActiveTab('edit');
+                                        setSearchParams({ subTab: 'edit', testId: test._id });
+                                      }}
+                                      title="Edit Assessment Details"
+                                      className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition border border-transparent hover:border-slate-200 cursor-pointer"
+                                    >
+                                      <Edit3 className="h-4 w-4" />
+                                    </button>
+
+                                    {/* Duplicate */}
+                                    <button
+                                      onClick={() => handleDuplicate(test._id)}
+                                      title="Duplicate Assessment Paper"
+                                      className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition border border-transparent hover:border-purple-100 cursor-pointer"
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </button>
+
+                                    {/* Delete */}
+                                    <button
+                                      onClick={() => handleDelete(test._id)}
+                                      title="Delete Assessment"
+                                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition border border-transparent hover:border-rose-100 cursor-pointer"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Pagination Footer */}
+                  {!loadingTests && filteredTests.length > 0 && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-t border-slate-100 bg-slate-50/50 text-xs">
+                      <span className="text-slate-500 font-medium">
+                        Showing <strong className="text-slate-800">{Math.min((testsPage - 1) * testsPerPage + 1, filteredTests.length)}</strong> to <strong className="text-slate-800">{Math.min(testsPage * testsPerPage, filteredTests.length)}</strong> of <strong className="text-slate-800">{filteredTests.length}</strong> assessment papers
+                      </span>
+
+                      {totalTestPages > 1 && (
+                        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                          <button
+                            onClick={() => setTestsPage(p => Math.max(1, p - 1))}
+                            disabled={testsPage === 1}
+                            className="p-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                          </button>
+                          
+                          <span className="px-2 font-bold text-slate-700">
+                            Page {testsPage} of {totalTestPages}
+                          </span>
+
+                          <button
+                            onClick={() => setTestsPage(p => Math.min(totalTestPages, p + 1))}
+                            disabled={testsPage === totalTestPages}
+                            className="p-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                          >
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {activeTab === 'create' && (
             <CreateTest
