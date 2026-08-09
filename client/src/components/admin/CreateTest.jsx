@@ -29,14 +29,14 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
 
   // Custom 12-hour AM/PM Time States
   const [startDate, setStartDate] = useState(getTodayDateStr);
-  const [startHour, setStartHour] = useState('09');
+  const [startHour, setStartHour] = useState('00');
   const [startMinute, setStartMinute] = useState('00');
   const [startAmpm, setStartAmpm] = useState('AM');
 
   const [endDate, setEndDate] = useState(getNextMonthDateStr);
-  const [endHour, setEndHour] = useState('11');
-  const [endMinute, setEndMinute] = useState('59');
-  const [endAmpm, setEndAmpm] = useState('PM');
+  const [endHour, setEndHour] = useState('00');
+  const [endMinute, setEndMinute] = useState('00');
+  const [endAmpm, setEndAmpm] = useState('AM');
 
   // Category Mode & Cohort targeting controls ('college' | 'institute')
   const [categoryMode, setCategoryMode] = useState('college');
@@ -341,8 +341,12 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
   const parseDateTime = (dateStr, hourStr, minStr, ampmStr) => {
     const [year, month, day] = dateStr.split('-').map(Number);
     let hours = Number(hourStr);
-    if (ampmStr === 'PM' && hours < 12) hours += 12;
-    if (ampmStr === 'AM' && hours === 12) hours = 0;
+    if (hours === 0) {
+      hours = ampmStr === 'PM' ? 12 : 0;
+    } else {
+      if (ampmStr === 'PM' && hours < 12) hours += 12;
+      if (ampmStr === 'AM' && hours === 12) hours = 0;
+    }
     return new Date(year, month - 1, day, hours, Number(minStr));
   };
 
@@ -520,7 +524,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
     );
   }
 
-  const hourOptions = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const hourOptions = ['00', ...Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'))];
   const minuteOptions = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 
   return (

@@ -51,14 +51,14 @@ const AdminDashboard = ({ tab }) => {
   const getTomorrowStr = () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const [bulkStartDate, setBulkStartDate] = useState(getTodayStr);
-  const [bulkStartHour, setBulkStartHour] = useState('09');
+  const [bulkStartHour, setBulkStartHour] = useState('00');
   const [bulkStartMinute, setBulkStartMinute] = useState('00');
   const [bulkStartAmpm, setBulkStartAmpm] = useState('AM');
 
   const [bulkEndDate, setBulkEndDate] = useState(getTomorrowStr);
-  const [bulkEndHour, setBulkEndHour] = useState('11');
-  const [bulkEndMinute, setBulkEndMinute] = useState('59');
-  const [bulkEndAmpm, setBulkEndAmpm] = useState('PM');
+  const [bulkEndHour, setBulkEndHour] = useState('00');
+  const [bulkEndMinute, setBulkEndMinute] = useState('00');
+  const [bulkEndAmpm, setBulkEndAmpm] = useState('AM');
 
   useEffect(() => {
     api.get('/cohorts/departments')
@@ -78,15 +78,19 @@ const AdminDashboard = ({ tab }) => {
       .catch(() => {});
   }, []);
 
-  const hourOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  const hourOptions = ['00', ...Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))];
   const minuteOptions = ['00', '15', '30', '45', '59'];
 
   const constructDateTime = (dateStr, hourStr, minuteStr, ampmStr) => {
     if (!dateStr) return new Date();
     let hour = parseInt(hourStr, 10);
     const minute = parseInt(minuteStr, 10);
-    if (ampmStr === 'PM' && hour < 12) hour += 12;
-    if (ampmStr === 'AM' && hour === 12) hour = 0;
+    if (hour === 0) {
+      hour = ampmStr === 'PM' ? 12 : 0;
+    } else {
+      if (ampmStr === 'PM' && hour < 12) hour += 12;
+      if (ampmStr === 'AM' && hour === 12) hour = 0;
+    }
     
     const d = new Date(dateStr);
     d.setHours(hour, minute, 0, 0);
