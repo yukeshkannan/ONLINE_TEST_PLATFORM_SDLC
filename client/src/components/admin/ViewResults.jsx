@@ -244,7 +244,7 @@ const ViewResults = ({ test, onBack }) => {
           <span className="text-[10px] text-accent font-bold tracking-widest uppercase">Grading & Participation Ledger</span>
           <h2 className="text-xl font-black text-white">{test.title}</h2>
           <p className="text-xs text-softgrey">
-            Pass Marks Threshold: <span className="text-white font-bold">{test.passMark}</span> out of {test.totalMarks}
+            Pass Marks Threshold: <span className="text-white font-bold">{test.passMark ?? test.passMarks ?? 0}</span> out of {test.totalMarks || 0}
           </p>
         </div>
 

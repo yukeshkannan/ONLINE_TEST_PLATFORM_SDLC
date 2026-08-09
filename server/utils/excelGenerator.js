@@ -19,12 +19,27 @@ export const generateExcelReport = async (testId) => {
   // Find eligible students based on test assignments
   let eligibleCount = 0;
   if (test.assignedTo && test.assignedTo.length > 0) {
-    const queryConditions = test.assignedTo.map(assign => ({
-      department: assign.department,
-      batch: assign.batch,
-      year: assign.year
-    }));
-    eligibleCount = await Student.countDocuments({ $or: queryConditions });
+    const queryConditions = test.assignedTo.map(assign => {
+      const condition = {};
+      if (assign.department && !['All Departments', 'ALL', ''].includes(assign.department)) {
+        condition.department = assign.department;
+      }
+      if (assign.batch && !['All Batches', 'ALL', ''].includes(assign.batch)) {
+        condition.batch = assign.batch;
+      }
+      if (assign.year && !['All Years', 'ALL', ''].includes(assign.year)) {
+        condition.year = assign.year;
+      }
+      return condition;
+    });
+
+    if (queryConditions.some(c => Object.keys(c).length === 0)) {
+      eligibleCount = await Student.countDocuments();
+    } else {
+      eligibleCount = await Student.countDocuments({ $or: queryConditions });
+    }
+  } else {
+    eligibleCount = await Student.countDocuments();
   }
 
   // Calculate aggregates
