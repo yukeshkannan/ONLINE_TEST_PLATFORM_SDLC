@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, GraduationCap, Building2, UserCheck, ShieldCheck, BookOpen } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ClockLoader from '../shared/ClockLoader.jsx';
 
 const StudentLogin = ({ onClose, onAdminRedirect }) => {
   const { loginStudent } = useAuth();
   const navigate = useNavigate();
 
-  // Tab State: 'college' | 'institute'
+  // Portal Tab: 'college' | 'institute'
   const [loginType, setLoginType] = useState('college');
 
   // Input States
@@ -25,15 +25,15 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
     if (!identifier.trim() || !password) {
       return toast.error(
         loginType === 'college' 
-          ? 'Please enter your email address and roll number.' 
-          : 'Please enter your enrollment ID and password.'
+          ? 'Please enter your college email address and password.' 
+          : 'Please enter your email address and password.'
       );
     }
 
     setIsSubmitting(true);
     try {
       await loginStudent(identifier.trim(), password, rememberMe, loginType);
-      toast.success('Authentication successful. Loading student portal...');
+      toast.success('Authentication successful. Loading your dashboard...');
       navigate('/student/dashboard');
     } catch (err) {
       toast.error(err || 'Authentication failed. Please check your credentials.');
@@ -42,113 +42,160 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
     }
   };
 
+  const isCollege = loginType === 'college';
+  const primaryColor = isCollege ? '#004f90' : '#e45d13';
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      className="w-full min-h-screen flex flex-col md:flex-row bg-white relative font-sans"
+      transition={{ duration: 0.35 }}
+      className="w-full min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] text-slate-900 font-sans selection:bg-[#004f90]/10 selection:text-[#004f90]"
     >
       
-      {/* LEFT PANE: Branding, Logo, and Accent Background */}
-      <motion.div 
-        initial={{ opacity: 0, x: -80 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -80 }}
-        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-        className="md:w-1/2 w-full min-h-[45vh] md:min-h-screen bg-[#f3f6fa] flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200/60 relative overflow-hidden text-center"
-      >
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
-          className="z-10 flex flex-col items-center text-center space-y-6 max-w-md"
-        >
-          <img 
-            alt="Assessment Platform Logo" 
-            className="w-60 sm:w-72 h-auto object-contain" 
-            src="/logo.png" 
-          />
+      {/* ========================================================================= */}
+      {/* LEFT PANE: Premium Corporate Branding & Identity Panel                   */}
+      {/* ========================================================================= */}
+      <div className="lg:w-[48%] xl:w-[46%] w-full bg-gradient-to-b from-[#003866] via-[#004f90] to-[#002b50] text-white flex flex-col justify-between p-8 sm:p-12 lg:p-14 relative overflow-hidden">
+        
+        {/* Subtle geometric background grid line overlay (Clean architectural style) */}
+        <div 
+          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
+            backgroundSize: '48px 48px'
+          }}
+        />
+
+        {/* Ambient subtle glow for depth */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Top: Logo & System Badge */}
+        <div className="relative z-10 space-y-6">
+          <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] font-bold tracking-wider text-slate-100 uppercase">Assessment Suite v2.4</span>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl shadow-black/10 inline-block border border-white/40">
+            <img 
+              alt="SDLC Skill Development Learning Centre" 
+              className="h-10 sm:h-12 w-auto object-contain" 
+              src="/logo.png" 
+            />
+          </div>
+        </div>
+
+        {/* Middle: Core Headline & Key Pillars */}
+        <div className="relative z-10 my-10 lg:my-0 space-y-8 max-w-lg">
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#004f90] tracking-tight leading-tight font-poppins">
-              Assessment & Skills<br/>Portal
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">
-              Unified testing portal for College Academic Programs & Institute Specialization Tracks.
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-snug font-poppins">
+              Secure Assessment &<br/>Skills Evaluation Portal
+            </h1>
+            <p className="text-sm text-slate-200/90 leading-relaxed font-normal">
+              A high-precision testing environment designed for university academic cohorts and specialized SDLC industry programs.
             </p>
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* RIGHT PANE: Dual-Tab Login Form */}
-      <motion.div 
-        initial={{ opacity: 0, x: 80 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 80 }}
-        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-        className="md:w-1/2 w-full min-h-[55vh] md:min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 md:p-16 bg-white overflow-y-auto"
-      >
-        <div className="w-full max-w-[460px] flex flex-col justify-center space-y-7 py-6 my-auto text-left">
+          {/* Minimalist, Clean Pillar Highlights */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/[0.07] border border-white/10 backdrop-blur-xs transition-colors hover:bg-white/[0.12]">
+              <div className="w-1.5 h-1.5 rounded-full bg-sky-300 mt-2 shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Automated Real-Time Proctoring</h4>
+                <p className="text-[11px] text-slate-300 mt-0.5">Strict multi-tab and active fullscreen monitoring for maximum examination integrity.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/[0.07] border border-white/10 backdrop-blur-xs transition-colors hover:bg-white/[0.12]">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Instantaneous Item Analysis</h4>
+                <p className="text-[11px] text-slate-300 mt-0.5">Automated scoring algorithms and item difficulty distractor breakdowns upon submission.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/[0.07] border border-white/10 backdrop-blur-xs transition-colors hover:bg-white/[0.12]">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Dedicated Cohort Routing</h4>
+                <p className="text-[11px] text-slate-300 mt-0.5">Seamless separation for College semester curriculum and SDLC branch center tracks.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom: Institutional Footer note */}
+        <div className="relative z-10 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-300 font-medium">
+          <span>Skill Development Learning Centre</span>
+          <span>© {new Date().getFullYear()} All Rights Reserved</span>
+        </div>
+
+      </div>
+
+      {/* ========================================================================= */}
+      {/* RIGHT PANE: Modern High-End Authentication Card                           */}
+      {/* ========================================================================= */}
+      <div className="lg:w-[52%] xl:w-[54%] w-full flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 bg-[#f8fafc] overflow-y-auto">
+        
+        <div className="w-full max-w-[440px] space-y-7 my-auto">
           
           {/* Header Title */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-          >
-            <h3 className="text-2xl font-black text-slate-900 mb-1 font-poppins">
+          <div className="space-y-1.5">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 font-poppins tracking-tight">
               Student Portal Access
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Select your enrollment portal type below to log in.
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Select your examination portal and enter your credentials.
             </p>
-          </motion.div>
+          </div>
 
-          {/* DUAL LOGIN TAB SWITCHER */}
-          <div className="p-1.5 bg-slate-100/90 rounded-2xl flex items-center gap-1 border border-slate-200/60 shadow-xs">
+          {/* DUAL PORTAL SWITCHER PILL */}
+          <div className="p-1 bg-slate-200/80 rounded-2xl flex items-center gap-1 border border-slate-300/60 shadow-inner">
             <button
               type="button"
-              onClick={() => { setLoginType('college'); setIdentifier(''); setPassword(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                loginType === 'college'
-                  ? 'bg-white text-[#004f90] shadow-sm border border-slate-200/60'
-                  : 'text-slate-500 hover:text-slate-800'
+              onClick={() => { 
+                setLoginType('college'); 
+                setIdentifier(''); 
+                setPassword(''); 
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer text-center ${
+                isCollege
+                  ? 'bg-white text-[#004f90] shadow-sm border border-slate-200 font-black'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <GraduationCap className="h-4 w-4" />
-              <span>College Portal</span>
+              College Portal
             </button>
 
             <button
               type="button"
-              onClick={() => { setLoginType('institute'); setIdentifier(''); setPassword(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                loginType === 'institute'
-                  ? 'bg-white text-amber-700 shadow-sm border border-slate-200/60'
-                  : 'text-slate-500 hover:text-slate-800'
+              onClick={() => { 
+                setLoginType('institute'); 
+                setIdentifier(''); 
+                setPassword(''); 
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer text-center ${
+                !isCollege
+                  ? 'bg-white text-[#e45d13] shadow-sm border border-slate-200 font-black'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <BookOpen className="h-4 w-4" />
-              <span>SDLC Portal</span>
+              SDLC Portal
             </button>
           </div>
 
-          {/* Login Card wrapper */}
-          <motion.div 
-            key={loginType}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white border border-slate-200/90 shadow-xl shadow-slate-100 rounded-[28px] p-6 sm:p-7 space-y-5"
-          >
+          {/* AUTHENTICATION FORM CARD */}
+          <div className="bg-white border border-slate-200/90 shadow-xl shadow-slate-200/50 rounded-3xl p-6 sm:p-8 space-y-6">
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Identifier Input */}
+              {/* Field 1: Email Address */}
               <div className="space-y-1.5 flex flex-col">
-                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                  {loginType === 'college' ? 'College Email Address *' : 'Enrollment ID or Personal Email *'}
+                <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">
+                  {isCollege ? 'College Email Address *' : 'Email Address *'}
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
@@ -156,20 +203,21 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                   </span>
                   <input
                     required
-                    type="text"
-                    placeholder={loginType === 'college' ? 'student@college.edu' : 'e.g. SDLC-KRR-2026-0001 or name@gmail.com'}
+                    type="email"
+                    placeholder={isCollege ? 'student@college.edu' : 'name@gmail.com'}
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-slate-50/80 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 transition-all"
+                    autoComplete="email"
+                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                   />
                 </div>
               </div>
 
-              {/* Password Input */}
+              {/* Field 2: Password */}
               <div className="space-y-1.5 flex flex-col">
-                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                  {loginType === 'college' ? 'Password (Roll Number) *' : 'Institute Password *'}
+                <label className="text-[11px] font-extrabold text-slate-700 tracking-wider uppercase">
+                  {isCollege ? 'Password (Roll Number) *' : 'Password *'}
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
@@ -178,56 +226,58 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                   <input
                     required
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={loginType === 'college' ? 'Enter Roll Number (e.g. CS23001)' : 'Enter your course password'}
+                    placeholder={isCollege ? 'Enter roll number (e.g. CS23001)' : 'Enter your password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-slate-50/80 border border-slate-200 rounded-xl py-2.5 pl-10 pr-10 text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/10 transition-all"
+                    autoComplete="current-password"
+                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-10 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password */}
+              {/* Remember Me & Forgot Password Row */}
               <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 text-slate-600 font-semibold cursor-pointer select-none">
+                <label className="flex items-center gap-2 text-slate-600 font-medium cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-[#004f90] focus:ring-[#004f90] h-4 w-4"
+                    className="rounded border-slate-300 text-[#004f90] focus:ring-[#004f90] h-4 w-4 cursor-pointer"
                   />
                   <span>Remember Me</span>
                 </label>
                 <button 
                   type="button"
                   onClick={() => toast("Please contact your institute center or college administrator to reset your credentials.")}
-                  className="font-bold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left"
+                  className="font-bold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left text-xs"
                 >
                   Forgot Password?
                 </button>
               </div>
 
-              {/* Login Button */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full text-white py-3 rounded-xl font-black text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2 ${
-                  loginType === 'college'
-                    ? 'bg-[#004f90] hover:bg-[#003c6e] shadow-blue-900/15'
-                    : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/15'
+                className={`w-full text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center space-x-2 ${
+                  isCollege
+                    ? 'bg-[#004f90] hover:bg-[#003e73] shadow-[#004f90]/20'
+                    : 'bg-[#e45d13] hover:bg-[#cc500d] shadow-[#e45d13]/20'
                 }`}
               >
                 {isSubmitting ? (
                   <ClockLoader size="xs" color="#ffffff" />
                 ) : (
-                  <span>Log In to {loginType === 'college' ? 'College Portal' : 'SDLC Portal'}</span>
+                  <span>Log In to {isCollege ? 'College Portal' : 'SDLC Portal'}</span>
                 )}
               </button>
 
@@ -235,32 +285,34 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full border border-slate-200 text-slate-600 hover:bg-slate-50 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Home</span>
               </button>
 
             </form>
-          </motion.div>
 
-          {/* Faculty Switcher Link */}
-          <div className="flex flex-col items-center pt-2">
+          </div>
+
+          {/* Faculty / Staff Redirect Footer Link */}
+          <div className="text-center pt-1">
             <button
               type="button"
               onClick={onAdminRedirect}
-              className="text-xs font-bold text-[#004f90] hover:underline cursor-pointer transition-all"
+              className="text-xs font-bold text-[#004f90] hover:underline cursor-pointer transition-all inline-flex items-center gap-1"
             >
-              Are you a Faculty / Trainer? Log in here &rarr;
+              <span>Are you a Faculty / Trainer?</span>
+              <span className="font-extrabold">Log in here &rarr;</span>
             </button>
           </div>
 
         </div>
-      </motion.div>
+
+      </div>
 
     </motion.div>
   );
 };
 
 export default StudentLogin;
-
