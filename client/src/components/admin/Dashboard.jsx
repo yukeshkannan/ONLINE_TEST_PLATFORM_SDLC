@@ -82,6 +82,16 @@ const Dashboard = () => {
     setShowExportTestModal(true);
   };
 
+  const openAllRecordsModal = () => {
+    const initialCat = selectedTrack === 'institute' ? 'institute' : selectedTrack === 'college' ? 'college' : 'all';
+    setRecordsCategoryFilter(initialCat);
+    setRecordsStatusFilter('all');
+    setRecordsSearch('');
+    setRecordsPage(1);
+    setShowAllRecordsModal(true);
+    fetchAllSubmissions();
+  };
+
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
@@ -219,10 +229,18 @@ const Dashboard = () => {
       } else if (exportStudentCategory === 'institute') {
         filteredStudents = allStudents.filter(s => s.studentType === 'institute');
         if (exportBranch !== 'all' && exportBranch !== 'ALL') {
-          filteredStudents = filteredStudents.filter(s => (s.center || 'Karur').toLowerCase() === exportBranch.toLowerCase());
+          const targetBranch = exportBranch.trim().toLowerCase();
+          filteredStudents = filteredStudents.filter(s => {
+            const studentCenter = (s.center || 'Karur').trim().toLowerCase();
+            return studentCenter === targetBranch || studentCenter.includes(targetBranch) || targetBranch.includes(studentCenter);
+          });
         }
         if (exportCourseTrack !== 'all' && exportCourseTrack !== 'ALL') {
-          filteredStudents = filteredStudents.filter(s => (s.courseTrack || '').toLowerCase() === exportCourseTrack.toLowerCase());
+          const targetTrack = exportCourseTrack.trim().toLowerCase();
+          filteredStudents = filteredStudents.filter(s => {
+            const studentTrack = (s.courseTrack || '').trim().toLowerCase();
+            return studentTrack === targetTrack || studentTrack.includes(targetTrack) || targetTrack.includes(studentTrack);
+          });
         }
       }
 
@@ -395,6 +413,16 @@ const Dashboard = () => {
     }
     return true;
   }).slice(0, 10);
+
+  // Filter submissions list for current active track count
+  const trackSubmissionsList = allSubmissionsList.filter(attempt => {
+    if (selectedTrack === 'college') {
+      return attempt.studentId?.studentType !== 'institute';
+    } else if (selectedTrack === 'institute') {
+      return attempt.studentId?.studentType === 'institute';
+    }
+    return true;
+  });
 
   // Filter all submissions for the modal
   const filteredAllSubmissions = allSubmissionsList.filter(attempt => {
@@ -610,14 +638,17 @@ const Dashboard = () => {
               Showing {filteredRecentActivity.length} submissions
             </span>
             <button
-              onClick={() => {
-                setShowAllRecordsModal(true);
-                fetchAllSubmissions();
-              }}
+              onClick={openAllRecordsModal}
               className="bg-white hover:bg-slate-50 text-[#004f90] border border-[#004f90]/30 hover:border-[#004f90] px-3 py-1 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
             >
               <Eye className="w-3.5 h-3.5 text-[#004f90]" />
-              <span>View All Records ({allSubmissionsList.length})</span>
+              <span>
+                {selectedTrack === 'institute' 
+                  ? `View SDLC Records (${trackSubmissionsList.length})` 
+                  : selectedTrack === 'college' 
+                  ? `View College Records (${trackSubmissionsList.length})` 
+                  : `View All Records (${allSubmissionsList.length})`}
+              </span>
             </button>
           </div>
         </div>
@@ -800,7 +831,11 @@ const Dashboard = () => {
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h4 className="text-base font-bold text-slate-900 font-poppins flex items-center gap-2">
                   <Download className="w-4 h-4 text-emerald-600" />
-                  <span>Export Candidate Directory</span>
+                  <span>
+                    {selectedTrack === 'institute' ? 'Export SDLC Candidates Directory' :
+                     selectedTrack === 'college' ? 'Export College Students Directory' :
+                     'Export Candidate Directory'}
+                  </span>
                 </h4>
                 <button 
                   onClick={() => setShowExportStudentModal(false)}
@@ -812,28 +847,34 @@ const Dashboard = () => {
 
               <div className="space-y-3 text-xs">
                 <p className="text-slate-500 font-medium leading-relaxed">
-                  Choose candidate category, branch, and department filters for exporting the roster CSV.
+                  {selectedTrack === 'institute' ? 'Download candidate roster filtered by District Branch Center and Course Track.' :
+                   selectedTrack === 'college' ? 'Download candidate roster filtered by College Department.' :
+                   'Choose candidate category, branch, and department filters for exporting the roster CSV.'}
                 </p>
 
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    Candidate Classification *
-                  </label>
-                  <div className="relative flex items-center">
-                    <select
-                      value={exportStudentCategory}
-                      onChange={(e) => setExportStudentCategory(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                    >
-                      <option value="all">All Enrolled Candidates</option>
-                      <option value="college">College Students Only</option>
-                      <option value="institute">SDLC Institute Candidates Only</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                {/* Candidate Classification Selector - only shown when on 'all' telemetry track */}
+                {selectedTrack === 'all' && (
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Candidate Classification *
+                    </label>
+                    <div className="relative flex items-center">
+                      <select
+                        value={exportStudentCategory}
+                        onChange={(e) => setExportStudentCategory(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
+                      >
+                        <option value="all">All Enrolled Candidates</option>
+                        <option value="college">College Students Only</option>
+                        <option value="institute">SDLC Institute Candidates Only</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {exportStudentCategory === 'college' && (
+                {/* College Department Filter */}
+                {(selectedTrack === 'college' || (selectedTrack === 'all' && exportStudentCategory === 'college')) && (
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                       Department Filter *
@@ -853,7 +894,8 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {exportStudentCategory === 'institute' && (
+                {/* SDLC Institute Branch & Course Track Filters */}
+                {(selectedTrack === 'institute' || (selectedTrack === 'all' && exportStudentCategory === 'institute')) && (
                   <>
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
