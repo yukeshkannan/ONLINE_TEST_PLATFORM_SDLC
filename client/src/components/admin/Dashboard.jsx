@@ -332,7 +332,6 @@ const Dashboard = () => {
   const computeLiveStatus = (t) => {
     if (!t) return 'draft';
     if (t.status === 'draft') return 'draft';
-    if (t.status === 'ended') return 'ended';
     if (t.endTime && now > new Date(t.endTime)) return 'ended';
     return 'active';
   };

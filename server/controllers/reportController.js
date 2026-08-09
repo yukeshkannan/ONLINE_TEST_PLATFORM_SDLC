@@ -13,7 +13,6 @@ export const getDashboardStats = async (req, res, next) => {
     const computeStatus = (t) => {
       if (!t) return 'draft';
       if (t.status === 'draft') return 'draft';
-      if (t.status === 'ended') return 'ended';
       const endTime = new Date(t.endTime);
       if (now > endTime) return 'ended';
       return 'active';

@@ -6,7 +6,6 @@ import Result from '../models/Result.js';
 const computeTestStatus = (test, now = new Date()) => {
   if (!test) return 'draft';
   if (test.status === 'draft') return 'draft';
-  if (test.status === 'ended') return 'ended';
 
   const endTime = new Date(test.endTime);
   if (now > endTime) return 'ended';
@@ -193,6 +192,11 @@ export const updateTest = async (req, res, next) => {
     if (startTime) test.startTime = new Date(startTime);
     if (endTime) test.endTime = new Date(endTime);
     if (status) test.status = status;
+
+    // If status was 'ended' but the updated endTime is in the future, automatically reactivate to 'active'
+    if (test.status === 'ended' && test.endTime > new Date()) {
+      test.status = 'active';
+    }
 
     const updatedTest = await test.save();
     const now = new Date();

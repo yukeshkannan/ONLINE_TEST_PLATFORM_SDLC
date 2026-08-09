@@ -47,7 +47,6 @@ const AdminDashboard = ({ tab }) => {
   const computeLiveTestStatus = (t) => {
     if (!t) return 'draft';
     if (t.status === 'draft') return 'draft';
-    if (t.status === 'ended') return 'ended';
     const now = new Date();
     if (t.endTime && now > new Date(t.endTime)) return 'ended';
     return 'active';

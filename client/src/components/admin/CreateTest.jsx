@@ -245,7 +245,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       if (testToEdit.passMark !== undefined) {
         setCustomPassMark(String(testToEdit.passMark));
       }
-      setStatus(testToEdit.status || 'draft');
+      setStatus(testToEdit.status === 'ended' ? 'active' : (testToEdit.status || 'draft'));
       setShowResultsToStudents(testToEdit.showResultsToStudents !== undefined ? testToEdit.showResultsToStudents : true);
 
       if (testToEdit.categoryMode) {
@@ -480,6 +480,8 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       }
     }
 
+    const finalStatus = (status === 'ended' && endDateTime > new Date()) ? 'active' : status;
+
     const testPayload = {
       title: title.trim(),
       subject: subject.trim(),
@@ -490,7 +492,7 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       passMark: finalPassMark,
       startTime: startDateTime,
       endTime: endDateTime,
-      status: status,
+      status: finalStatus,
       categoryMode: categoryMode || 'college',
       showResultsToStudents: showResultsToStudents,
       assignedTo: assignedCombinations
