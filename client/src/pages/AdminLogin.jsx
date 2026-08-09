@@ -139,26 +139,26 @@ const AdminLogin = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35 }}
-      className="w-full min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] text-slate-900 font-sans selection:bg-[#004f90]/10 selection:text-[#004f90]"
+      className="w-full min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] text-slate-900 font-sans selection:bg-[#e45d13]/10 selection:text-[#e45d13]"
     >
       
       {/* ========================================================================= */}
-      {/* LEFT PANE: Minimalist Animated Logo Showcase (Matches Student Login)      */}
+      {/* LEFT PANE: Premium Orange Animated Logo Showcase (Faculty & Admin Portal) */}
       {/* ========================================================================= */}
-      <div className="lg:w-[48%] xl:w-[46%] w-full min-h-[35vh] lg:min-h-screen bg-gradient-to-b from-[#003866] via-[#004f90] to-[#002b50] flex items-center justify-center p-8 sm:p-12 relative overflow-hidden">
+      <div className="lg:w-[48%] xl:w-[46%] w-full min-h-[35vh] lg:min-h-screen bg-gradient-to-b from-[#b84206] via-[#e45d13] to-[#8f2f00] flex items-center justify-center p-8 sm:p-12 relative overflow-hidden">
         
         {/* Subtle geometric background grid line overlay */}
         <div 
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          className="absolute inset-0 opacity-[0.07] pointer-events-none"
           style={{
             backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
             backgroundSize: '48px 48px'
           }}
         />
 
-        {/* Ambient subtle soft glows for depth */}
-        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient subtle warm glows for depth */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-amber-300/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
 
         {/* Centered Animated Logo Card */}
         <motion.div
@@ -174,7 +174,7 @@ const AdminLogin = () => {
             y: { duration: 4.5, repeat: Infinity, ease: 'easeInOut' }
           }}
           whileHover={{ scale: 1.04 }}
-          className="relative z-10 bg-white/95 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/25 border border-white/50 flex items-center justify-center max-w-[320px] sm:max-w-[360px] cursor-default transition-shadow hover:shadow-sky-900/30"
+          className="relative z-10 bg-white/95 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl shadow-orange-950/25 border border-white/50 flex items-center justify-center max-w-[320px] sm:max-w-[360px] cursor-default transition-shadow hover:shadow-orange-900/35"
         >
           <img 
             alt="SDLC Skill Development Learning Centre" 
@@ -224,7 +224,7 @@ const AdminLogin = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isSubmitting}
                     autoComplete="email"
-                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
+                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#e45d13] focus:ring-2 focus:ring-[#e45d13]/15 transition-all"
                   />
                 </div>
               </div>
@@ -246,7 +246,7 @@ const AdminLogin = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isSubmitting}
                     autoComplete="current-password"
-                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-10 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
+                    className="w-full bg-slate-50/70 border border-slate-200 hover:border-slate-300 rounded-xl py-2.5 pl-10 pr-10 text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#e45d13] focus:ring-2 focus:ring-[#e45d13]/15 transition-all"
                   />
                   <button
                     type="button"
@@ -266,7 +266,7 @@ const AdminLogin = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-[#004f90] focus:ring-[#004f90] h-4 w-4 cursor-pointer"
+                    className="rounded border-slate-300 text-[#e45d13] focus:ring-[#e45d13] h-4 w-4 cursor-pointer"
                   />
                   <span>Remember Me</span>
                 </label>
@@ -280,7 +280,7 @@ const AdminLogin = () => {
                     setConfirmNewPassword('');
                     setShowForgotModal(true); 
                   }}
-                  className="font-bold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left text-xs"
+                  className="font-bold text-[#e45d13] hover:underline bg-transparent border-none p-0 cursor-pointer text-left text-xs"
                 >
                   Forgot Password?
                 </button>
@@ -290,7 +290,7 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md shadow-[#004f90]/20 transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full bg-[#e45d13] hover:bg-[#cc500d] text-white py-3 rounded-xl font-bold text-xs shadow-md shadow-[#e45d13]/20 transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center space-x-2"
               >
                 {isSubmitting ? (
                   <ClockLoader size="xs" color="#ffffff" />
@@ -318,7 +318,7 @@ const AdminLogin = () => {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-xs font-bold text-[#004f90] hover:underline cursor-pointer transition-all inline-flex items-center gap-1"
+              className="text-xs font-bold text-[#e45d13] hover:underline cursor-pointer transition-all inline-flex items-center gap-1"
             >
               <span>Are you a Student?</span>
               <span className="font-extrabold">Access Candidate Portal here &rarr;</span>
@@ -378,14 +378,14 @@ const AdminLogin = () => {
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         disabled={otpLoading}
-                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
+                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#e45d13] focus:ring-2 focus:ring-[#e45d13]/15 transition-all"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full bg-[#e45d13] hover:bg-[#cc500d] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
                   >
                     {otpLoading ? (
                       <ClockLoader size="xs" color="#ffffff" />
@@ -416,14 +416,14 @@ const AdminLogin = () => {
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                         disabled={otpLoading}
-                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#004f90] tracking-widest text-center font-bold font-mono focus:ring-2 focus:ring-[#004f90]/15 transition-all"
+                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#e45d13] tracking-widest text-center font-bold font-mono focus:ring-2 focus:ring-[#e45d13]/15 transition-all"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full bg-[#e45d13] hover:bg-[#cc500d] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
                   >
                     {otpLoading ? (
                       <ClockLoader size="xs" color="#ffffff" />
@@ -463,7 +463,7 @@ const AdminLogin = () => {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           disabled={otpLoading}
-                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-10 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-10 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#e45d13] focus:ring-2 focus:ring-[#e45d13]/15 transition-all"
                         />
                         <button
                           type="button"
@@ -488,7 +488,7 @@ const AdminLogin = () => {
                           value={confirmNewPassword}
                           onChange={(e) => setConfirmNewPassword(e.target.value)}
                           disabled={otpLoading}
-                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#004f90] focus:ring-2 focus:ring-[#004f90]/15 transition-all"
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#e45d13] focus:ring-2 focus:ring-[#e45d13]/15 transition-all"
                         />
                       </div>
                     </div>
@@ -496,7 +496,7 @@ const AdminLogin = () => {
                   <button
                     type="submit"
                     disabled={otpLoading}
-                    className="w-full bg-[#004f90] hover:bg-[#003e73] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full bg-[#e45d13] hover:bg-[#cc500d] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2"
                   >
                     {otpLoading ? (
                       <ClockLoader size="xs" color="#ffffff" />
