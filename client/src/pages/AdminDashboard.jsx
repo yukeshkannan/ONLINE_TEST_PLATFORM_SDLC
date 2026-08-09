@@ -15,7 +15,7 @@ import { parsePdfToText } from '../utils/pdfParser.js';
 import { parseTextToQuestions } from '../utils/questionParser.js';
 import { calculateAcademicYear } from '../utils/academicYearHelper.js';
 import { normalizeBatch, normalizeDept } from '../utils/constants.js';
-import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
+import { Calendar, Clock, Edit3, Trash2, Copy, HelpCircle, GraduationCap, BookOpen, Eye, FileSpreadsheet, PlusCircle, AlertCircle, AlertTriangle, RefreshCw, Upload, X, FileText, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClockLoader from '../components/shared/ClockLoader.jsx';
@@ -29,6 +29,29 @@ const AdminDashboard = ({ tab }) => {
   const [tests, setTests] = useState([]);
   const [loadingTests, setLoadingTests] = useState(false);
   const [selectedTest, setSelectedTest] = useState(null);
+  const [testsTrackFilter, setTestsTrackFilter] = useState('all'); // 'all' | 'college' | 'institute'
+
+  // Helper to identify College vs SDLC tests
+  const isCollegeTest = (t) => {
+    if (!t) return true;
+    if (t.categoryMode === 'college') return true;
+    if (t.categoryMode === 'institute') return false;
+    if (t.assignedTo && t.assignedTo.length > 0) {
+      const hasCollegeDept = t.assignedTo.some(a => 
+        ['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS'].includes(a.department) ||
+        (a.department === 'All Departments' && a.batch && /\d{4}/.test(a.batch))
+      );
+      if (hasCollegeDept) return true;
+
+      const hasInstituteBranchOrBatch = t.assignedTo.some(a => 
+        a.department === 'SDLC' || 
+        (a.year && ['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai', 'All Branches'].includes(a.year)) ||
+        (a.batch && !/\d{4}/.test(a.batch) && a.batch !== 'All Batches')
+      );
+      if (hasInstituteBranchOrBatch) return false;
+    }
+    return true;
+  };
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [testToDelete, setTestToDelete] = useState(null);
@@ -520,6 +543,44 @@ const AdminDashboard = ({ tab }) => {
                 </div>
               </div>
 
+              {/* Segmented Filter Bar: All / College / SDLC */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="bg-slate-100/80 p-1 rounded-xl border border-slate-200 flex items-center gap-1">
+                  <button
+                    onClick={() => setTestsTrackFilter('all')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      testsTrackFilter === 'all'
+                        ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    All Assessments ({tests.length})
+                  </button>
+                  <button
+                    onClick={() => setTestsTrackFilter('college')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                      testsTrackFilter === 'college'
+                        ? 'bg-[#004f90] text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>College ({tests.filter(isCollegeTest).length})</span>
+                  </button>
+                  <button
+                    onClick={() => setTestsTrackFilter('institute')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                      testsTrackFilter === 'institute'
+                        ? 'bg-[#F7931A] text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>SDLC ({tests.filter(t => !isCollegeTest(t)).length})</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Tests list table inside beautiful white card */}
               <div className="bg-white border border-slate-100 shadow-md shadow-slate-100/50 rounded-[24px] p-6">
                 {loadingTests ? (
@@ -538,6 +599,7 @@ const AdminDashboard = ({ tab }) => {
                       <thead>
                         <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm uppercase font-bold tracking-wider">
                           <th className="py-6 px-6">Subject</th>
+                          <th className="py-6 px-6">Classification</th>
                           <th className="py-6 px-6">Assessment Title</th>
                           <th className="py-6 px-6">Target Cohort</th>
                           <th className="py-6 px-6 text-center">Duration</th>
@@ -547,13 +609,33 @@ const AdminDashboard = ({ tab }) => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {tests.map((test) => (
+                        {tests
+                          .filter(test => {
+                            if (testsTrackFilter === 'college') return isCollegeTest(test);
+                            if (testsTrackFilter === 'institute') return !isCollegeTest(test);
+                            return true;
+                          })
+                          .map((test) => (
                           <tr key={test._id} className="hover:bg-slate-50/30 transition-colors">
                             {/* Subject badge */}
                             <td className="py-6 px-6">
                               <span className="inline-block bg-blue-50 border border-blue-150 text-[#004f90] font-extrabold px-3.5 py-1.5 rounded-xl text-xs uppercase tracking-wider">
                                 {test.subject}
                               </span>
+                            </td>
+                            {/* Classification Badge (College / SDLC) */}
+                            <td className="py-6 px-6">
+                              {isCollegeTest(test) ? (
+                                <span className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200/80 text-[#004f90] font-bold px-3 py-1.5 rounded-xl text-xs uppercase tracking-wider">
+                                  <GraduationCap className="w-3.5 h-3.5" />
+                                  <span>College</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-[#F7931A] font-bold px-3 py-1.5 rounded-xl text-xs uppercase tracking-wider">
+                                  <BookOpen className="w-3.5 h-3.5" />
+                                  <span>SDLC</span>
+                                </span>
+                              )}
                             </td>
                             {/* Title & Timing Window */}
                             <td className="py-6 px-6">
@@ -563,13 +645,15 @@ const AdminDashboard = ({ tab }) => {
                                 <span>Window: {new Date(test.startTime).toLocaleDateString()} {new Date(test.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - {new Date(test.endTime).toLocaleDateString()} {new Date(test.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
                               </p>
                             </td>
-                            {/* Assigned Cohorts - college view */}
+                            {/* Assigned Cohorts */}
                             <td className="py-6 px-6">
                               {test.assignedTo?.length > 0 ? (
                                 <div className="flex flex-col gap-1.5 max-w-[280px]">
                                   {test.assignedTo.map((item, idx) => (
                                     <span key={idx} className="inline-block bg-slate-50 border border-slate-200/60 text-slate-655 font-bold text-xs px-3 py-1 rounded-lg shrink-0">
-                                      {item.department} ({item.year}, Batch {item.batch})
+                                      {item.department === 'SDLC' 
+                                        ? `${item.batch} (${item.year})` 
+                                        : `${item.department} (${item.year}, Batch ${item.batch})`}
                                     </span>
                                   ))}
                                 </div>
