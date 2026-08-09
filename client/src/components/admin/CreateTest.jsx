@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../../utils/api.js';
 import { parsePdfToText } from '../../utils/pdfParser.js';
 import { parseTextToQuestions } from '../../utils/questionParser.js';
