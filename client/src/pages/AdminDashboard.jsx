@@ -58,20 +58,31 @@ const AdminDashboard = ({ tab }) => {
     if (!t) return true;
     if (t.categoryMode === 'college') return true;
     if (t.categoryMode === 'institute') return false;
-    if (t.assignedTo && t.assignedTo.length > 0) {
-      const hasCollegeDept = t.assignedTo.some(a => 
-        ['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS'].includes(a.department) ||
-        (a.department === 'All Departments' && a.batch && /\d{4}/.test(a.batch))
-      );
-      if (hasCollegeDept) return true;
 
-      const hasInstituteBranchOrBatch = t.assignedTo.some(a => 
-        a.department === 'SDLC' || 
-        (a.year && ['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai', 'All Branches'].includes(a.year)) ||
-        (a.batch && !/\d{4}/.test(a.batch) && a.batch !== 'All Batches')
+    if (t.assignedTo && t.assignedTo.length > 0) {
+      // 1. If explicitly SDLC department, it is SDLC
+      const isSdlcDept = t.assignedTo.some(a => a.department === 'SDLC');
+      if (isSdlcDept) return false;
+
+      // 2. If year is a specific Institute Branch Center, it is SDLC
+      const isSdlcBranch = t.assignedTo.some(a => 
+        ['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai'].includes(a.year)
       );
-      if (hasInstituteBranchOrBatch) return false;
+      if (isSdlcBranch) return false;
+
+      // 3. If department is a College department or 'All Departments', it is College
+      const isCollegeDept = t.assignedTo.some(a => 
+        ['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS', 'All Departments'].includes(a.department)
+      );
+      if (isCollegeDept) return true;
+
+      // 4. If year is a College academic year, it is College
+      const isCollegeYear = t.assignedTo.some(a => 
+        ['1st Year', '2nd Year', '3rd Year', '4th Year', 'All Years'].includes(a.year)
+      );
+      if (isCollegeYear) return true;
     }
+
     return true;
   };
 

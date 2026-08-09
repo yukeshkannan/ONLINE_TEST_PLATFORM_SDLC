@@ -253,6 +253,11 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
 
       if (testToEdit.categoryMode) {
         setCategoryMode(testToEdit.categoryMode);
+      } else if (testToEdit.assignedTo && testToEdit.assignedTo.length > 0) {
+        const isInst = testToEdit.assignedTo.some(a => 
+          a.department === 'SDLC' || ['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai'].includes(a.year)
+        );
+        setCategoryMode(isInst ? 'institute' : 'college');
       }
 
       if (testToEdit.assignedTo && testToEdit.assignedTo.length > 0) {
