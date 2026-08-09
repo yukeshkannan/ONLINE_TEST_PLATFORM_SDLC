@@ -721,9 +721,52 @@ const StudentList = () => {
     setShowBulkModal(true);
   };
 
-  const openAddModal = () => {
+    const openAddModal = () => {
     setAddStudentType(categoryTab);
     setShowAddModal(true);
+  };
+
+  const handleExportFilteredStudents = () => {
+    if (filteredStudents.length === 0) {
+      return toast.error('No students matching current filters to export.');
+    }
+
+    const isInst = categoryTab === 'institute';
+    const headers = isInst
+      ? ['Candidate Name', 'Category', 'SDLC Enrollment ID', 'Course Track', 'District Center / Branch', 'Date of Birth', 'Email Address']
+      : ['Candidate Name', 'Category', 'Roll / Enrollment ID', 'Department / Track', 'Batch', 'Year', 'Email Address'];
+
+    const csvRows = [
+      headers.join(','),
+      ...filteredStudents.map(s => isInst ? [
+        `"${s.name}"`,
+        `"SDLC Institute"`,
+        `"${s.enrollmentId || s.rollNumber || 'N/A'}"`,
+        `"${s.courseTrack || 'N/A'}"`,
+        `"${s.center || 'Karur'}"`,
+        `"${s.dob || 'N/A'}"`,
+        `"${s.email}"`
+      ].join(',') : [
+        `"${s.name}"`,
+        `"College"`,
+        `"${s.rollNumber || s.enrollmentId || 'N/A'}"`,
+        `"${s.department || s.courseTrack || 'N/A'}"`,
+        `"${s.batch || 'N/A'}"`,
+        `"${s.year || 'N/A'}"`,
+        `"${s.email}"`
+      ].join(','))
+    ];
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    const suffix = isInst 
+      ? (centerFilter !== 'All' ? `SDLC_${centerFilter}` : 'SDLC_All_Branches')
+      : (deptFilter !== 'All' ? `College_${deptFilter}` : 'College_All_Depts');
+    a.setAttribute('download', `student_roster_${suffix}_${new Date().toISOString().slice(0, 10)}.csv`);
+    a.click();
+    toast.success(`Exported ${filteredStudents.length} student records.`);
   };
 
   return (
@@ -742,13 +785,24 @@ const StudentList = () => {
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           {filteredStudents.length > 0 && (
-            <button
-              onClick={() => setShowSendAllConfirm(true)}
-              className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2"
-            >
-              <Mail className="h-4 w-4 text-slate-500" />
-              <span>Email Credentials ({filteredStudents.length})</span>
-            </button>
+            <>
+              <button
+                onClick={handleExportFilteredStudents}
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2"
+                title="Download CSV of current filtered list"
+              >
+                <Download className="h-4 w-4 text-emerald-600" />
+                <span>Export List ({filteredStudents.length})</span>
+              </button>
+
+              <button
+                onClick={() => setShowSendAllConfirm(true)}
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2"
+              >
+                <Mail className="h-4 w-4 text-slate-500" />
+                <span>Email Credentials ({filteredStudents.length})</span>
+              </button>
+            </>
           )}
 
           <button

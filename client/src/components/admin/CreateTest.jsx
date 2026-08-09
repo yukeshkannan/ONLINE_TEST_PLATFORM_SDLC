@@ -251,10 +251,26 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       setStatus(testToEdit.status || 'draft');
       setShowResultsToStudents(testToEdit.showResultsToStudents !== undefined ? testToEdit.showResultsToStudents : true);
 
-      if (testToEdit.assignedTo && testToEdit.assignedTo[0]) {
-        setTargetDept(testToEdit.assignedTo[0].department || 'CSE');
-        setTargetYear(testToEdit.assignedTo[0].year || '3rd Year');
-        setTargetBatch(testToEdit.assignedTo[0].batch || '2023-2027');
+      if (testToEdit.categoryMode) {
+        setCategoryMode(testToEdit.categoryMode);
+      }
+
+      if (testToEdit.assignedTo && testToEdit.assignedTo.length > 0) {
+        const first = testToEdit.assignedTo[0];
+        setTargetDept(first.department || 'CSE');
+        setTargetYear(first.year || '3rd Year');
+        setTargetBatch(first.batch || '2023-2027');
+
+        const uniqueBatches = [...new Set(testToEdit.assignedTo.map(a => a.batch).filter(Boolean))];
+        const uniqueDepts = [...new Set(testToEdit.assignedTo.map(a => a.department).filter(Boolean))];
+        const uniqueYears = [...new Set(testToEdit.assignedTo.map(a => a.year).filter(Boolean))];
+
+        if (uniqueBatches.length > 0) setSelectedBatches(uniqueBatches);
+        if (uniqueDepts.length > 0) setSelectedDepts(uniqueDepts);
+        if (uniqueYears.length > 0) {
+          setSelectedYears(uniqueYears);
+          setSelectedCenters(uniqueYears);
+        }
       }
 
       if (testToEdit.startTime) {
@@ -439,14 +455,25 @@ const CreateTest = ({ testToEdit, onSave, onCancel }) => {
       : Math.ceil(calculatedTotalMarks * 0.4);
 
     const assignedCombinations = [];
-    const deptsToAssign = selectedDepts.length > 0 ? selectedDepts : ['All Departments'];
-    const batchesToAssign = selectedBatches.length > 0 ? selectedBatches : ['All Batches'];
-    const yearsToAssign = selectedYears.length > 0 ? selectedYears : ['All Years'];
+    if (categoryMode === 'institute') {
+      const batchesToAssign = selectedBatches.length > 0 ? selectedBatches : ['All Batches'];
+      const centersToAssign = selectedCenters.length > 0 ? selectedCenters : ['All Branches'];
 
-    for (let d of deptsToAssign) {
       for (let b of batchesToAssign) {
-        for (let y of yearsToAssign) {
-          assignedCombinations.push({ department: d, batch: b, year: y });
+        for (let c of centersToAssign) {
+          assignedCombinations.push({ department: 'SDLC', batch: b, year: c });
+        }
+      }
+    } else {
+      const deptsToAssign = selectedDepts.length > 0 ? selectedDepts : ['All Departments'];
+      const batchesToAssign = selectedBatches.length > 0 ? selectedBatches : ['All Batches'];
+      const yearsToAssign = selectedYears.length > 0 ? selectedYears : ['All Years'];
+
+      for (let d of deptsToAssign) {
+        for (let b of batchesToAssign) {
+          for (let y of yearsToAssign) {
+            assignedCombinations.push({ department: d, batch: b, year: y });
+          }
         }
       }
     }

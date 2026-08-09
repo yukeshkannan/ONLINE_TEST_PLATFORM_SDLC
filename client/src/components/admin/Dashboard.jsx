@@ -29,6 +29,10 @@ const Dashboard = () => {
   const [showExportStudentModal, setShowExportStudentModal] = useState(false);
   const [exportStudentCategory, setExportStudentCategory] = useState('all');
   const [exportDept, setExportDept] = useState('all');
+  const [exportBranch, setExportBranch] = useState('all');
+  const [exportCourseTrack, setExportCourseTrack] = useState('all');
+  const [centersList, setCentersList] = useState(['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai']);
+  const [sdlcCoursesList, setSdlcCoursesList] = useState(['Full Stack Web Dev (MERN)', 'Python Full Stack', 'Java Full Stack', 'UI/UX Design & Figma', 'Cloud & DevOps Engineering', 'Cybersecurity & Networking', 'Data Science & AI']);
 
   // Delete submission target
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -50,7 +54,33 @@ const Dashboard = () => {
     fetchDashboardData();
     fetchTestsList();
     fetchAllSubmissions();
+
+    api.get('/cohorts/centers').then(({ data }) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setCentersList(data.filter(c => c.isActive !== false).map(c => c.name));
+      }
+    }).catch(() => {});
+
+    api.get('/cohorts/batches').then(({ data }) => {
+      if (Array.isArray(data) && data.length > 0) {
+        const instBatches = data.filter(b => b.category !== 'college' && b.isActive !== false).map(b => b.name);
+        if (instBatches.length > 0) setSdlcCoursesList(instBatches);
+      }
+    }).catch(() => {});
   }, []);
+
+  const openExportStudentModal = () => {
+    setExportStudentCategory(selectedTrack === 'institute' ? 'institute' : selectedTrack === 'college' ? 'college' : 'all');
+    setExportDept('all');
+    setExportBranch('all');
+    setExportCourseTrack('all');
+    setShowExportStudentModal(true);
+  };
+
+  const openExportTestModal = () => {
+    setExportTestId('all');
+    setShowExportTestModal(true);
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -183,24 +213,41 @@ const Dashboard = () => {
       let filteredStudents = allStudents;
       if (exportStudentCategory === 'college') {
         filteredStudents = allStudents.filter(s => s.studentType !== 'institute');
+        if (exportDept !== 'all' && exportDept !== 'ALL') {
+          filteredStudents = filteredStudents.filter(s => s.department === exportDept || s.courseTrack === exportDept);
+        }
       } else if (exportStudentCategory === 'institute') {
         filteredStudents = allStudents.filter(s => s.studentType === 'institute');
-      }
-
-      if (exportDept !== 'all' && exportDept !== 'ALL') {
-        filteredStudents = filteredStudents.filter(s => s.department === exportDept || s.courseTrack === exportDept);
+        if (exportBranch !== 'all' && exportBranch !== 'ALL') {
+          filteredStudents = filteredStudents.filter(s => (s.center || 'Karur').toLowerCase() === exportBranch.toLowerCase());
+        }
+        if (exportCourseTrack !== 'all' && exportCourseTrack !== 'ALL') {
+          filteredStudents = filteredStudents.filter(s => (s.courseTrack || '').toLowerCase() === exportCourseTrack.toLowerCase());
+        }
       }
 
       if (filteredStudents.length === 0) {
         return toast.error('No candidates match the selected export filter.', { id: loader });
       }
 
-      const headers = ['Candidate Name', 'Category', 'Roll / Enrollment ID', 'Department / Track', 'Batch', 'Year', 'Email Address'];
+      const isInst = exportStudentCategory === 'institute';
+      const headers = isInst
+        ? ['Candidate Name', 'Category', 'SDLC Enrollment ID', 'Course Track', 'District Center / Branch', 'Date of Birth', 'Email Address']
+        : ['Candidate Name', 'Category', 'Roll / Enrollment ID', 'Department / Track', 'Batch', 'Year', 'Email Address'];
+
       const csvRows = [
         headers.join(','),
-        ...filteredStudents.map(s => [
+        ...filteredStudents.map(s => isInst ? [
           `"${s.name}"`,
-          `"${s.studentType === 'institute' ? 'SDLC Institute' : 'College'}"`,
+          `"SDLC Institute"`,
+          `"${s.enrollmentId || s.rollNumber || 'N/A'}"`,
+          `"${s.courseTrack || 'N/A'}"`,
+          `"${s.center || 'Karur'}"`,
+          `"${s.dob || 'N/A'}"`,
+          `"${s.email}"`
+        ].join(',') : [
+          `"${s.name}"`,
+          `"College"`,
           `"${s.rollNumber || s.enrollmentId || 'N/A'}"`,
           `"${s.department || s.courseTrack || 'N/A'}"`,
           `"${s.batch || 'N/A'}"`,
@@ -209,11 +256,14 @@ const Dashboard = () => {
         ].join(','))
       ];
 
-      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.setAttribute('href', url);
-      a.setAttribute('download', `candidates_roster_${exportStudentCategory}_${new Date().toISOString().slice(0, 10)}.csv`);
+      const filenameSuffix = isInst 
+        ? (exportBranch !== 'all' ? `SDLC_${exportBranch}` : 'SDLC_All_Branches') 
+        : (exportDept !== 'all' ? `College_${exportDept}` : 'College_All_Depts');
+      a.setAttribute('download', `candidates_roster_${filenameSuffix}_${new Date().toISOString().slice(0, 10)}.csv`);
       a.click();
       
       setShowExportStudentModal(false);
@@ -274,11 +324,18 @@ const Dashboard = () => {
     if (t.categoryMode === 'college') return true;
     if (t.categoryMode === 'institute') return false;
     if (t.assignedTo && t.assignedTo.length > 0) {
-      const hasInstituteSpecific = t.assignedTo.some(a => 
-        (a.batch && !/\d{4}/.test(a.batch) && !['All Batches'].includes(a.batch)) || 
-        (a.department && !['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS', 'All Departments'].includes(a.department))
+      const hasCollegeDept = t.assignedTo.some(a => 
+        ['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS'].includes(a.department) ||
+        (a.department === 'All Departments' && a.batch && /\d{4}/.test(a.batch))
       );
-      return !hasInstituteSpecific;
+      if (hasCollegeDept) return true;
+
+      const hasInstituteBranchOrBatch = t.assignedTo.some(a => 
+        a.department === 'SDLC' || 
+        (a.year && ['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai', 'All Branches'].includes(a.year)) ||
+        (a.batch && !/\d{4}/.test(a.batch) && a.batch !== 'All Batches')
+      );
+      if (hasInstituteBranchOrBatch) return false;
     }
     return true;
   };
@@ -316,15 +373,16 @@ const Dashboard = () => {
       : (data?.stats?.overallPassRate ?? 0),
   };
 
-  // Filter recent activity based on selectedTrack
-  const filteredRecentActivity = recentActivity.filter(attempt => {
+  // Filter recent activity dynamically from all valid submissions
+  const allValidSubmissions = allSubmissionsList.length > 0 ? allSubmissionsList : (data?.recentActivity || []);
+  const filteredRecentActivity = allValidSubmissions.filter(attempt => {
     if (selectedTrack === 'college') {
       return attempt.studentId?.studentType !== 'institute';
     } else if (selectedTrack === 'institute') {
       return attempt.studentId?.studentType === 'institute';
     }
     return true;
-  });
+  }).slice(0, 10);
 
   // Filter all submissions for the modal
   const filteredAllSubmissions = allSubmissionsList.filter(attempt => {
@@ -495,7 +553,7 @@ const Dashboard = () => {
             </div>
             
             <button 
-              onClick={() => setShowExportTestModal(true)}
+              onClick={openExportTestModal}
               className="bg-[#004f90] hover:bg-[#003c6e] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-center"
             >
               <Download className="h-3.5 w-3.5" />
@@ -511,7 +569,7 @@ const Dashboard = () => {
             </div>
             
             <button 
-              onClick={() => setShowExportStudentModal(true)}
+              onClick={openExportStudentModal}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-center"
             >
               <Download className="h-3.5 w-3.5" />
@@ -672,9 +730,17 @@ const Dashboard = () => {
                       onChange={(e) => setExportTestId(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
                     >
-                      <option value="all">All Test Assessments (Combined)</option>
-                      {allTestsList.map(t => (
-                        <option key={t._id} value={t._id}>{t.title} ({t.subject})</option>
+                      <option value="all">
+                        {selectedTrack === 'institute' 
+                          ? 'All SDLC Assessments (Combined)' 
+                          : selectedTrack === 'college' 
+                          ? 'All College Assessments (Combined)' 
+                          : 'All Test Assessments (Combined)'}
+                      </option>
+                      {(selectedTrack === 'institute' ? instituteTestsList : selectedTrack === 'college' ? collegeTestsList : allTestsList).map(t => (
+                        <option key={t._id} value={t._id}>
+                          {selectedTrack === 'all' ? (isCollegeTest(t) ? '[College] ' : '[SDLC] ') : ''}{t.title} ({t.subject})
+                        </option>
                       ))}
                     </select>
                     <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
@@ -734,7 +800,7 @@ const Dashboard = () => {
 
               <div className="space-y-3 text-xs">
                 <p className="text-slate-500 font-medium leading-relaxed">
-                  Choose candidate category and department filters for exporting the roster CSV.
+                  Choose candidate category, branch, and department filters for exporting the roster CSV.
                 </p>
 
                 <div className="space-y-1.5">
@@ -749,7 +815,7 @@ const Dashboard = () => {
                     >
                       <option value="all">All Enrolled Candidates</option>
                       <option value="college">College Students Only</option>
-                      <option value="institute">SDLC Institute Students Only</option>
+                      <option value="institute">SDLC Institute Candidates Only</option>
                     </select>
                     <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
                   </div>
@@ -773,6 +839,48 @@ const Dashboard = () => {
                       <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
                     </div>
                   </div>
+                )}
+
+                {exportStudentCategory === 'institute' && (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        District Branch / Center Filter *
+                      </label>
+                      <div className="relative flex items-center">
+                        <select
+                          value={exportBranch}
+                          onChange={(e) => setExportBranch(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
+                        >
+                          <option value="all">All District Branches (All Centers)</option>
+                          {centersList.map(c => (
+                            <option key={c} value={c}>{c} Branch</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Course Track Filter
+                      </label>
+                      <div className="relative flex items-center">
+                        <select
+                          value={exportCourseTrack}
+                          onChange={(e) => setExportCourseTrack(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
+                        >
+                          <option value="all">All SDLC Course Tracks</option>
+                          {sdlcCoursesList.map(course => (
+                            <option key={course} value={course}>{course}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
 

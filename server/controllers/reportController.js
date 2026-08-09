@@ -24,11 +24,18 @@ export const getDashboardStats = async (req, res, next) => {
       if (t.categoryMode === 'college') return true;
       if (t.categoryMode === 'institute') return false;
       if (t.assignedTo && t.assignedTo.length > 0) {
-        const hasInstituteSpecific = t.assignedTo.some(a => 
-          (a.batch && !/\d{4}/.test(a.batch) && !['All Batches'].includes(a.batch)) || 
-          (a.department && !['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS', 'All Departments'].includes(a.department))
+        const hasCollegeDept = t.assignedTo.some(a => 
+          ['CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS'].includes(a.department) ||
+          (a.department === 'All Departments' && a.batch && /\d{4}/.test(a.batch))
         );
-        return !hasInstituteSpecific;
+        if (hasCollegeDept) return true;
+
+        const hasInstituteBranchOrBatch = t.assignedTo.some(a => 
+          a.department === 'SDLC' || 
+          (a.year && ['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai', 'All Branches'].includes(a.year)) ||
+          (a.batch && !/\d{4}/.test(a.batch) && a.batch !== 'All Batches')
+        );
+        if (hasInstituteBranchOrBatch) return false;
       }
       return true;
     };
