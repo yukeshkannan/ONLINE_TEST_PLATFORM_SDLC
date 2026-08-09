@@ -36,7 +36,7 @@ const AnimatedRoutes = () => {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoading(false);
-    }, 1300);
+    }, 850);
     return () => clearTimeout(timer);
   }, []);
 
@@ -64,7 +64,7 @@ const AnimatedRoutes = () => {
         setTransitioning(true);
         const timer = setTimeout(() => {
           setTransitioning(false);
-        }, 1300);
+        }, 850);
         return () => clearTimeout(timer);
       }
     }

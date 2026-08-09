@@ -125,8 +125,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout request failed:', err);
     }
     
-    // 1.2s smooth branded transition with official SDLC logo
-    await new Promise(resolve => setTimeout(resolve, 1100));
+    // 0.85s smooth branded transition with official SDLC logo
+    await new Promise(resolve => setTimeout(resolve, 850));
     setAccessToken('');
     setUser(null);
     localStorage.removeItem('auth_user');
