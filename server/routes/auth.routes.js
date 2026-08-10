@@ -14,15 +14,15 @@ router.post('/admin/forgot-password', adminForgotPassword);
 router.post('/admin/verify-otp', adminVerifyOTP);
 router.post('/admin/reset-password', adminResetPassword);
 
-// Protected admin routes (Students CRUD)
-router.get('/students', authMiddleware, roleMiddleware('admin'), getAllStudents);
-router.post('/students', authMiddleware, roleMiddleware('admin'), createStudent);
-router.post('/students/bulk', authMiddleware, roleMiddleware('admin'), bulkCreateStudents);
-router.put('/students/:id', authMiddleware, roleMiddleware('admin'), updateStudent);
-router.delete('/students/:id', authMiddleware, roleMiddleware('admin'), deleteStudent);
-router.post('/students/:id/send-credentials', authMiddleware, roleMiddleware('admin'), sendStudentCredentials);
-router.post('/students/send-credentials/all', authMiddleware, roleMiddleware('admin'), sendAllStudentsCredentials);
-router.post('/students/send-credentials-bulk', authMiddleware, roleMiddleware('admin'), sendAllStudentsCredentials);
+// Protected routes (Students CRUD for Admins & Trainers)
+router.get('/students', authMiddleware, roleMiddleware('admin', 'trainer'), getAllStudents);
+router.post('/students', authMiddleware, roleMiddleware('admin', 'trainer'), createStudent);
+router.post('/students/bulk', authMiddleware, roleMiddleware('admin', 'trainer'), bulkCreateStudents);
+router.put('/students/:id', authMiddleware, roleMiddleware('admin', 'trainer'), updateStudent);
+router.delete('/students/:id', authMiddleware, roleMiddleware('admin', 'trainer'), deleteStudent);
+router.post('/students/:id/send-credentials', authMiddleware, roleMiddleware('admin', 'trainer'), sendStudentCredentials);
+router.post('/students/send-credentials/all', authMiddleware, roleMiddleware('admin', 'trainer'), sendAllStudentsCredentials);
+router.post('/students/send-credentials-bulk', authMiddleware, roleMiddleware('admin', 'trainer'), sendAllStudentsCredentials);
 
 // Protected admin routes (Admins/Trainers CRUD)
 router.get('/admins', authMiddleware, roleMiddleware('admin'), getAllAdmins);

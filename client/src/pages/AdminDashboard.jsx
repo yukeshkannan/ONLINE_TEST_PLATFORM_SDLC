@@ -511,14 +511,14 @@ const AdminDashboard = ({ tab }) => {
           )}
 
           {activeTab === 'students' && (
-            user?.role === 'admin' ? (
+            (user?.role === 'admin' || user?.role === 'trainer') ? (
               <StudentList initialTrack={searchParams.get('track') || searchParams.get('category') || searchParams.get('type')} />
             ) : (
               <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center max-w-2xl mx-auto my-12 space-y-4 shadow-sm">
                 <AlertTriangle className="h-14 w-14 text-rose-500 mx-auto" />
                 <h3 className="text-xl font-bold text-slate-800 font-poppins">Access Denied</h3>
                 <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  You do not have administrative privileges to manage student directories. This section is restricted to Master Administrators only.
+                  You do not have privileges to manage student directories.
                 </p>
               </div>
             )
