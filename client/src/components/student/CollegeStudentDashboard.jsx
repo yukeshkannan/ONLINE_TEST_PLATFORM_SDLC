@@ -90,9 +90,9 @@ const CollegeStudentDashboard = ({ onStartTest, onViewResult }) => {
                 Academic Year: <strong className="text-slate-800">{user.year}</strong>
               </div>
             )}
-            {user?.batch && (
+            {(user?.courseTrack || (user?.batch && !/^\d{4}-\d{4}$/.test(user.batch))) && (
               <div>
-                Batch: <strong className="text-slate-800">{user.batch}</strong>
+                Course Track: <strong className="text-slate-800">{user.courseTrack || user.batch}</strong>
               </div>
             )}
           </div>
