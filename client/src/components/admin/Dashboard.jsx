@@ -18,8 +18,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [allTestsList, setAllTestsList] = useState([]);
   
-  // Track Filter: 'all' | 'college' | 'institute'
-  const [selectedTrack, setSelectedTrack] = useState('all');
+  // Track Filter: 'college' | 'institute'
+  const [selectedTrack, setSelectedTrack] = useState('college');
 
   // Export Specific Test Modal states
   const [showExportTestModal, setShowExportTestModal] = useState(false);
@@ -70,7 +70,7 @@ const Dashboard = () => {
   }, []);
 
   const openExportStudentModal = () => {
-    setExportStudentCategory(selectedTrack === 'institute' ? 'institute' : selectedTrack === 'college' ? 'college' : 'all');
+    setExportStudentCategory(selectedTrack === 'institute' ? 'institute' : 'college');
     setExportDept('all');
     setExportBranch('all');
     setExportCourseTrack('all');
@@ -83,7 +83,7 @@ const Dashboard = () => {
   };
 
   const openAllRecordsModal = () => {
-    const initialCat = selectedTrack === 'institute' ? 'institute' : selectedTrack === 'college' ? 'college' : 'all';
+    const initialCat = selectedTrack === 'institute' ? 'institute' : 'college';
     setRecordsCategoryFilter(initialCat);
     setRecordsStatusFilter('all');
     setRecordsSearch('');
@@ -375,31 +375,19 @@ const Dashboard = () => {
   // Dynamic metrics computed based on selectedTrack
   const currentMetrics = {
     totalTests: allTestsList.length > 0
-      ? (selectedTrack === 'college' 
-          ? collegeTestsList.length 
-          : selectedTrack === 'institute' 
-          ? instituteTestsList.length 
-          : allTestsList.length)
-      : (selectedTrack === 'college' 
-          ? (data?.collegeStats?.totalTests ?? 0) 
-          : selectedTrack === 'institute' 
+      ? (selectedTrack === 'institute' ? instituteTestsList.length : collegeTestsList.length)
+      : (selectedTrack === 'institute' 
           ? (data?.instituteStats?.totalTests ?? 0) 
-          : (data?.stats?.totalTests ?? 0)),
-    totalStudents: selectedTrack === 'college' 
-      ? (data?.collegeStats?.totalStudents ?? 0) 
-      : selectedTrack === 'institute' 
+          : (data?.collegeStats?.totalTests ?? 0)),
+    totalStudents: selectedTrack === 'institute' 
       ? (data?.instituteStats?.totalStudents ?? 0) 
-      : (data?.stats?.totalStudents ?? 0),
-    todaysAttempts: selectedTrack === 'college' 
-      ? (data?.collegeStats?.todaysAttempts ?? 0) 
-      : selectedTrack === 'institute' 
+      : (data?.collegeStats?.totalStudents ?? 0),
+    todaysAttempts: selectedTrack === 'institute' 
       ? (data?.instituteStats?.todaysAttempts ?? 0) 
-      : (data?.stats?.todaysAttempts ?? 0),
-    overallPassRate: selectedTrack === 'college' 
-      ? (data?.collegeStats?.overallPassRate ?? 0) 
-      : selectedTrack === 'institute' 
+      : (data?.collegeStats?.todaysAttempts ?? 0),
+    overallPassRate: selectedTrack === 'institute' 
       ? (data?.instituteStats?.overallPassRate ?? 0) 
-      : (data?.stats?.overallPassRate ?? 0),
+      : (data?.collegeStats?.overallPassRate ?? 0),
   };
 
   // Filter recent activity dynamically from all valid submissions
@@ -460,27 +448,17 @@ const Dashboard = () => {
             System Telemetry & Reports
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-            {selectedTrack === 'college' && 'Filtered to College Engineering Departments & Academic Programs.'}
-            {selectedTrack === 'institute' && 'Filtered to SDLC Training Institute Centers & Skill Tracks.'}
-            {selectedTrack === 'all' && 'Combined real-time statistics across College & SDLC Institute.'}
+            {selectedTrack === 'institute' 
+              ? 'Filtered to SDLC Training Institute Centers & Skill Tracks.' 
+              : 'Filtered to College Engineering Departments & Academic Programs.'}
           </p>
         </div>
 
         {/* Track Segmented Control */}
         <div className="bg-slate-100/80 p-1 rounded-xl border border-slate-200 flex items-center gap-1 self-start md:self-auto">
           <button
-            onClick={() => setSelectedTrack('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-              selectedTrack === 'all'
-                ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            All Telemetry
-          </button>
-          <button
             onClick={() => setSelectedTrack('college')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
               selectedTrack === 'college'
                 ? 'bg-[#004f90] text-white shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -491,7 +469,7 @@ const Dashboard = () => {
           </button>
           <button
             onClick={() => setSelectedTrack('institute')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
               selectedTrack === 'institute'
                 ? 'bg-[#F7931A] text-white shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -508,38 +486,38 @@ const Dashboard = () => {
         
         {/* Total Assessments */}
         <div 
-          onClick={() => navigate(selectedTrack === 'institute' ? '/admin/tests?track=institute' : selectedTrack === 'college' ? '/admin/tests?track=college' : '/admin/tests')}
+          onClick={() => navigate(selectedTrack === 'institute' ? '/admin/tests?track=institute' : '/admin/tests?track=college')}
           className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:shadow-xs transition cursor-pointer flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              {selectedTrack === 'college' ? 'College Assessments' : selectedTrack === 'institute' ? 'SDLC Assessments' : 'Active Assessments'}
+              {selectedTrack === 'institute' ? 'SDLC Assessments' : 'College Assessments'}
             </span>
             <FileText className="h-4 w-4 text-slate-400" />
           </div>
           <div className="mt-3">
             <span className="text-3xl font-extrabold text-slate-900 font-poppins">{currentMetrics.totalTests}</span>
             <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-              {selectedTrack === 'college' ? 'Department exams' : selectedTrack === 'institute' ? 'Institute skill exams' : 'Active and draft test papers'}
+              {selectedTrack === 'institute' ? 'Institute skill exams' : 'Department exams'}
             </p>
           </div>
         </div>
 
         {/* Registered Candidates */}
         <div 
-          onClick={() => navigate(selectedTrack === 'institute' ? '/admin/students?track=institute' : selectedTrack === 'college' ? '/admin/students?track=college' : '/admin/students')}
+          onClick={() => navigate(selectedTrack === 'institute' ? '/admin/students?track=institute' : '/admin/students?track=college')}
           className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:shadow-xs transition cursor-pointer flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              {selectedTrack === 'college' ? 'College Students' : selectedTrack === 'institute' ? 'SDLC Candidates' : 'Registered Candidates'}
+              {selectedTrack === 'institute' ? 'SDLC Candidates' : 'College Students'}
             </span>
             <Users className="h-4 w-4 text-slate-400" />
           </div>
           <div className="mt-3">
             <span className="text-3xl font-extrabold text-slate-900 font-poppins">{currentMetrics.totalStudents}</span>
             <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-              {selectedTrack === 'college' ? 'College roster count' : selectedTrack === 'institute' ? 'Institute enrolled count' : 'Enrolled student accounts'}
+              {selectedTrack === 'institute' ? 'Institute enrolled count' : 'College roster count'}
             </p>
           </div>
         </div>
@@ -547,7 +525,9 @@ const Dashboard = () => {
         {/* Today's Attempts */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Today's Attempts</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              {selectedTrack === 'institute' ? 'SDLC Today\'s Attempts' : 'College Today\'s Attempts'}
+            </span>
             <Clock className="h-4 w-4 text-slate-400" />
           </div>
           <div className="mt-3">
@@ -560,7 +540,7 @@ const Dashboard = () => {
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              {selectedTrack === 'college' ? 'College Pass Rate' : selectedTrack === 'institute' ? 'SDLC Pass Rate' : 'Overall Pass Rate'}
+              {selectedTrack === 'institute' ? 'SDLC Pass Rate' : 'College Pass Rate'}
             </span>
             <Award className="h-4 w-4 text-slate-400" />
           </div>
@@ -644,9 +624,7 @@ const Dashboard = () => {
               <span>
                 {selectedTrack === 'institute' 
                   ? `View SDLC Records (${trackSubmissionsList.length})` 
-                  : selectedTrack === 'college' 
-                  ? `View College Records (${trackSubmissionsList.length})` 
-                  : `View All Records (${allSubmissionsList.length})`}
+                  : `View College Records (${trackSubmissionsList.length})`}
               </span>
             </button>
           </div>
@@ -775,13 +753,11 @@ const Dashboard = () => {
                       <option value="all">
                         {selectedTrack === 'institute' 
                           ? 'All SDLC Assessments (Combined)' 
-                          : selectedTrack === 'college' 
-                          ? 'All College Assessments (Combined)' 
-                          : 'All Test Assessments (Combined)'}
+                          : 'All College Assessments (Combined)'}
                       </option>
-                      {(selectedTrack === 'institute' ? instituteTestsList : selectedTrack === 'college' ? collegeTestsList : allTestsList).map(t => (
+                      {(selectedTrack === 'institute' ? instituteTestsList : collegeTestsList).map(t => (
                         <option key={t._id} value={t._id}>
-                          {selectedTrack === 'all' ? (isCollegeTest(t) ? '[College] ' : '[SDLC] ') : ''}{t.title} ({t.subject})
+                          {t.title} ({t.subject})
                         </option>
                       ))}
                     </select>
@@ -831,9 +807,7 @@ const Dashboard = () => {
                 <h4 className="text-base font-bold text-slate-900 font-poppins flex items-center gap-2">
                   <Download className="w-4 h-4 text-emerald-600" />
                   <span>
-                    {selectedTrack === 'institute' ? 'Export SDLC Candidates Directory' :
-                     selectedTrack === 'college' ? 'Export College Students Directory' :
-                     'Export Candidate Directory'}
+                    {selectedTrack === 'institute' ? 'Export SDLC Candidates Directory' : 'Export College Students Directory'}
                   </span>
                 </h4>
                 <button 
@@ -846,34 +820,13 @@ const Dashboard = () => {
 
               <div className="space-y-3 text-xs">
                 <p className="text-slate-500 font-medium leading-relaxed">
-                  {selectedTrack === 'institute' ? 'Download candidate roster filtered by District Branch Center and Course Track.' :
-                   selectedTrack === 'college' ? 'Download candidate roster filtered by College Department.' :
-                   'Choose candidate category, branch, and department filters for exporting the roster CSV.'}
+                  {selectedTrack === 'institute' 
+                    ? 'Download candidate roster filtered by District Branch Center and Course Track.' 
+                    : 'Download candidate roster filtered by College Department.'}
                 </p>
 
-                {/* Candidate Classification Selector - only shown when on 'all' telemetry track */}
-                {selectedTrack === 'all' && (
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                      Candidate Classification *
-                    </label>
-                    <div className="relative flex items-center">
-                      <select
-                        value={exportStudentCategory}
-                        onChange={(e) => setExportStudentCategory(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 rounded-xl h-10 pl-3.5 pr-10 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                      >
-                        <option value="all">All Enrolled Candidates</option>
-                        <option value="college">College Students Only</option>
-                        <option value="institute">SDLC Institute Candidates Only</option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
-                    </div>
-                  </div>
-                )}
-
                 {/* College Department Filter */}
-                {(selectedTrack === 'college' || (selectedTrack === 'all' && exportStudentCategory === 'college')) && (
+                {selectedTrack === 'college' && (
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                       Department Filter *
@@ -894,7 +847,7 @@ const Dashboard = () => {
                 )}
 
                 {/* SDLC Institute Branch & Course Track Filters */}
-                {(selectedTrack === 'institute' || (selectedTrack === 'all' && exportStudentCategory === 'institute')) && (
+                {selectedTrack === 'institute' && (
                   <>
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
