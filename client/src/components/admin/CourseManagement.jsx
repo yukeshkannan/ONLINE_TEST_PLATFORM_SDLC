@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../utils/api.js';
 import { 
   Plus, Search, Edit3, Trash2, RefreshCw, X, ChevronDown
@@ -7,9 +8,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ClockLoader from '../shared/ClockLoader.jsx';
 
-const CourseManagement = () => {
+const CourseManagement = ({ initialTrack }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const getInitialTab = () => {
+    const track = searchParams.get('track') || searchParams.get('category') || initialTrack;
+    if (track === 'institute' || track === 'sdlc') return 'institute';
+    return 'college';
+  };
   // Category Tab: 'college' | 'institute'
-  const [activeTab, setActiveTab] = useState('college');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+
+  useEffect(() => {
+    const track = searchParams.get('track') || searchParams.get('category') || initialTrack;
+    if (track === 'institute' || track === 'sdlc') {
+      setActiveTab('institute');
+    } else if (track === 'college') {
+      setActiveTab('college');
+    }
+  }, [searchParams, initialTrack]);
 
   // Data States
   const [departments, setDepartments] = useState([]);
@@ -291,7 +307,14 @@ const CourseManagement = () => {
       <div className="flex items-center justify-between border-b border-slate-200">
         <div className="flex space-x-8">
           <button
-            onClick={() => setActiveTab('college')}
+            onClick={() => {
+              setActiveTab('college');
+              setSearchParams(prev => {
+                const next = new URLSearchParams(prev);
+                next.set('track', 'college');
+                return next;
+              }, { replace: true });
+            }}
             className={`py-3 text-sm font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2.5 ${
               activeTab === 'college'
                 ? 'border-[#004f90] text-[#004f90]'
@@ -307,7 +330,14 @@ const CourseManagement = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('institute')}
+            onClick={() => {
+              setActiveTab('institute');
+              setSearchParams(prev => {
+                const next = new URLSearchParams(prev);
+                next.set('track', 'institute');
+                return next;
+              }, { replace: true });
+            }}
             className={`py-3 text-sm font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2.5 ${
               activeTab === 'institute'
                 ? 'border-[#004f90] text-[#004f90]'

@@ -508,7 +508,7 @@ const Dashboard = () => {
         
         {/* Total Assessments */}
         <div 
-          onClick={() => navigate('/admin/tests')}
+          onClick={() => navigate(selectedTrack === 'institute' ? '/admin/tests?track=institute' : selectedTrack === 'college' ? '/admin/tests?track=college' : '/admin/tests')}
           className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:shadow-xs transition cursor-pointer flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
@@ -527,7 +527,7 @@ const Dashboard = () => {
 
         {/* Registered Candidates */}
         <div 
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate(selectedTrack === 'institute' ? '/admin/students?track=institute' : selectedTrack === 'college' ? '/admin/students?track=college' : '/admin/students')}
           className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:shadow-xs transition cursor-pointer flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">

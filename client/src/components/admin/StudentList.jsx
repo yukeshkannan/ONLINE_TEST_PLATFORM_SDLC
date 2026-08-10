@@ -1,4 +1,5 @@
-import React, { useState , useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Users, UserPlus, Search, Filter, Trash2, Edit3, CheckCircle2, 
   XCircle, ChevronDown, Check, GraduationCap, Building2, Upload, 
@@ -21,13 +22,30 @@ export const INSTITUTE_CENTERS = [
   { name: 'Dindigul', code: 'DGL' }
 ];
 
-const StudentList = () => {
+const StudentList = ({ initialTrack }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Category Tab: 'college' | 'institute'
-  const [categoryTab, setCategoryTab] = useState('college');
+  const getInitialTab = () => {
+    const track = searchParams.get('track') || searchParams.get('category') || searchParams.get('type') || initialTrack;
+    if (track === 'institute' || track === 'sdlc') return 'institute';
+    if (track === 'college') return 'college';
+    return 'college';
+  };
+
+  const [categoryTab, setCategoryTab] = useState(getInitialTab);
+
+  useEffect(() => {
+    const track = searchParams.get('track') || searchParams.get('category') || searchParams.get('type') || initialTrack;
+    if (track === 'institute' || track === 'sdlc') {
+      setCategoryTab('institute');
+    } else if (track === 'college') {
+      setCategoryTab('college');
+    }
+  }, [searchParams, initialTrack]);
 
   // Filters
   const [deptFilter, setDeptFilter] = useState('All');
@@ -827,7 +845,14 @@ const StudentList = () => {
       <div className="flex items-center justify-between border-b border-slate-200">
         <div className="flex space-x-8">
           <button
-            onClick={() => setCategoryTab('college')}
+            onClick={() => {
+              setCategoryTab('college');
+              setSearchParams(prev => {
+                const next = new URLSearchParams(prev);
+                next.set('track', 'college');
+                return next;
+              }, { replace: true });
+            }}
             className={`py-3 text-sm font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2.5 ${
               categoryTab === 'college'
                 ? 'border-[#004f90] text-[#004f90]'
@@ -844,7 +869,14 @@ const StudentList = () => {
           </button>
 
           <button
-            onClick={() => setCategoryTab('institute')}
+            onClick={() => {
+              setCategoryTab('institute');
+              setSearchParams(prev => {
+                const next = new URLSearchParams(prev);
+                next.set('track', 'institute');
+                return next;
+              }, { replace: true });
+            }}
             className={`py-3 text-sm font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2.5 ${
               categoryTab === 'institute'
                 ? 'border-[#004f90] text-[#004f90]'

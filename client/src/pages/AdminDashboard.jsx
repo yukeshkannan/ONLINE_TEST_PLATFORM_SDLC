@@ -371,6 +371,16 @@ const AdminDashboard = ({ tab }) => {
   useEffect(() => {
     const tId = searchParams.get('testId');
     const subTab = searchParams.get('subTab');
+    const track = searchParams.get('track') || searchParams.get('category') || searchParams.get('type');
+    if (track) {
+      if (track === 'institute' || track === 'sdlc') {
+        setTestsTrackFilter('institute');
+      } else if (track === 'college') {
+        setTestsTrackFilter('college');
+      } else if (track === 'all') {
+        setTestsTrackFilter('all');
+      }
+    }
     if (subTab) setActiveTab(subTab);
     if (tId && !selectedTest && isAuthenticated) {
       api.get(`/tests/${tId}`)
@@ -502,7 +512,7 @@ const AdminDashboard = ({ tab }) => {
 
           {activeTab === 'students' && (
             user?.role === 'admin' ? (
-              <StudentList />
+              <StudentList initialTrack={searchParams.get('track') || searchParams.get('category') || searchParams.get('type')} />
             ) : (
               <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center max-w-2xl mx-auto my-12 space-y-4 shadow-sm">
                 <AlertTriangle className="h-14 w-14 text-rose-500 mx-auto" />
@@ -515,7 +525,7 @@ const AdminDashboard = ({ tab }) => {
           )}
 
           {(activeTab === 'courses' || activeTab === 'cohorts') && (
-            <CourseManagement />
+            <CourseManagement initialTrack={searchParams.get('track') || searchParams.get('category') || searchParams.get('type')} />
           )}
 
           {activeTab === 'users' && (
