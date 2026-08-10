@@ -35,10 +35,16 @@ export const sendTokens = (res, user, rememberMe = false) => {
       _id: user._id,
       name: user.name,
       email: user.email || undefined,
+      studentType: user.studentType || (user.enrollmentId ? 'institute' : 'college'),
+      portalType: user.studentType === 'institute' || user.enrollmentId ? 'sdlc' : 'college',
       rollNumber: user.rollNumber || undefined,
+      enrollmentId: user.enrollmentId || undefined,
       department: user.department,
       batch: user.batch || undefined,
       year: user.year || undefined,
+      courseTrack: user.courseTrack || undefined,
+      center: user.center || undefined,
+      batchTime: user.batchTime || undefined,
       role
     }
   };

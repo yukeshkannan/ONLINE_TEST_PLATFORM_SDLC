@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/shared/Navbar.jsx';
-import TestList from '../components/student/TestList.jsx';
+import CollegeStudentDashboard from '../components/student/CollegeStudentDashboard.jsx';
+import SdlcStudentDashboard from '../components/student/SdlcStudentDashboard.jsx';
 import TestEngine from '../components/student/TestEngine.jsx';
 import ResultScreen from '../components/student/ResultScreen.jsx';
 import { motion } from 'framer-motion';
@@ -116,13 +117,21 @@ const StudentPortal = () => {
           onFinish={handleFinishTest}
         />
       ) : (
-        <div className="flex-1 px-4 md:px-8 max-w-7xl mx-auto w-full">
-          {activeScreen === 'dashboard' && (
-            <TestList
-              onStartTest={handleStartTest}
-              onViewResult={handleViewResult}
-            />
-          )}
+        <div className="flex-1 w-full">
+          {activeScreen === 'dashboard' && (() => {
+            const isInst = user?.studentType === 'institute' || user?.portalType === 'sdlc' || !!user?.enrollmentId;
+            return isInst ? (
+              <SdlcStudentDashboard
+                onStartTest={handleStartTest}
+                onViewResult={handleViewResult}
+              />
+            ) : (
+              <CollegeStudentDashboard
+                onStartTest={handleStartTest}
+                onViewResult={handleViewResult}
+              />
+            );
+          })()}
 
           {activeScreen === 'result' && activeResultId && (
             <ResultScreen
