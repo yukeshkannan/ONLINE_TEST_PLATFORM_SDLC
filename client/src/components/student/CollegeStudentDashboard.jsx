@@ -251,6 +251,7 @@ const CollegeStudentDashboard = ({ onStartTest, onViewResult }) => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
                   {completedTests.map((t) => {
+                    const isResultsReleased = t.showResultsToStudents !== false;
                     const isPassed = t.passed || (t.userPercentage >= (t.passingMarks || 50));
                     return (
                       <tr key={t._id} className="hover:bg-slate-50/50 transition">
@@ -264,28 +265,40 @@ const CollegeStudentDashboard = ({ onStartTest, onViewResult }) => {
                           {t.subject || 'General'}
                         </td>
                         <td className="py-4 px-5 font-mono font-bold text-slate-800">
-                          {t.userScore ?? t.score ?? '-'} / {t.totalMarks || t.questions?.length || '-'}
+                          {isResultsReleased ? `${t.userScore ?? t.score ?? '-'} / ${t.totalMarks || t.questions?.length || '-'}` : '— / —'}
                         </td>
                         <td className="py-4 px-5 font-mono font-bold text-slate-800">
-                          {t.userPercentage ?? t.percentage ?? 0}%
+                          {isResultsReleased ? `${t.userPercentage ?? t.percentage ?? 0}%` : 'Held by Faculty'}
                         </td>
                         <td className="py-4 px-5">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
-                            isPassed 
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                              : 'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}>
-                            {isPassed ? 'PASSED' : 'FAILED'}
-                          </span>
+                          {isResultsReleased ? (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                              isPassed 
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}>
+                              {isPassed ? 'PASSED' : 'FAILED'}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                              CONFIDENTIAL
+                            </span>
+                          )}
                         </td>
                         <td className="py-4 px-5 text-right">
-                          <button
-                            onClick={() => onViewResult(t.resultId || t._id)}
-                            className="text-[#004f90] hover:text-[#003866] hover:bg-blue-50 font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 cursor-pointer"
-                          >
-                            <span>View Result</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </button>
+                          {isResultsReleased ? (
+                            <button
+                              onClick={() => onViewResult(t.resultId || t._id)}
+                              className="text-[#004f90] hover:text-[#003866] hover:bg-blue-50 font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>View Result</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                          ) : (
+                            <span className="text-slate-400 text-xs font-semibold px-3 py-1.5">
+                              Results Locked
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );
