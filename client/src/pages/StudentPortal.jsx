@@ -107,7 +107,7 @@ const StudentPortal = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.45 }}
-      className="min-h-screen bg-charcoal flex flex-col"
+      className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans"
     >
       {activeScreen !== 'test' && <Navbar />}
 
