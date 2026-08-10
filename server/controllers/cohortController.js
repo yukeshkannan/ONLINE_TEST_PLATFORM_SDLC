@@ -2,48 +2,7 @@ import Department from '../models/Department.js';
 import BatchTrack from '../models/BatchTrack.js';
 import Center from '../models/Center.js';
 
-const DEFAULT_DEPARTMENTS = [
-  { code: 'CSE', name: 'Computer Science & Engineering', description: 'Department of Computer Science and Software Systems' },
-  { code: 'IT', name: 'Information Technology', description: 'Department of Information Technology and Network Systems' },
-  { code: 'AIDS', name: 'Artificial Intelligence & Data Science', description: 'Department of AI, Machine Learning and Analytics' },
-  { code: 'ECE', name: 'Electronics & Communication Engineering', description: 'Department of Electronics and Signals' },
-  { code: 'EEE', name: 'Electrical & Electronics Engineering', description: 'Department of Electrical Engineering and Power Systems' },
-  { code: 'MECH', name: 'Mechanical Engineering', description: 'Department of Mechanical and Industrial Engineering' },
-  { code: 'CIVIL', name: 'Civil Engineering', description: 'Department of Civil and Structural Engineering' }
-];
-
-const DEFAULT_CENTERS = [
-  { name: 'Karur', code: 'KRR', location: 'Karur District Branch' },
-  { name: 'Coimbatore', code: 'CBE', location: 'Coimbatore Tech Hub Branch' },
-  { name: 'Namakkal', code: 'NKL', location: 'Namakkal District Branch' },
-  { name: 'Dindigul', code: 'DGL', location: 'Dindigul District Branch' }
-];
-
-const DEFAULT_BATCHES = [
-  { name: 'Full Stack Web Dev (MERN)', code: 'FS-WEB', category: 'institute', description: 'Complete MERN Stack Web Development' },
-  { name: 'AutoCAD & Mechanical CAD', code: 'CAD-MECH', category: 'institute', description: '2D & 3D Mechanical Computer Aided Design' },
-  { name: 'SolidWorks & 3D Modeling', code: 'SOLID-3D', category: 'institute', description: 'SolidWorks Industry Standard 3D Modeling' },
-  { name: 'Python Data Science & AI', code: 'PY-DS', category: 'institute', description: 'Python Analytics, Machine Learning & AI' },
-  { name: 'Embedded Systems & IoT', code: 'EMB-IOT', category: 'institute', description: 'Embedded Systems, Microcontrollers & IoT' }
-];
-
-// Optional Manual Reset Endpoint for Admin
-export const resetDefaults = async (req, res, next) => {
-  try {
-    const deptCount = await Department.countDocuments();
-    if (deptCount === 0) await Department.insertMany(DEFAULT_DEPARTMENTS);
-
-    const batchCount = await BatchTrack.countDocuments();
-    if (batchCount === 0) await BatchTrack.insertMany(DEFAULT_BATCHES);
-
-    const centerCount = await Center.countDocuments();
-    if (centerCount === 0) await Center.insertMany(DEFAULT_CENTERS);
-
-    res.status(200).json({ message: 'Catalog defaults restored.' });
-  } catch (error) {
-    next(error);
-  }
-};
+// Dynamic Cohort & Catalog Controller (100% DB-driven without hardcoded seeds)
 
 export const getDepartments = async (req, res, next) => {
   try {

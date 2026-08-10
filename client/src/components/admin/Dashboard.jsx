@@ -31,14 +31,15 @@ const Dashboard = () => {
   const [exportDept, setExportDept] = useState('all');
   const [exportBranch, setExportBranch] = useState('all');
   const [exportCourseTrack, setExportCourseTrack] = useState('all');
-  const [centersList, setCentersList] = useState(['Karur', 'Coimbatore', 'Namakkal', 'Dindigul', 'Chennai']);
-  const [sdlcCoursesList, setSdlcCoursesList] = useState(['Full Stack Web Dev (MERN)', 'Python Full Stack', 'Java Full Stack', 'UI/UX Design & Figma', 'Cloud & DevOps Engineering', 'Cybersecurity & Networking', 'Data Science & AI']);
+  const [centersList, setCentersList] = useState([]);
+  const [sdlcCoursesList, setSdlcCoursesList] = useState([]);
+  const [deptList, setDeptList] = useState([]);
 
   // Delete submission target
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   // Departments list for filter
-  const depts = ['ALL', 'CSE', 'ECE', 'MECH', 'EEE', 'IT', 'CIVIL', 'AI&DS'];
+  const depts = ['ALL', ...deptList];
 
   // All Submissions Modal states
   const [showAllRecordsModal, setShowAllRecordsModal] = useState(false);
@@ -55,16 +56,22 @@ const Dashboard = () => {
     fetchTestsList();
     fetchAllSubmissions();
 
+    api.get('/cohorts/departments').then(({ data }) => {
+      if (Array.isArray(data)) {
+        setDeptList(data.filter(d => d.isActive !== false).map(d => d.code));
+      }
+    }).catch(() => {});
+
     api.get('/cohorts/centers').then(({ data }) => {
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setCentersList(data.filter(c => c.isActive !== false).map(c => c.name));
       }
     }).catch(() => {});
 
     api.get('/cohorts/batches').then(({ data }) => {
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         const instBatches = data.filter(b => b.category !== 'college' && b.isActive !== false).map(b => b.name);
-        if (instBatches.length > 0) setSdlcCoursesList(instBatches);
+        setSdlcCoursesList(instBatches);
       }
     }).catch(() => {});
   }, []);

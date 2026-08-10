@@ -15,12 +15,7 @@ import { normalizeBatch, normalizeDept } from '../../utils/constants.js';
 
 const COURSE_TRACKS = [];
 
-export const INSTITUTE_CENTERS = [
-  { name: 'Karur', code: 'KRR' },
-  { name: 'Coimbatore', code: 'CBE' },
-  { name: 'Namakkal', code: 'NKL' },
-  { name: 'Dindigul', code: 'DGL' }
-];
+export const INSTITUTE_CENTERS = [];
 
 const StudentList = ({ initialTrack }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,7 +63,7 @@ const StudentList = ({ initialTrack }) => {
 
   const [deptList, setDeptList] = useState([]);
   const [allBatches, setAllBatches] = useState([]);
-  const [centersList, setCentersList] = useState(INSTITUTE_CENTERS);
+  const [centersList, setCentersList] = useState([]);
 
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [studentForCredentials, setStudentForCredentials] = useState(null);
@@ -81,12 +76,12 @@ const StudentList = ({ initialTrack }) => {
     email: '',
     dob: '',
     rollNumber: '',
-    department: 'CSE',
+    department: '',
     batch: '2023-2027',
     year: '3rd Year',
     enrollmentId: '',
     courseTrack: '',
-    center: 'Karur'
+    center: ''
   });
 
   // Edit Form state
@@ -96,12 +91,12 @@ const StudentList = ({ initialTrack }) => {
     dob: '',
     studentType: 'college',
     rollNumber: '',
-    department: 'CSE',
+    department: '',
     batch: '2023-2027',
     year: '3rd Year',
     enrollmentId: '',
     courseTrack: '',
-    center: 'Karur'
+    center: ''
   });
 
   // Bulk Upload states
@@ -119,14 +114,16 @@ const StudentList = ({ initialTrack }) => {
         if (Array.isArray(deptRes.data)) {
           const dCodes = deptRes.data.filter(d => d.isActive !== false).map(d => d.code);
           setDeptList(dCodes);
-          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || 'CSE') }));
+          setFormData(prev => ({ ...prev, department: dCodes.includes(prev.department) ? prev.department : (dCodes[0] || '') }));
         }
         if (Array.isArray(batchRes.data)) {
           const activeBatches = batchRes.data.filter(b => b.isActive !== false);
           setAllBatches(activeBatches);
         }
-        if (Array.isArray(centerRes.data) && centerRes.data.length > 0) {
-          setCentersList(centerRes.data.filter(c => c.isActive !== false).map(c => ({ name: c.name, code: c.code })));
+        if (Array.isArray(centerRes.data)) {
+          const validCenters = centerRes.data.filter(c => c.isActive !== false).map(c => ({ name: c.name, code: c.code }));
+          setCentersList(validCenters);
+          setFormData(prev => ({ ...prev, center: validCenters.some(c => c.name === prev.center) ? prev.center : (validCenters[0]?.name || '') }));
         }
       })
       .catch(() => {});
@@ -175,8 +172,8 @@ const StudentList = ({ initialTrack }) => {
   }, [searchTerm, categoryTab, deptFilter, courseFilter, centerFilter]);
 
   const getLiveSdclIdPreview = (centerName, dobStr) => {
-    const centerObj = INSTITUTE_CENTERS.find(c => c.name === centerName) || INSTITUTE_CENTERS[0];
-    const code = centerObj.code;
+    const centerObj = centersList.find(c => c.name === centerName) || centersList[0] || { code: (centerName || 'CBE').slice(0, 3).toUpperCase() };
+    const code = centerObj.code || (centerName || 'CBE').slice(0, 3).toUpperCase();
     let dobClean = '';
     if (dobStr) {
       if (dobStr.includes('-') && dobStr.indexOf('-') === 4) {
