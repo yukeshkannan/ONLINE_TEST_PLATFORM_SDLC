@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  Users, UserPlus, Search, Filter, Trash2, Edit3, CheckCircle2, 
-  XCircle, ChevronDown, Check, GraduationCap, Building2, Upload, 
-  FileSpreadsheet, RefreshCw, Send, X, Award, Eye, KeyRound, Copy, Mail,
-  ChevronLeft, ChevronRight, Download
-} from 'lucide-react';
+import { Download } from 'lucide-react';
 import ClockLoader from '../shared/ClockLoader.jsx';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api.js';
-import { calculateAcademicYear } from '../../utils/academicYearHelper.js';
 import { normalizeBatch, normalizeDept } from '../../utils/constants.js';
 
-const COURSE_TRACKS = [];
-
-export const INSTITUTE_CENTERS = [];
+import StudentTable from './students/StudentTable.jsx';
+import StudentAddModal from './students/StudentAddModal.jsx';
+import StudentEditModal from './students/StudentEditModal.jsx';
+import StudentBulkModal from './students/StudentBulkModal.jsx';
+import { 
+  DeleteStudentModal, 
+  SendCredentialsModal, 
+  SendAllCredentialsModal 
+} from './students/StudentActionModals.jsx';
 
 const StudentList = ({ initialTrack }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,6 +46,7 @@ const StudentList = ({ initialTrack }) => {
   const [courseFilter, setCourseFilter] = useState('All');
   const [centerFilter, setCenterFilter] = useState('All');
   
+  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -129,7 +129,7 @@ const StudentList = ({ initialTrack }) => {
       .catch(() => {});
   };
 
-  // Specialized College Tracks (strictly category === 'college')
+  // Specialized College Tracks
   const collegeCourseTracks = allBatches
     .filter(b => b.category === 'college' && (b.department === 'All Departments' || !formData.department || b.department === formData.department))
     .map(b => b.name);
@@ -138,7 +138,7 @@ const StudentList = ({ initialTrack }) => {
     .filter(b => b.category === 'college' && (b.department === 'All Departments' || !editFormData.department || b.department === editFormData.department))
     .map(b => b.name);
 
-  // SDLC Institute Courses (category === 'institute' or default)
+  // SDLC Institute Courses
   const instituteCourseTracks = allBatches
     .filter(b => b.category !== 'college')
     .map(b => b.name);
@@ -723,24 +723,6 @@ const StudentList = ({ initialTrack }) => {
     toast.success(`Downloaded ${type === 'college' ? 'College' : 'SDLC'} student sample CSV.`);
   };
 
-  const resetBulkState = () => {
-    setSelectedFile(null);
-    setParsedStudents([]);
-    setShowBulkModal(false);
-  };
-
-  const openBulkModal = () => {
-    setBulkStudentType(categoryTab);
-    setSelectedFile(null);
-    setParsedStudents([]);
-    setShowBulkModal(true);
-  };
-
-    const openAddModal = () => {
-    setAddStudentType(categoryTab);
-    setShowAddModal(true);
-  };
-
   const handleExportFilteredStudents = () => {
     if (filteredStudents.length === 0) {
       return toast.error('No students matching current filters to export.');
@@ -784,10 +766,21 @@ const StudentList = ({ initialTrack }) => {
     toast.success(`Exported ${filteredStudents.length} student records.`);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 font-sans">
+        <ClockLoader 
+          size="lg" 
+          color="#004f90" 
+          text="Retrieving student directory and category rosters..." 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 text-left pb-12 font-sans">
-      
-      {/* Simple Clean Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight font-poppins">
@@ -798,1160 +791,147 @@ const StudentList = ({ initialTrack }) => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          {filteredStudents.length > 0 && (
-            <>
-              <button
-                onClick={handleExportFilteredStudents}
-                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2"
-                title="Download CSV of current filtered list"
-              >
-                <Download className="h-4 w-4 text-emerald-600" />
-                <span>Export List ({filteredStudents.length})</span>
-              </button>
-
-              <button
-                onClick={() => setShowSendAllConfirm(true)}
-                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2"
-              >
-                <Mail className="h-4 w-4 text-slate-500" />
-                <span>Email Credentials ({filteredStudents.length})</span>
-              </button>
-            </>
-          )}
-
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={openBulkModal}
-            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2"
+            type="button"
+            onClick={handleExportFilteredStudents}
+            disabled={filteredStudents.length === 0}
+            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+            title="Export filtered roster to CSV"
           >
-            <Upload className="h-4 w-4 text-slate-500" />
-            <span>Bulk Import</span>
-          </button>
-
-          <button
-            onClick={openAddModal}
-            className="bg-[#004f90] hover:bg-[#003c6e] text-white px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 shadow-xs"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Add Student</span>
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Export Roster ({filteredStudents.length})</span>
           </button>
         </div>
       </div>
 
-      {/* Clean Segmented Tab Switcher (Senior Developer Style) */}
-      <div className="flex items-center justify-between border-b border-slate-200">
-        <div className="flex space-x-8">
-          <button
-            onClick={() => {
-              setCategoryTab('college');
-              setSearchParams(prev => {
-                const next = new URLSearchParams(prev);
-                next.set('track', 'college');
-                return next;
-              }, { replace: true });
-            }}
-            className={`py-3 text-sm font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2.5 ${
-              categoryTab === 'college'
-                ? 'border-[#004f90] text-[#004f90]'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <GraduationCap className="w-4.5 h-4.5" />
-            <span>College Students</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-              categoryTab === 'college' ? 'bg-blue-100 text-[#004f90]' : 'bg-slate-100 text-slate-600'
-            }`}>
-              {collegeCount}
-            </span>
-          </button>
-
-          <button
-            onClick={() => {
-              setCategoryTab('institute');
-              setSearchParams(prev => {
-                const next = new URLSearchParams(prev);
-                next.set('track', 'institute');
-                return next;
-              }, { replace: true });
-            }}
-            className={`py-3 text-sm font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2.5 ${
-              categoryTab === 'institute'
-                ? 'border-[#004f90] text-[#004f90]'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Building2 className="w-4.5 h-4.5" />
-            <span>SDLC Candidates</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-              categoryTab === 'institute' ? 'bg-blue-100 text-[#004f90]' : 'bg-slate-100 text-slate-600'
-            }`}>
-              {instituteCount}
-            </span>
-          </button>
-        </div>
-
-        <div className="hidden sm:block text-xs font-semibold text-slate-500">
-          Showing {totalItems} candidates
-        </div>
-      </div>
-
-      {/* Main Roster Panel */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-        
-        {/* Search & Filter Bar */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder={categoryTab === 'college' ? "Search name, email, roll no..." : "Search name, email, SDLC ID..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-lg h-9 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#004f90] transition font-medium"
-            />
-            {searchTerm && (
-              <button 
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
-            {categoryTab === 'college' && (
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-slate-500">Department:</span>
-                <div className="relative flex items-center">
-                  <select
-                    value={deptFilter}
-                    onChange={(e) => setDeptFilter(e.target.value)}
-                    className="bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg pl-3 pr-8 h-9 focus:outline-none focus:border-[#004f90] cursor-pointer appearance-none"
-                  >
-                    <option value="All">All Departments</option>
-                    {deptList.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
-                </div>
-              </div>
-            )}
-
-            {categoryTab === 'institute' && (
-              <>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-slate-500">Branch:</span>
-                  <div className="relative flex items-center">
-                    <select
-                      value={centerFilter}
-                      onChange={(e) => setCenterFilter(e.target.value)}
-                      className="bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg pl-3 pr-8 h-9 focus:outline-none focus:border-[#004f90] cursor-pointer appearance-none"
-                    >
-                      <option value="All">All Centers</option>
-                      {centersList.map(c => (
-                        <option key={c.name} value={c.name}>{c.name} ({c.code})</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-slate-500">Course:</span>
-                  <div className="relative flex items-center">
-                    <select
-                      value={courseFilter}
-                      onChange={(e) => setCourseFilter(e.target.value)}
-                      className="bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg pl-3 pr-8 h-9 focus:outline-none focus:border-[#004f90] cursor-pointer appearance-none"
-                    >
-                      <option value="All">All Courses</option>
-                      {instituteCourseTracks.map(track => (
-                        <option key={track} value={track}>{track}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Data Table */}
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="py-16 text-center">
-              <ClockLoader size="md" color="#004f90" text="Loading roster data..." />
-            </div>
-          ) : currentStudents.length === 0 ? (
-            <div className="py-14 text-center space-y-1.5 px-4">
-              <p className="text-sm font-semibold text-slate-800">No candidates found</p>
-              <p className="text-xs text-slate-500">Try adjusting your search or active filters.</p>
-            </div>
-          ) : (
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
-                  <th className="py-3 px-3.5 text-center w-14">S.NO</th>
-                  <th className="py-3 px-4">STUDENT DETAILS</th>
-                  {categoryTab === 'college' ? (
-                    <>
-                      <th className="py-3 px-4">DEPARTMENT</th>
-                      <th className="py-3 px-4">ROLL NUMBER</th>
-                      <th className="py-3 px-4">YEAR</th>
-                      <th className="py-3 px-4">COURSE</th>
-                    </>
-                  ) : (
-                    <>
-                      <th className="py-3 px-4">BRANCH</th>
-                      <th className="py-3 px-4">SDLC ID</th>
-                      <th className="py-3 px-4">COURSE</th>
-                      <th className="py-3 px-4">CENTER</th>
-                    </>
-                  )}
-                  <th className="py-3 px-4 text-right">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {currentStudents.map((student, index) => {
-                  const serialNo = indexOfFirstStudent + index + 1;
-                  const isInstitute = student.studentType === 'institute';
-                  const identifier = isInstitute ? (student.enrollmentId || student.rollNumber) : student.rollNumber;
-                  const trackDisplay = isInstitute ? (student.courseTrack || student.department) : getCollegeCourseTrack(student);
-
-                  return (
-                    <tr key={student._id} className="hover:bg-slate-50 transition-colors">
-                      {/* S.NO */}
-                      <td className="py-3 px-3.5 text-center font-semibold text-xs text-slate-400 font-mono">
-                        {String(serialNo).padStart(2, '0')}
-                      </td>
-
-                      {/* Student Details */}
-                      <td className="py-3 px-4">
-                        <div>
-                          <div className="font-semibold text-slate-900 text-sm">
-                            {student.name}
-                          </div>
-                          <div className="text-xs text-slate-500 font-normal mt-0.5">
-                            {student.email}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Category Specific Columns */}
-                      {categoryTab === 'college' ? (
-                        <>
-                          {/* Department */}
-                          <td className="py-3 px-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-[#004f90] border border-blue-100">
-                              {student.department}
-                            </span>
-                          </td>
-
-                          {/* Roll Number */}
-                          <td className="py-3 px-4 font-mono text-xs font-medium text-slate-800">
-                            {student.rollNumber || 'N/A'}
-                          </td>
-
-                          {/* Year */}
-                          <td className="py-3 px-4 text-xs font-medium text-slate-700">
-                            {student.year || '4th Year'}
-                          </td>
-
-                          {/* Course */}
-                          <td className="py-3 px-4 font-semibold text-slate-800">
-                            {trackDisplay}
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          {/* Branch Badge */}
-                          <td className="py-3 px-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                              {student.center || 'Karur'} Branch
-                            </span>
-                          </td>
-
-                          {/* SDLC ID */}
-                          <td className="py-3 px-4 font-mono text-xs font-medium text-slate-800">
-                            {identifier || 'N/A'}
-                          </td>
-
-                          {/* Course */}
-                          <td className="py-3 px-4 font-semibold text-slate-800">
-                            {trackDisplay}
-                          </td>
-
-                          {/* Center */}
-                          <td className="py-3 px-4 text-xs text-slate-600 font-medium">
-                            {student.center || 'Karur'} Branch
-                          </td>
-                        </>
-                      )}
-
-                      {/* Actions */}
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          <button
-                            onClick={() => handleSendCredentials(student)}
-                            title="Send Login Email"
-                            className="p-1.5 text-slate-400 hover:text-[#004f90] hover:bg-slate-100 rounded-md transition cursor-pointer"
-                          >
-                            <Mail className="w-4 h-4" />
-                          </button>
-                          
-                          <button
-                            onClick={() => handleEditClick(student)}
-                            title="Edit Profile"
-                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-md transition cursor-pointer"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            onClick={() => handleDeleteStudent(student._id, student.name)}
-                            title="Delete Account"
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-md transition cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Dotted Ellipsis Pagination Bar */}
-        {totalPages > 1 && (
-          <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-center text-xs">
-            <div className="flex items-center space-x-1">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="p-1.5 rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
-                title="Previous Page"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-
-              {getPageNumbers().map((item, idx) => {
-                if (typeof item === 'string') {
-                  return (
-                    <span 
-                      key={`dots-${idx}`} 
-                      className="w-7 h-7 flex items-center justify-center text-slate-400 font-bold text-xs select-none"
-                    >
-                      ...
-                    </span>
-                  );
-                }
-
-                return (
-                  <button
-                    key={item}
-                    onClick={() => setCurrentPage(item)}
-                    className={`w-7 h-7 rounded-md text-xs font-semibold cursor-pointer transition ${
-                      currentPage === item
-                        ? 'bg-[#004f90] text-white shadow-2xs'
-                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                    }`}
-                  >
-                    {item}
-                  </button>
-                );
-              })}
-
-              <button
-                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="p-1.5 rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
-                title="Next Page"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ========================================================================= */}
-      {/* ADD STUDENT - SIMPLE CLEAN DRAWER */}
-      {/* ========================================================================= */}
-      <AnimatePresence>
-        {showAddModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowAddModal(false)}
-              className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-[999]"
-            />
-
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
-              className="fixed right-0 top-0 bottom-0 h-screen w-full max-w-[460px] bg-white z-[1000] shadow-2xl flex flex-col overflow-hidden"
-            >
-              <div className="flex-1 overflow-y-auto p-7 space-y-6 scrollbar-none text-left">
-                
-                <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-                  <div className="space-y-2.5">
-                    <img 
-                      src="/logo.png" 
-                      alt="SDLC Logo" 
-                      className="h-9 w-auto object-contain max-w-[160px]"
-                    />
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900 font-poppins">
-                        Add New Student
-                      </h3>
-                      <p className="text-xs text-slate-500 font-medium">
-                        Register candidate to roster.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowAddModal(false)}
-                    className="p-1.5 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100 cursor-pointer"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleSaveStudent} className="space-y-4 text-xs">
-                  
-                  {/* Category Switcher */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Candidate Category</label>
-                    <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-                      <button
-                        type="button"
-                        onClick={() => setAddStudentType('college')}
-                        className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                          addStudentType === 'college'
-                            ? 'bg-[#004f90] text-white shadow-sm ring-1 ring-[#004f90]'
-                            : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
-                        }`}
-                      >
-                        <GraduationCap className="w-4 h-4" />
-                        <span>College Student</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setAddStudentType('institute')}
-                        className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                          addStudentType === 'institute'
-                            ? 'bg-[#004f90] text-white shadow-sm ring-1 ring-[#004f90]'
-                            : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
-                        }`}
-                      >
-                        <Building2 className="w-4 h-4" />
-                        <span>SDLC Student</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Full Name"
-                      className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs text-slate-800 outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Email Address *</label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="student@example.com"
-                      className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs text-slate-800 outline-none"
-                    />
-                  </div>
-
-                  {addStudentType === 'college' ? (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Roll Number *</label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.rollNumber}
-                          onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
-                          placeholder="e.g. 21CS045"
-                          className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono uppercase text-slate-800 outline-none"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Department</label>
-                          <div className="relative flex items-center">
-                            <select
-                              value={formData.department}
-                              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                              className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                            >
-                              {deptList.length === 0 ? (
-                                <option value="">-- No Departments Added Yet (Add in Course Catalog) --</option>
-                              ) : (
-                                deptList.map(d => (
-                                  <option key={d} value={d}>{d}</option>
-                                ))
-                              )}
-                            </select>
-                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Year</label>
-                          <div className="relative flex items-center">
-                            <select
-                              value={formData.year}
-                              onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                              className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                            >
-                              <option value="1st Year">1st Year</option>
-                              <option value="2nd Year">2nd Year</option>
-                              <option value="3rd Year">3rd Year</option>
-                              <option value="4th Year">4th Year</option>
-                            </select>
-                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track</label>
-                        <div className="relative flex items-center">
-                          <select
-                            value={formData.courseTrack || ''}
-                            onChange={(e) => setFormData({ ...formData, courseTrack: e.target.value })}
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                          >
-                            <option value="">-- None / Standard Department --</option>
-                            {collegeCourseTracks.map(ct => (
-                              <option key={ct} value={ct}>{ct}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date of Birth (DOB)</label>
-                        <input
-                          type="text"
-                          value={formData.dob}
-                          onChange={(e) => handleAddDobChange(e.target.value)}
-                          placeholder="e.g. 04092003 or 04/09/2003"
-                          className={`w-full bg-white border rounded-lg h-10 px-3.5 text-xs text-slate-800 outline-none transition ${
-                            dobError ? 'border-rose-400 focus:border-rose-500 ring-1 ring-rose-200' : 'border-slate-200 focus:border-[#004f90]'
-                          }`}
-                        />
-                        {dobError && (
-                          <p className="text-[11px] font-semibold text-rose-600 mt-1">
-                            Letters not supported. Numbers only.
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">District Branch</label>
-                        <div className="relative flex items-center">
-                          <select
-                            value={formData.center || 'Karur'}
-                            onChange={(e) => setFormData({ ...formData, center: e.target.value })}
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                          >
-                            {centersList.map(c => (
-                              <option key={c.name} value={c.name}>{c.name} Branch ({c.code})</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">SDLC Enrollment ID</label>
-                        <input
-                          type="text"
-                          value={formData.enrollmentId}
-                          onChange={(e) => setFormData({ ...formData, enrollmentId: e.target.value })}
-                          placeholder="Auto-generated e.g. SDLC-KRR-04092003"
-                          className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono uppercase text-slate-800 outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Course *</label>
-                        <div className="relative flex items-center">
-                          <select
-                            value={formData.courseTrack}
-                            onChange={(e) => setFormData({ ...formData, courseTrack: e.target.value })}
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                          >
-                            {instituteCourseTracks.length === 0 ? (
-                              <option value="">-- No SDLC Courses Added Yet (Add in Course Catalog) --</option>
-                            ) : (
-                              instituteCourseTracks.map(ct => (
-                                <option key={ct} value={ct}>{ct}</option>
-                              ))
-                            )}
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="pt-5 border-t border-slate-100 flex items-center justify-end gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddModal(false)}
-                      className="px-4 h-9 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 transition cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-5 h-9 bg-[#004f90] hover:bg-[#003c6e] text-white text-xs font-semibold rounded-lg shadow-2xs transition cursor-pointer"
-                    >
-                      Register Student
-                    </button>
-                  </div>
-
-                </form>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ========================================================================= */}
-      {/* EDIT STUDENT - SIMPLE CLEAN DRAWER */}
-      {/* ========================================================================= */}
-      <AnimatePresence>
-        {showEditModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowEditModal(false)}
-              className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-[999]"
-            />
-
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
-              className="fixed right-0 top-0 bottom-0 h-screen w-full max-w-[460px] bg-white z-[1000] shadow-2xl flex flex-col overflow-hidden"
-            >
-              <div className="flex-1 overflow-y-auto p-7 space-y-6 scrollbar-none text-left">
-                
-                <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-                  <div className="space-y-2.5">
-                    <img 
-                      src="/logo.png" 
-                      alt="SDLC Logo" 
-                      className="h-9 w-auto object-contain max-w-[160px]"
-                    />
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900 font-poppins">
-                        Edit Student Profile
-                      </h3>
-                      <p className="text-xs text-slate-500 font-medium">
-                        Modify candidate profile information.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="p-1.5 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100 cursor-pointer"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleUpdateStudent} className="space-y-4 text-xs">
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={editFormData.name}
-                      onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                      className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs text-slate-800 outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={editFormData.email}
-                      onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                      className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs text-slate-800 outline-none"
-                    />
-                  </div>
-
-                  {editFormData.studentType === 'college' ? (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Roll Number</label>
-                        <input
-                          type="text"
-                          required
-                          value={editFormData.rollNumber}
-                          onChange={(e) => setEditFormData({ ...editFormData, rollNumber: e.target.value })}
-                          className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono uppercase text-slate-800 outline-none"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Department</label>
-                          <div className="relative flex items-center">
-                            <select
-                              value={editFormData.department}
-                              onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
-                              className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                            >
-                              {deptList.length === 0 ? (
-                                <option value="">-- No Departments Added Yet --</option>
-                              ) : (
-                                deptList.map(d => (
-                                  <option key={d} value={d}>{d}</option>
-                                ))
-                              )}
-                            </select>
-                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Year</label>
-                          <div className="relative flex items-center">
-                            <select
-                              value={editFormData.year}
-                              onChange={(e) => setEditFormData({ ...editFormData, year: e.target.value })}
-                              className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                            >
-                              <option value="1st Year">1st Year</option>
-                              <option value="2nd Year">2nd Year</option>
-                              <option value="3rd Year">3rd Year</option>
-                              <option value="4th Year">4th Year</option>
-                            </select>
-                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialized Batch / Course Track</label>
-                        <div className="relative flex items-center">
-                          <select
-                            value={editFormData.courseTrack || ''}
-                            onChange={(e) => setEditFormData({ ...editFormData, courseTrack: e.target.value })}
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                          >
-                            <option value="">-- None / Standard Department --</option>
-                            {collegeEditCourseTracks.map(ct => (
-                              <option key={ct} value={ct}>{ct}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date of Birth (DOB)</label>
-                        <input
-                          type="text"
-                          value={editFormData.dob}
-                          onChange={(e) => handleEditDobInputChange(e.target.value)}
-                          placeholder="e.g. 04092003 or 04/09/2003"
-                          className={`w-full bg-white border rounded-lg h-10 px-3.5 text-xs text-slate-800 outline-none transition ${
-                            editDobError ? 'border-rose-400 focus:border-rose-500 ring-1 ring-rose-200' : 'border-slate-200 focus:border-[#004f90]'
-                          }`}
-                        />
-                        {editDobError && (
-                          <p className="text-[11px] font-semibold text-rose-600 mt-1">
-                            Letters not supported. Numbers only.
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">District Branch</label>
-                        <div className="relative flex items-center">
-                          <select
-                            value={editFormData.center || 'Karur'}
-                            onChange={(e) => handleEditCenterChange(e.target.value)}
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                          >
-                            {centersList.map(c => (
-                              <option key={c.name} value={c.name}>{c.name} Branch ({c.code})</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">SDLC Enrollment ID</label>
-                        <input
-                          type="text"
-                          value={editFormData.enrollmentId}
-                          onChange={(e) => setEditFormData({ ...editFormData, enrollmentId: e.target.value })}
-                          className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 px-3.5 text-xs font-mono uppercase text-slate-800 outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Course</label>
-                        <div className="relative flex items-center">
-                          <select
-                            value={editFormData.courseTrack}
-                            onChange={(e) => setEditFormData({ ...editFormData, courseTrack: e.target.value })}
-                            className="w-full bg-white border border-slate-200 focus:border-[#004f90] rounded-lg h-10 pl-3 pr-8 text-xs font-semibold text-slate-800 outline-none cursor-pointer appearance-none"
-                          >
-                            {instituteCourseTracks.length === 0 ? (
-                              <option value="">-- No SDLC Courses Added Yet --</option>
-                            ) : (
-                              instituteCourseTracks.map(ct => (
-                                <option key={ct} value={ct}>{ct}</option>
-                              ))
-                            )}
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 pointer-events-none" />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="pt-5 border-t border-slate-100 flex items-center justify-end gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setShowEditModal(false)}
-                      className="px-4 h-9 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 transition cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-5 h-9 bg-[#004f90] hover:bg-[#003c6e] text-white text-xs font-semibold rounded-lg shadow-2xs transition cursor-pointer"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ========================================================================= */}
-      {/* BULK IMPORT MODAL - MINIMAL SENIOR DEVELOPER DESIGN */}
-      {/* ========================================================================= */}
-      <AnimatePresence>
-        {showBulkModal && (
-          <div className="fixed inset-0 z-[1050] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              className="bg-white border border-slate-200 rounded-xl max-w-md w-full overflow-hidden shadow-xl text-xs font-sans"
-            >
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <div>
-                  <h2 className="text-base font-bold text-slate-900 font-poppins">
-                    Bulk Import Students
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Upload a CSV file to register candidate records.
-                  </p>
-                </div>
-
-                <button
-                  onClick={resetBulkState}
-                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-4 text-left">
-                
-                {/* Category Switcher Tabs */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Target Category</label>
-                  <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBulkStudentType('college');
-                        setSelectedFile(null);
-                        setParsedStudents([]);
-                      }}
-                      className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        bulkStudentType === 'college'
-                          ? 'bg-[#004f90] text-white shadow-sm ring-1 ring-[#004f90]'
-                          : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
-                      }`}
-                    >
-                      <GraduationCap className="w-4 h-4" />
-                      <span>College Students</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBulkStudentType('institute');
-                        setSelectedFile(null);
-                        setParsedStudents([]);
-                      }}
-                      className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        bulkStudentType === 'institute'
-                          ? 'bg-[#004f90] text-white shadow-sm ring-1 ring-[#004f90]'
-                          : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
-                      }`}
-                    >
-                      <Building2 className="w-4 h-4" />
-                      <span>SDLC Students</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* File Dropzone */}
-                {!selectedFile ? (
-                  <div className="border border-dashed border-slate-300 hover:border-[#004f90] bg-slate-50/50 hover:bg-slate-50 rounded-xl p-6 text-center transition cursor-pointer relative">
-                    <input
-                      type="file"
-                      accept=".csv, .txt"
-                      onChange={handleBulkFileUpload}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                    />
-                    <div className="space-y-1.5 pointer-events-none">
-                      <Upload className="w-5 h-5 text-slate-400 mx-auto" />
-                      <p className="text-xs font-semibold text-slate-800">
-                        Click to select or drag & drop CSV file
-                      </p>
-                      <p className="text-[11px] text-slate-400 font-normal">
-                        Supported formats: .csv, .txt
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5 min-w-0">
-                      <FileText className="w-5 h-5 text-[#004f90] shrink-0" />
-                      <div className="min-w-0 text-left">
-                        <p className="text-xs font-semibold text-slate-900 truncate">
-                          {selectedFile.name}
-                        </p>
-                        <p className="text-[11px] text-emerald-700 font-medium flex items-center gap-1 mt-0.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
-                          {parsedStudents.length} candidates ready
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setSelectedFile(null);
-                        setParsedStudents([]);
-                      }}
-                      className="p-1 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-200/60 cursor-pointer shrink-0"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Download Sample CSV Action */}
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <span className="text-slate-500">Need sample CSV template?</span>
-                  <button
-                    type="button"
-                    onClick={() => downloadSampleCSV(bulkStudentType)}
-                    className="text-[#004f90] font-semibold flex items-center gap-1 hover:underline cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download {bulkStudentType === 'college' ? 'College' : 'SDLC'} Template</span>
-                  </button>
-                </div>
-
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-3.5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={resetBulkState}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleBulkImportSubmit}
-                  disabled={parsedStudents.length === 0}
-                  className="px-4 py-2 bg-[#004f90] hover:bg-[#003c6e] text-white text-xs font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Import {parsedStudents.length > 0 ? `(${parsedStudents.length})` : ''}
-                </button>
-              </div>
-
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* CONFIRMATION DIALOGS - SUPER CLEAN & SIMPLE */}
-      <AnimatePresence>
-        {showDeleteConfirm && studentToDelete && (
-          <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white rounded-xl max-w-sm w-full p-5 space-y-3.5 shadow-xl text-left border border-slate-200"
-            >
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 font-poppins">
-                  Delete Student
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Are you sure you want to delete <strong className="text-slate-900 font-semibold">{studentToDelete.name}</strong>?
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end space-x-2 pt-1 text-xs font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="px-3.5 py-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-md cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmDeleteStudent}
-                  className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-md cursor-pointer"
-                >
-                  Delete
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {showSendConfirm && studentForCredentials && (
-          <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white rounded-xl max-w-sm w-full p-5 space-y-3.5 shadow-xl text-left border border-slate-200"
-            >
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 font-poppins">
-                  Send Credentials
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Send login email to <strong className="text-slate-900 font-semibold">{studentForCredentials.email}</strong>?
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end space-x-2 pt-1 text-xs font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setShowSendConfirm(false)}
-                  className="px-3.5 py-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-md cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmSendCredentials}
-                  disabled={sendingEmail}
-                  className="px-3.5 py-1.5 bg-[#004f90] hover:bg-[#003c6e] text-white rounded-md cursor-pointer disabled:opacity-50"
-                >
-                  {sendingEmail ? 'Sending...' : 'Send'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {showSendAllConfirm && (
-          <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white rounded-xl max-w-sm w-full p-5 space-y-3.5 shadow-xl text-left border border-slate-200"
-            >
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 font-poppins">
-                  Send Bulk Credentials
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Send credentials to all <strong className="text-slate-900 font-semibold">{filteredStudents.length} student(s)</strong> in current view?
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end space-x-2 pt-1 text-xs font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setShowSendAllConfirm(false)}
-                  className="px-3.5 py-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-md cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmSendAllCredentials}
-                  disabled={sendingEmail}
-                  className="px-3.5 py-1.5 bg-[#004f90] hover:bg-[#003c6e] text-white rounded-md cursor-pointer disabled:opacity-50"
-                >
-                  {sendingEmail ? 'Sending...' : `Send (${filteredStudents.length})`}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
+      {/* Subcomponent: StudentTable */}
+      <StudentTable
+        categoryTab={categoryTab}
+        setCategoryTab={setCategoryTab}
+        collegeCount={collegeCount}
+        instituteCount={instituteCount}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        deptFilter={deptFilter}
+        setDeptFilter={setDeptFilter}
+        courseFilter={courseFilter}
+        setCourseFilter={setCourseFilter}
+        centerFilter={centerFilter}
+        setCenterFilter={setCenterFilter}
+        deptList={deptList}
+        instituteCourseTracks={instituteCourseTracks}
+        centersList={centersList}
+        currentStudents={currentStudents}
+        filteredStudents={filteredStudents}
+        totalItems={totalItems}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        getPageNumbers={getPageNumbers}
+        onAddClick={() => {
+          setAddStudentType(categoryTab);
+          setShowAddModal(true);
+        }}
+        onBulkClick={() => {
+          setBulkStudentType(categoryTab);
+          setSelectedFile(null);
+          setParsedStudents([]);
+          setShowBulkModal(true);
+        }}
+        onSendAllClick={() => setShowSendAllConfirm(true)}
+        onEditClick={handleEditClick}
+        onDeleteClick={handleDeleteStudent}
+        onSendCredentialsClick={handleSendCredentials}
+        getCollegeCourseTrack={getCollegeCourseTrack}
+      />
+
+      {/* Subcomponent: StudentAddModal */}
+      <StudentAddModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        addStudentType={addStudentType}
+        setAddStudentType={setAddStudentType}
+        formData={formData}
+        setFormData={setFormData}
+        handleAddDobChange={handleAddDobChange}
+        dobError={dobError}
+        deptList={deptList}
+        collegeCourseTracks={collegeCourseTracks}
+        instituteCourseTracks={instituteCourseTracks}
+        centersList={centersList}
+        handleSaveStudent={handleSaveStudent}
+        getLiveSdclIdPreview={getLiveSdclIdPreview}
+      />
+
+      {/* Subcomponent: StudentEditModal */}
+      <StudentEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setStudentToEdit(null);
+        }}
+        studentToEdit={studentToEdit}
+        editFormData={editFormData}
+        setEditFormData={setEditFormData}
+        handleEditDobInputChange={handleEditDobInputChange}
+        editDobError={editDobError}
+        handleEditCenterChange={handleEditCenterChange}
+        deptList={deptList}
+        collegeEditCourseTracks={collegeEditCourseTracks}
+        instituteCourseTracks={instituteCourseTracks}
+        centersList={centersList}
+        handleUpdateStudent={handleUpdateStudent}
+      />
+
+      {/* Subcomponent: StudentBulkModal */}
+      <StudentBulkModal
+        isOpen={showBulkModal}
+        onClose={() => {
+          setSelectedFile(null);
+          setParsedStudents([]);
+          setShowBulkModal(false);
+        }}
+        bulkStudentType={bulkStudentType}
+        setBulkStudentType={setBulkStudentType}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
+        parsedStudents={parsedStudents}
+        setParsedStudents={setParsedStudents}
+        handleBulkFileUpload={handleBulkFileUpload}
+        handleBulkImportSubmit={handleBulkImportSubmit}
+        downloadSampleCSV={downloadSampleCSV}
+      />
+
+      {/* Subcomponents: Action Modals */}
+      <DeleteStudentModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setStudentToDelete(null);
+        }}
+        studentToDelete={studentToDelete}
+        onConfirm={confirmDeleteStudent}
+      />
+
+      <SendCredentialsModal
+        isOpen={showSendConfirm}
+        onClose={() => {
+          setShowSendConfirm(false);
+          setStudentForCredentials(null);
+        }}
+        studentForCredentials={studentForCredentials}
+        sendingEmail={sendingEmail}
+        onConfirm={confirmSendCredentials}
+      />
+
+      <SendAllCredentialsModal
+        isOpen={showSendAllConfirm}
+        onClose={() => setShowSendAllConfirm(false)}
+        targetCount={filteredStudents.length}
+        sendingEmail={sendingEmail}
+        onConfirm={confirmSendAllCredentials}
+      />
     </div>
   );
 };

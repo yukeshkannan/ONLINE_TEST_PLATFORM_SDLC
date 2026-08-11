@@ -41,10 +41,47 @@ app.set('trust proxy', 1);
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
+import { generalLimiter } from './middleware/rateLimiter.js';
+
+// Setup explicit allowed origins from environment and local dev
+const allowedOriginsList = (process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'http://localhost:5000'
+];
+
+const allAllowedOrigins = new Set([...defaultAllowedOrigins, ...allowedOriginsList]);
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Dynamic origin matching to allow Vercel previews, custom domains, and local dev
-    callback(null, true);
+    // Allow non-browser requests (e.g. mobile apps, curl, uptime bots)
+    if (!origin) return callback(null, true);
+
+    // Allow explicitly defined origins
+    if (allAllowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow Vercel preview deployments & subdomains securely
+    if (/^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // In development mode, allow any local or lan origin
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+
+    // In strict production, if not matched
+    console.warn(`[CORS Blocked] Origin not allowed: ${origin}`);
+    callback(new Error('CORS policy violation: Access not allowed for this origin.'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -53,6 +90,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+// Apply general rate limiter to prevent API abuse
+app.use('/api', generalLimiter);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));

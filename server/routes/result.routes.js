@@ -5,10 +5,12 @@ import roleMiddleware from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
+import { submitLimiter } from '../middleware/rateLimiter.js';
+
 // Guard all result routes with JWT authentication
 router.use(authMiddleware);
 
-router.post('/submit', roleMiddleware('student'), submitTest);
+router.post('/submit', roleMiddleware('student'), submitLimiter, submitTest);
 router.get('/test/:testId', roleMiddleware('admin', 'trainer'), getResultsByTest);
 router.get('/student/:studentId', getResultsByStudent);
 router.delete('/student/:studentId/test/:testId', roleMiddleware('admin', 'trainer'), resetStudentAttempt);
