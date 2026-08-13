@@ -50,29 +50,29 @@ const StudentAddModal = ({
           </div>
 
           {/* Student Type Switcher */}
-          <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+          <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
             <button
               type="button"
               onClick={() => setAddStudentType('college')}
-              className={`py-2 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 addStudentType === 'college'
-                  ? 'bg-white text-[#004f90] shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-[#004f90] text-white shadow-sm ring-1 ring-[#004f90]'
+                  : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
               }`}
             >
-              <GraduationCap className="w-3.5 h-3.5" />
+              <GraduationCap className="w-4 h-4" />
               <span>College Student</span>
             </button>
             <button
               type="button"
               onClick={() => setAddStudentType('institute')}
-              className={`py-2 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 addStudentType === 'institute'
-                  ? 'bg-white text-[#F7931A] shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-[#F7931A] text-white shadow-sm ring-1 ring-[#F7931A]'
+                  : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5" />
+              <BookOpen className="w-4 h-4" />
               <span>SDLC Institute</span>
             </button>
           </div>

@@ -81,7 +81,7 @@ const StudentBulkModal = ({
                   }}
                   className={`py-2.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
                     bulkStudentType === 'institute'
-                      ? 'bg-[#004f90] text-white shadow-sm ring-1 ring-[#004f90]'
+                      ? 'bg-[#F7931A] text-white shadow-sm ring-1 ring-[#F7931A]'
                       : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/60'
                   }`}
                 >
