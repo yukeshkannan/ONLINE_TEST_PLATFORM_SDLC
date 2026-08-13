@@ -109,44 +109,26 @@ const StudentAddModal = ({
               />
             </div>
 
-            {/* DOB */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                  Date of Birth (DOB) *
-                </label>
-                {dobError && <span className="text-rose-500 text-[10px] font-semibold">{dobError}</span>}
-              </div>
-              <input
-                required
-                type="text"
-                placeholder="DD-MM-YYYY (e.g. 04-09-2003)"
-                value={formData.dob}
-                onChange={(e) => handleAddDobChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono"
-              />
-              <p className="text-[10px] text-slate-400">Used as the default login password (format: DDMMYYYY)</p>
-            </div>
-
             {/* Dynamic fields based on student type */}
             {addStudentType === 'college' ? (
               <>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Roll Number */}
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                      College Roll Number *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="e.g. 21CS042"
-                      value={formData.rollNumber}
-                      onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono uppercase"
-                    />
-                  </div>
+                {/* College Roll Number */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
+                    College Roll Number *
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. 21CS042"
+                    value={formData.rollNumber}
+                    onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono uppercase"
+                  />
+                  <p className="text-[10px] text-slate-400">Used as the default login password</p>
+                </div>
 
+                <div className="grid grid-cols-2 gap-3">
                   {/* Department */}
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
@@ -162,22 +144,6 @@ const StudentAddModal = ({
                       </select>
                       <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
                     </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Batch Year Range */}
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                      Batch Range *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2023-2027"
-                      value={formData.batch}
-                      onChange={(e) => setFormData(prev => ({ ...prev, batch: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono"
-                    />
                   </div>
 
                   {/* Academic Year */}
@@ -221,6 +187,25 @@ const StudentAddModal = ({
               </>
             ) : (
               <>
+                {/* DOB for SDLC Institute */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
+                      Date of Birth (DOB) *
+                    </label>
+                    {dobError && <span className="text-rose-500 text-[10px] font-semibold">{dobError}</span>}
+                  </div>
+                  <input
+                    required
+                    type="text"
+                    placeholder="DD-MM-YYYY (e.g. 04-09-2003)"
+                    value={formData.dob}
+                    onChange={(e) => handleAddDobChange(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400">Used as the default login password (format: DDMMYYYY)</p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   {/* SDLC Center */}
                   <div className="space-y-1">

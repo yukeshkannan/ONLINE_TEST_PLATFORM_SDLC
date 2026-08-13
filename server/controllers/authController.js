@@ -185,8 +185,8 @@ export const createStudent = async (req, res, next) => {
 
     let identifier = '';
     if (type === 'college') {
-      if (!rollNumber || !department || !batch) {
-        return res.status(400).json({ message: 'Roll Number, Department, and Batch are required for college students' });
+      if (!rollNumber || !department) {
+        return res.status(400).json({ message: 'Roll Number and Department are required for college students' });
       }
       identifier = rollNumber.trim().toUpperCase();
     } else {

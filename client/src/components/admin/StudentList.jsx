@@ -69,6 +69,19 @@ const StudentList = ({ initialTrack }) => {
   const [studentForCredentials, setStudentForCredentials] = useState(null);
   const [studentToEdit, setStudentToEdit] = useState(null);
 
+  const getInitialFormData = (type = 'college', dept = '', center = '') => ({
+    name: '',
+    email: '',
+    dob: '',
+    rollNumber: '',
+    department: dept || deptList[0] || 'CSE',
+    batch: '',
+    year: '3rd Year',
+    enrollmentId: '',
+    courseTrack: '',
+    center: center || centersList[0]?.name || 'Karur'
+  });
+
   // Add Form state
   const [addStudentType, setAddStudentType] = useState('college');
   const [formData, setFormData] = useState({
@@ -77,7 +90,7 @@ const StudentList = ({ initialTrack }) => {
     dob: '',
     rollNumber: '',
     department: '',
-    batch: '2023-2027',
+    batch: '',
     year: '3rd Year',
     enrollmentId: '',
     courseTrack: '',
@@ -92,7 +105,7 @@ const StudentList = ({ initialTrack }) => {
     studentType: 'college',
     rollNumber: '',
     department: '',
-    batch: '2023-2027',
+    batch: '',
     year: '3rd Year',
     enrollmentId: '',
     courseTrack: '',
@@ -300,7 +313,7 @@ const StudentList = ({ initialTrack }) => {
         } : {
           rollNumber: editFormData.rollNumber.trim().toUpperCase(),
           department: editFormData.department,
-          batch: editFormData.batch ? editFormData.batch.trim() : '2023-2027',
+          batch: editFormData.batch ? editFormData.batch.trim() : (editFormData.year ? `${editFormData.year} Batch` : 'General'),
           year: editFormData.year,
           courseTrack: editFormData.courseTrack
         })
@@ -399,6 +412,26 @@ const StudentList = ({ initialTrack }) => {
     return pages;
   };
 
+  const handleOpenAddModal = () => {
+    const type = categoryTab;
+    setAddStudentType(type);
+    setDobError('');
+    setFormData(getInitialFormData(type));
+    setShowAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setShowAddModal(false);
+    setDobError('');
+    setFormData(getInitialFormData(addStudentType));
+  };
+
+  const handleSwitchAddStudentType = (newType) => {
+    setAddStudentType(newType);
+    setDobError('');
+    setFormData(getInitialFormData(newType));
+  };
+
   const handleSaveStudent = async (e) => {
     e.preventDefault();
     const loader = toast.loading('Adding student...');
@@ -408,15 +441,15 @@ const StudentList = ({ initialTrack }) => {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         studentType: addStudentType,
-        dob: formData.dob ? formData.dob.trim() : '',
         ...(isInstitute ? {
+          dob: formData.dob ? formData.dob.trim() : '',
           enrollmentId: formData.enrollmentId ? formData.enrollmentId.trim().toUpperCase() : '',
           courseTrack: formData.courseTrack,
           center: formData.center || 'Karur'
         } : {
           rollNumber: formData.rollNumber.trim().toUpperCase(),
           department: formData.department,
-          batch: formData.batch ? formData.batch.trim() : '2023-2027',
+          batch: formData.batch ? formData.batch.trim() : (formData.year ? `${formData.year} Batch` : 'General'),
           year: formData.year,
           courseTrack: formData.courseTrack
         })
@@ -424,19 +457,7 @@ const StudentList = ({ initialTrack }) => {
 
       await api.post('/auth/students', payload);
       toast.success(`${isInstitute ? 'SDLC' : 'College'} student added.`, { id: loader });
-      setShowAddModal(false);
-      setFormData({
-        name: '',
-        email: '',
-        dob: '',
-        rollNumber: '',
-        department: 'CSE',
-        batch: '2023-2027',
-        year: '3rd Year',
-        enrollmentId: '',
-        courseTrack: 'Full Stack Web Dev (MERN)',
-        center: 'Karur'
-      });
+      handleCloseAddModal();
       fetchStudents();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add student.', { id: loader });
@@ -829,10 +850,7 @@ const StudentList = ({ initialTrack }) => {
         totalPages={totalPages}
         setCurrentPage={setCurrentPage}
         getPageNumbers={getPageNumbers}
-        onAddClick={() => {
-          setAddStudentType(categoryTab);
-          setShowAddModal(true);
-        }}
+        onAddClick={handleOpenAddModal}
         onBulkClick={() => {
           setBulkStudentType(categoryTab);
           setSelectedFile(null);
@@ -849,9 +867,9 @@ const StudentList = ({ initialTrack }) => {
       {/* Subcomponent: StudentAddModal */}
       <StudentAddModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={handleCloseAddModal}
         addStudentType={addStudentType}
-        setAddStudentType={setAddStudentType}
+        setAddStudentType={handleSwitchAddStudentType}
         formData={formData}
         setFormData={setFormData}
         handleAddDobChange={handleAddDobChange}

@@ -181,9 +181,9 @@ const StudentTable = ({
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
                 <th className="py-3 px-4">Student Info</th>
-                <th className="py-3 px-4">Identifier / DOB</th>
+                <th className="py-3 px-4">{categoryTab === 'college' ? 'Roll Number' : 'Identifier / DOB'}</th>
                 <th className="py-3 px-4">{categoryTab === 'college' ? 'Department & Track' : 'Course & Center'}</th>
-                <th className="py-3 px-4">{categoryTab === 'college' ? 'Batch & Year' : 'Registration Info'}</th>
+                <th className="py-3 px-4">{categoryTab === 'college' ? 'Academic Year' : 'Registration Info'}</th>
                 <th className="py-3 px-4 text-center">Credentials</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
@@ -199,9 +199,9 @@ const StudentTable = ({
               ) : (
                 currentStudents.map((student) => {
                   const isInstitute = student.studentType === 'institute';
-                  const defaultPass = student.dob 
-                    ? student.dob.replace(/-/g, '').trim()
-                    : '123456';
+                  const defaultPass = isInstitute
+                    ? (student.dob ? student.dob.replace(/-/g, '').trim() : (student.enrollmentId || student.rollNumber || '123456'))
+                    : (student.rollNumber || '123456');
 
                   return (
                     <tr key={student._id} className="hover:bg-slate-50/60 transition-colors">
@@ -224,8 +224,8 @@ const StudentTable = ({
                           <span className="font-bold text-[#004f90]">
                             {isInstitute ? (student.enrollmentId || student.rollNumber || 'N/A') : (student.rollNumber || 'N/A')}
                           </span>
-                          {student.dob && (
-                            <div className="text-[11px] text-slate-400">DOB: {student.dob}</div>
+                          {isInstitute && student.dob && (
+                            <div className="text-[11px] text-slate-400 font-sans">DOB: {student.dob}</div>
                           )}
                         </div>
                       </td>
@@ -265,7 +265,9 @@ const StudentTable = ({
                         ) : (
                           <div className="text-[11px]">
                             <div className="font-semibold text-slate-700">{student.year || 'N/A'}</div>
-                            <div className="text-slate-400">Batch: {student.batch || 'General'}</div>
+                            {student.batch && student.batch !== 'General' && !student.batch.includes('Batch') && (
+                              <div className="text-slate-400 font-mono text-[10px]">Batch: {student.batch}</div>
+                            )}
                           </div>
                         )}
                       </td>

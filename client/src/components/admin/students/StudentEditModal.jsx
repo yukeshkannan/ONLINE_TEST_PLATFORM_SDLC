@@ -79,25 +79,25 @@ const StudentEditModal = ({
               />
             </div>
 
-            {/* DOB */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                  Date of Birth (DOB)
-                </label>
-                {editDobError && <span className="text-rose-500 text-[10px] font-semibold">{editDobError}</span>}
-              </div>
-              <input
-                type="text"
-                placeholder="DD-MM-YYYY (e.g. 04-09-2003)"
-                value={editFormData.dob}
-                onChange={(e) => handleEditDobInputChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono"
-              />
-            </div>
-
             {isInstitute ? (
               <>
+                {/* DOB for SDLC Institute */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
+                      Date of Birth (DOB)
+                    </label>
+                    {editDobError && <span className="text-rose-500 text-[10px] font-semibold">{editDobError}</span>}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="DD-MM-YYYY (e.g. 04-09-2003)"
+                    value={editFormData.dob}
+                    onChange={(e) => handleEditDobInputChange(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   {/* Center */}
                   <div className="space-y-1">
@@ -150,21 +150,21 @@ const StudentEditModal = ({
               </>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Roll Number */}
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                      College Roll Number *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      value={editFormData.rollNumber}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono uppercase"
-                    />
-                  </div>
+                {/* Roll Number */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
+                    College Roll Number *
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    value={editFormData.rollNumber}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono uppercase"
+                  />
+                </div>
 
+                <div className="grid grid-cols-2 gap-3">
                   {/* Department */}
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
@@ -180,22 +180,6 @@ const StudentEditModal = ({
                       </select>
                       <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
                     </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Batch Range */}
-                  <div className="space-y-1">
-                    <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                      Batch Range
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2023-2027"
-                      value={editFormData.batch}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, batch: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9 px-3 text-slate-800 outline-none font-mono"
-                    />
                   </div>
 
                   {/* Year */}
