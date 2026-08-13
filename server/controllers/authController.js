@@ -226,16 +226,29 @@ export const createStudent = async (req, res, next) => {
     const existingStudent = await Student.findOne({
       $or: [
         { email: cleanEmail },
-        ...(type === 'college' && rollNumber ? [{ rollNumber: identifier }] : []),
+        ...(type === 'college' && identifier ? [{ rollNumber: identifier }] : []),
         ...(type === 'institute' && identifier ? [{ enrollmentId: identifier }, { rollNumber: identifier }] : [])
       ]
     });
 
     if (existingStudent) {
-      if (existingStudent.email === cleanEmail) {
-        return res.status(400).json({ message: 'Student with this email already exists' });
+      const isEmailDup = existingStudent.email.toLowerCase() === cleanEmail;
+      const dupTypeStr = existingStudent.studentType === 'institute' ? 'SDLC Institute' : 'College';
+      if (isEmailDup) {
+        return res.status(400).json({ 
+          message: `Email "${cleanEmail}" already exists for ${existingStudent.name} (${dupTypeStr} Portal).` 
+        });
       }
-      return res.status(400).json({ message: 'Student with this Roll Number / Enrollment ID already exists' });
+      return res.status(400).json({ 
+        message: `Roll Number / ID "${identifier}" already exists for ${existingStudent.name} (${dupTypeStr} Portal).` 
+      });
+    }
+
+    const existingAdmin = await Admin.findOne({ email: cleanEmail });
+    if (existingAdmin) {
+      return res.status(400).json({
+        message: `Email "${cleanEmail}" is already in use by an Admin/Trainer account.`
+      });
     }
 
     const defaultPassword = identifier;
@@ -253,9 +266,10 @@ export const createStudent = async (req, res, next) => {
     if (type === 'college') {
       studentData.rollNumber = identifier;
       studentData.department = department.trim();
-      studentData.batch = batch ? batch.trim() : '2023-2027';
-      studentData.year = year ? year.trim() : calculateAcademicYear(batch);
+      studentData.batch = batch ? batch.trim() : (year ? `${year} Batch` : 'General');
+      studentData.year = year ? year.trim() : '1st Year';
       studentData.courseTrack = courseTrack ? courseTrack.trim() : '';
+      studentData.dob = dob ? dob.trim() : '';
     } else {
       studentData.enrollmentId = identifier;
       studentData.rollNumber = identifier;
@@ -264,6 +278,7 @@ export const createStudent = async (req, res, next) => {
       studentData.department = (courseTrack || 'Institute').trim();
       studentData.batch = (batchTime || 'Institute Batch').trim();
       studentData.year = 'Institute';
+      studentData.dob = dob ? dob.trim() : '';
     }
 
     const student = await Student.create(studentData);
@@ -478,10 +493,16 @@ export const updateStudent = async (req, res, next) => {
     });
 
     if (existingStudent) {
-      if (existingStudent.email === cleanEmail) {
-        return res.status(400).json({ message: 'Student with this email already exists' });
+      const isEmailDup = existingStudent.email.toLowerCase() === cleanEmail;
+      const dupTypeStr = existingStudent.studentType === 'institute' ? 'SDLC Institute' : 'College';
+      if (isEmailDup) {
+        return res.status(400).json({ 
+          message: `Email "${cleanEmail}" already exists for ${existingStudent.name} (${dupTypeStr} Portal).` 
+        });
       }
-      return res.status(400).json({ message: 'Student with this identifier already exists' });
+      return res.status(400).json({ 
+        message: `Roll Number / ID "${identifier}" already exists for ${existingStudent.name} (${dupTypeStr} Portal).` 
+      });
     }
 
     student.name = name.trim();
