@@ -879,7 +879,6 @@ const StudentList = ({ initialTrack }) => {
         instituteCourseTracks={instituteCourseTracks}
         centersList={centersList}
         handleSaveStudent={handleSaveStudent}
-        getLiveSdclIdPreview={getLiveSdclIdPreview}
       />
 
       {/* Subcomponent: StudentEditModal */}
