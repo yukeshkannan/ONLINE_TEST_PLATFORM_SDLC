@@ -219,7 +219,7 @@ const AdminLogin = () => {
                   <input
                     required
                     type="email"
-                    placeholder="faculty@college.edu or admin@sdlc.in"
+                    placeholder="admin@sdlc.in"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isSubmitting}
