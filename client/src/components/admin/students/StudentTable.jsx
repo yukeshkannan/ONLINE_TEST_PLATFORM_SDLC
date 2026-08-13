@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Users, UserPlus, Search, Filter, Trash2, Edit3, CheckCircle2, 
-  GraduationCap, BookOpen, Upload, Send, KeyRound, Copy, Mail,
+  GraduationCap, BookOpen, Upload, Send, Mail,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 const StudentTable = ({
   categoryTab,
@@ -37,15 +36,6 @@ const StudentTable = ({
   onSendCredentialsClick,
   getCollegeCourseTrack
 }) => {
-  const [copiedId, setCopiedId] = useState(null);
-
-  const copyToClipboard = (text, id) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    toast.success('Password copied to clipboard');
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
   return (
     <div className="space-y-6">
       {/* Category Tabs: College vs SDLC */}
@@ -184,14 +174,13 @@ const StudentTable = ({
                 <th className="py-3 px-4">{categoryTab === 'college' ? 'Roll Number' : 'Identifier / DOB'}</th>
                 <th className="py-3 px-4">{categoryTab === 'college' ? 'Department & Track' : 'Course & Center'}</th>
                 <th className="py-3 px-4">{categoryTab === 'college' ? 'Academic Year' : 'Registration Info'}</th>
-                <th className="py-3 px-4 text-center">Credentials</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {currentStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-12 text-center text-slate-400 font-medium">
+                  <td colSpan="5" className="py-12 text-center text-slate-400 font-medium">
                     <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                     <p>No students found matching the selected criteria.</p>
                   </td>
@@ -199,9 +188,6 @@ const StudentTable = ({
               ) : (
                 currentStudents.map((student) => {
                   const isInstitute = student.studentType === 'institute';
-                  const defaultPass = isInstitute
-                    ? (student.dob ? student.dob.replace(/-/g, '').trim() : (student.enrollmentId || student.rollNumber || '123456'))
-                    : (student.rollNumber || '123456');
 
                   return (
                     <tr key={student._id} className="hover:bg-slate-50/60 transition-colors">
@@ -238,7 +224,7 @@ const StudentTable = ({
                               {student.courseTrack || student.department || 'SDLC'}
                             </span>
                             <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                              📍 {student.center || 'Karur'} Center
+                              {student.center || 'Karur'} Center
                             </div>
                           </div>
                         ) : (
@@ -270,19 +256,6 @@ const StudentTable = ({
                             )}
                           </div>
                         )}
-                      </td>
-
-                      {/* Credentials */}
-                      <td className="py-3.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(defaultPass, student._id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-[11px] font-mono font-semibold transition cursor-pointer"
-                          title="Click to copy password"
-                        >
-                          <KeyRound className="w-3 h-3 text-slate-400" />
-                          <span>{copiedId === student._id ? 'Copied!' : 'Copy Pass'}</span>
-                        </button>
                       </td>
 
                       {/* Actions */}
