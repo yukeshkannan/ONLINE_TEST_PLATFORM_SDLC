@@ -193,13 +193,8 @@ const Footer = ({ onEnterPortal }) => {
         {/* Bottom Bar: Operational Status & Copyright */}
         <div className="border-t border-slate-100 pt-7 flex flex-col sm:flex-row justify-between items-center gap-3.5 text-xs text-slate-400">
           <p className="font-medium text-center sm:text-left">
-            © 2026 SDLC Skill Development Learning Centre. All rights reserved.
+            &Copyright 2026 SDLC Skill Development Learning Centre. All rights reserved.
           </p>
-
-          <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-bold">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span>All Assessment Systems Operational</span>
-          </div>
         </div>
 
       </div>
