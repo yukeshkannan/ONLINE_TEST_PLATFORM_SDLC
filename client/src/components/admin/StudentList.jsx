@@ -142,34 +142,20 @@ const StudentList = ({ initialTrack }) => {
       .catch(() => {});
   };
 
-  // Specialized College Tracks
+  // Specialized College Tracks dynamically from Database
   const collegeCourseTracks = allBatches
-    .filter(b => b.category === 'college' && (b.department === 'All Departments' || !formData.department || b.department === formData.department))
+    .filter(b => b.isActive !== false && b.category === 'college' && (b.department === 'All Departments' || !formData.department || b.department === formData.department))
     .map(b => b.name);
 
   const collegeEditCourseTracks = allBatches
-    .filter(b => b.category === 'college' && (b.department === 'All Departments' || !editFormData.department || b.department === editFormData.department))
+    .filter(b => b.isActive !== false && b.category === 'college' && (b.department === 'All Departments' || !editFormData.department || b.department === editFormData.department))
     .map(b => b.name);
 
-  // SDLC Institute Courses
-  const defaultInstituteTracks = [
-    'MERN Stack',
-    'Python Full Stack',
-    'Java Full Stack',
-    'PHP Full Stack',
-    'Data Science & AI',
-    'UI/UX Design & Figma',
-    'Cloud & DevOps Engineering',
-    'Cybersecurity & Networking',
-    'AutoCAD',
-    'SolidWorks'
-  ];
-
-  const instituteCourseTracks = Array.from(new Set([
-    ...allBatches.filter(b => b.category !== 'college').map(b => b.name),
-    ...students.filter(s => s.studentType === 'institute' && s.courseTrack && s.courseTrack !== 'General' && s.courseTrack !== '-').map(s => s.courseTrack),
-    ...defaultInstituteTracks
-  ])).filter(Boolean);
+  // 100% Dynamic SDLC Institute Courses directly from Database (SDLC Course Management)
+  const instituteCourseTracks = allBatches
+    .filter(b => b.isActive !== false && (b.category === 'institute' || b.category !== 'college'))
+    .map(b => b.name)
+    .filter(Boolean);
 
   // Fetch student roster from server
   const fetchStudents = async () => {
@@ -582,18 +568,10 @@ const StudentList = ({ initialTrack }) => {
 
   const normalizeCourseTrackName = (raw) => {
     if (!raw) return '';
-    const clean = raw.toString().trim().toLowerCase();
-    if (clean.includes('solid')) return 'SolidWorks';
-    if (clean.includes('autocad') || clean.includes('cad')) return 'AutoCAD';
-    if (clean.includes('mern') || clean.includes('full stack web') || clean.includes('web dev')) return 'Full Stack Web Dev (MERN)';
-    if (clean.includes('data science') || clean.includes('ai') || clean === 'ds') return 'Data Science & AI';
-    if (clean.includes('python')) return 'Python Full Stack';
-    if (clean.includes('java')) return 'Java Full Stack';
-    if (clean.includes('ui') || clean.includes('ux') || clean.includes('figma')) return 'UI/UX Design & Figma';
-    if (clean.includes('devops') || clean.includes('cloud')) return 'Cloud & DevOps Engineering';
-    if (clean.includes('cyber') || clean.includes('network')) return 'Cybersecurity & Networking';
-    
-    return raw.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    const clean = raw.toString().trim();
+    const matched = allBatches.find(b => b.name.toLowerCase() === clean.toLowerCase());
+    if (matched) return matched.name;
+    return clean;
   };
 
   const parseCsvToStudents = (text, type) => {
