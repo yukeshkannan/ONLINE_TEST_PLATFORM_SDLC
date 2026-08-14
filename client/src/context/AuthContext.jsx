@@ -9,9 +9,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkLocalFallback = () => {
+    const restoreSession = async () => {
       const savedToken = localStorage.getItem('auth_token');
       const savedUser = localStorage.getItem('auth_user');
+
+      // 1. If valid unexpired access token exists, authenticate immediately without network latency
       if (savedToken && savedUser) {
         try {
           if (!isTokenExpired(savedToken)) {
@@ -19,21 +21,24 @@ export const AuthProvider = ({ children }) => {
             setAccessToken(savedToken);
             setUser(parsedUser);
             setIsAuthenticated(true);
-            return true;
+            setLoading(false);
+            return;
           }
         } catch (e) {
           console.error('Failed to parse saved user:', e);
         }
       }
-      setUser(null);
-      setIsAuthenticated(false);
-      setAccessToken('');
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('auth_token');
-      return false;
-    };
 
-    const restoreSession = async () => {
+      // 2. If no saved token/user exists (guest visitor), skip refresh request to avoid console 401 errors
+      if (!savedToken && !savedUser) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setAccessToken('');
+        setLoading(false);
+        return;
+      }
+
+      // 3. If token is expired, attempt token refresh
       const isSessionActive = sessionStorage.getItem('app_session_active');
       sessionStorage.setItem('app_session_active', 'true');
 
@@ -45,10 +50,18 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('auth_user', JSON.stringify(data.user));
           setIsAuthenticated(true);
         } else {
-          checkLocalFallback();
+          setUser(null);
+          setIsAuthenticated(false);
+          setAccessToken('');
+          localStorage.removeItem('auth_user');
+          localStorage.removeItem('auth_token');
         }
       } catch (error) {
-        checkLocalFallback();
+        setUser(null);
+        setIsAuthenticated(false);
+        setAccessToken('');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_token');
       } finally {
         setLoading(false);
       }

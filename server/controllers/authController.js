@@ -85,7 +85,7 @@ export const studentLogin = async (req, res, next) => {
 
 
 export const refreshToken = async (req, res, next) => {
-  const token = req.cookies.refreshToken;
+  const token = req.cookies?.refreshToken || req.body?.refreshToken || req.headers['x-refresh-token'];
 
   if (!token) {
     return res.status(401).json({ authenticated: false, message: 'No refresh token provided' });
