@@ -152,10 +152,14 @@ const StudentList = ({ initialTrack }) => {
     .map(b => b.name);
 
   // 100% Dynamic SDLC Institute Courses directly from Database (SDLC Course Management)
-  const instituteCourseTracks = allBatches
-    .filter(b => b.isActive !== false && (b.category === 'institute' || b.category !== 'college'))
-    .map(b => b.name)
-    .filter(Boolean);
+  const instituteCourseTracks = Array.from(
+    new Set(
+      allBatches
+        .filter(b => b.isActive !== false && (b.category === 'institute' || b.category !== 'college'))
+        .map(b => (b.name || '').trim())
+        .filter(Boolean)
+    )
+  );
 
   // Fetch student roster from server
   const fetchStudents = async () => {
