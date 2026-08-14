@@ -193,13 +193,13 @@ const Footer = ({ onEnterPortal }) => {
         {/* Bottom Bar: Operational Status & Copyright */}
         <div className="border-t border-slate-100 pt-7 flex flex-col sm:flex-row justify-between items-center gap-3.5 text-xs text-slate-400">
           <p className="font-medium text-center sm:text-left">
-            &Copyright 2026 SDLC Skill Development Learning Centre. All rights reserved.
+            &copy 2026 SDLC Skill Development Learning Centre. All rights reserved.
           </p>
         </div>
 
       </div>
     </footer>
   );
-};
+}
 
 export default Footer;
