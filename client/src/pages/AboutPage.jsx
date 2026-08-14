@@ -1,56 +1,98 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { 
+  ShieldCheck, 
+  Zap, 
+  Wifi, 
+  Award, 
+  Users, 
+  Building2, 
+  CheckCircle2, 
+  ArrowRight,
+  Eye,
+  Rocket,
+  Lock,
+  Layers,
+  GraduationCap
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import MainNavbar from '../components/shared/MainNavbar.jsx';
 import Footer from '../components/shared/Footer.jsx';
 
 const AboutPage = () => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAction = () => {
+    if (isAuthenticated && user?.role === 'student') {
+      navigate('/student/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-background text-on-surface font-body-md relative overflow-x-hidden flex flex-col justify-between"
+      className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#F7931A]/20 relative overflow-x-hidden flex flex-col justify-between"
     >
       <MainNavbar />
 
       <main className="flex-grow pt-28 sm:pt-36 pb-20">
+        
+        {/* Background Ambient Glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute -top-40 left-1/4 w-96 h-96 bg-[#004f90]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-96 h-96 bg-[#F7931A]/10 rounded-full blur-3xl"></div>
+        </div>
+
         <section id="about">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-16 lg:px-20">
-            <div className="max-w-5xl mx-auto">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
+            <div className="max-w-5xl mx-auto space-y-16">
               
               {/* Minimalist Heading */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="text-center mb-16"
+                className="text-center space-y-4"
               >
-                <span className="text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3.5 py-1.5 rounded-full inline-block mb-4">About SDLC Platform</span>
-                <h1 className="font-poppins text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-                  Smart Testing. <span className="orange-underline">Zero Friction.</span>
+                <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-[#004f90] text-xs font-bold uppercase tracking-wider">
+                  <span>About SDLC Skill Assessment</span>
+                </div>
+                
+                <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                  High-Integrity Testing. <br />
+                  <span className="bg-gradient-to-r from-[#004f90] via-blue-600 to-[#F7931A] bg-clip-text text-transparent">
+                    Zero Operational Friction.
+                  </span>
                 </h1>
-                <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-                  We empower educational institutions with cutting-edge evaluation technology designed for high reliability, automated grading, and uncompromised security.
+
+                <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
+                  We engineer advanced digital assessment infrastructure designed specifically for colleges, universities, and training institutes to deliver secure, automated, and cheat-proof examinations at scale.
                 </p>
               </motion.div>
 
-              {/* 3 Sleek Core Value Pillar Cards with Hover Zoom & Box Shadow */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {/* 3 Core Value Pillars */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 {/* Card 1 */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 }}
-                  className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-2xl hover:shadow-primary/15 transform hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/40 transition-all duration-300 group cursor-pointer"
+                  className="bg-white p-7 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl font-bold">verified_user</span>
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 text-[#004f90] flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                    <ShieldCheck className="h-6 w-6" />
                   </div>
-                  <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">Secure Proctoring</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    Automated tab-switch monitoring and secure browser sessions ensure 100% integrity during examinations.
+                  <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2">Uncompromised Security</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Automated fullscreen enforcement, strict 3-warning tab switch monitoring, and real-time proctoring audit trails preserve academic honesty.
                   </p>
                 </motion.div>
 
@@ -59,14 +101,14 @@ const AboutPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
-                  className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-2xl hover:shadow-[#F7931A]/15 transform hover:-translate-y-2 hover:scale-[1.03] hover:border-[#F7931A]/40 transition-all duration-300 group cursor-pointer"
+                  className="bg-white p-7 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-[#F7931A]/10 text-[#F7931A] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl font-bold">bolt</span>
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 text-[#F7931A] flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                    <Zap className="h-6 w-6" />
                   </div>
-                  <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2 group-hover:text-[#F7931A] transition-colors">Instant Analytics</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    Automated evaluation engine delivers instant scorecards, rank sheets, and detailed student metrics.
+                  <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2">Instant Score Matrix</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Zero waiting for results. Candidates and instructors receive instant scorecards, pass/fail status, and percentile breakdowns upon submission.
                   </p>
                 </motion.div>
 
@@ -75,39 +117,68 @@ const AboutPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
-                  className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-2xl hover:shadow-primary/15 transform hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/40 transition-all duration-300 group cursor-pointer"
+                  className="bg-white p-7 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl font-bold">cloud_sync</span>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                    <Wifi className="h-6 w-6" />
                   </div>
-                  <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">Cloud Scale</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    Engineered to host thousands of concurrent exam candidates smoothly with zero latency and 99.9% uptime.
+                  <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2">Dropout Protection</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Built-in local memory backup safeguards all candidate answers against campus WiFi dropouts, ensuring seamless recovery with zero loss.
                   </p>
                 </motion.div>
 
               </div>
 
-              {/* Minimalist Vision & Mission Strip */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200/70 space-y-3 shadow-sm">
-                  <div className="flex items-center space-x-2 text-primary font-bold text-sm uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-lg">visibility</span>
-                    <span>Our Vision</span>
+              {/* Vision & Mission Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-8 rounded-2xl border border-slate-200/90 space-y-3 shadow-sm">
+                  <div className="flex items-center space-x-2 text-[#004f90] font-black text-xs uppercase tracking-wider">
+                    <Eye className="h-4 w-4" />
+                    <span>Our Institutional Vision</span>
                   </div>
-                  <p className="text-slate-700 text-base leading-relaxed">
-                    To build the most trusted, effortless digital testing infrastructure for colleges and training academies.
+                  <h4 className="font-poppins text-xl font-bold text-slate-800">Transforming Academic Calibration</h4>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    To deliver a seamless, state-of-the-art digital assessment standard that empowers colleges and training academies to evaluate technical competencies accurately with zero manual overhead.
                   </p>
                 </div>
 
-                <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200/70 space-y-3 shadow-sm">
-                  <div className="flex items-center space-x-2 text-[#F7931A] font-bold text-sm uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-lg">rocket_launch</span>
+                <div className="bg-white p-8 rounded-2xl border border-slate-200/90 space-y-3 shadow-sm">
+                  <div className="flex items-center space-x-2 text-[#F7931A] font-black text-xs uppercase tracking-wider">
+                    <Rocket className="h-4 w-4" />
                     <span>Our Mission</span>
                   </div>
-                  <p className="text-slate-700 text-base leading-relaxed">
-                    To eliminate manual examination hassles through intelligent automation and transparent skill calibration.
+                  <h4 className="font-poppins text-xl font-bold text-slate-800">Speed, Accuracy & Integrity</h4>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    To eliminate manual examination friction through intuitive candidate interfaces, enterprise-grade cloud grading, and transparent cohort analytics.
                   </p>
+                </div>
+              </div>
+
+              {/* Institutional Call To Action Banner */}
+              <div className="bg-gradient-to-r from-[#004f90] to-blue-700 rounded-3xl p-8 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-[#004f90]/15">
+                <div className="space-y-1.5 text-center md:text-left">
+                  <h3 className="font-poppins text-2xl font-black">Ready to experience the platform?</h3>
+                  <p className="text-blue-100 text-sm max-w-lg">
+                    Launch candidate assessments or explore administrative cohort analytics instantly.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <button 
+                    onClick={handleAction}
+                    className="bg-[#F7931A] hover:bg-[#e08210] text-white font-extrabold px-6 py-3 rounded-xl text-sm shadow-md transition-all cursor-pointer flex items-center space-x-2"
+                  >
+                    <span>Enter Portal</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+
+                  <Link 
+                    to="/contact"
+                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-5 py-3 rounded-xl text-sm transition-all"
+                  >
+                    <span>Contact Us</span>
+                  </Link>
                 </div>
               </div>
 

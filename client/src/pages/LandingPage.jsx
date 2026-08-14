@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
@@ -11,7 +11,6 @@ import {
   Layers, 
   CheckCircle2, 
   Clock, 
-  Sparkles, 
   MapPin, 
   Phone, 
   Mail, 
@@ -20,12 +19,72 @@ import {
   Users,
   Check,
   ShieldAlert,
-  ChevronRight
+  GraduationCap,
+  Sparkles,
+  Activity,
+  CheckCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import MainNavbar from '../components/shared/MainNavbar.jsx';
 import Footer from '../components/shared/Footer.jsx';
+
+// Scroll-triggered Animated Number Counter Component
+const AnimatedCounter = ({ target, duration = 1800, prefix = '', suffix = '', decimals = 0 }) => {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
+  useEffect(() => {
+    if (!hasAnimated) return;
+
+    const end = parseFloat(target);
+    const startTime = performance.now();
+
+    const updateCounter = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Easing function (easeOutExpo)
+      const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const current = easeOut * end;
+      
+      setCount(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(updateCounter);
+  }, [hasAnimated, target, duration]);
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      {prefix}
+      {decimals > 0 ? count.toFixed(decimals) : Math.floor(count).toLocaleString()}
+      {suffix}
+    </span>
+  );
+};
 
 const LandingPage = ({ onEnterPortal }) => {
   const { isAuthenticated, user } = useAuth();
@@ -38,24 +97,6 @@ const LandingPage = ({ onEnterPortal }) => {
     message: ''
   });
   const [sendingMessage, setSendingMessage] = useState(false);
-
-  // Interactive Live Simulator state
-  const [selectedMockOption, setSelectedMockOption] = useState('B');
-  const [mockTimer, setMockTimer] = useState(1785); // 29:45 in seconds
-
-  // Tick the live mockup timer for realism
-  useEffect(() => {
-    const timerInterval = setInterval(() => {
-      setMockTimer(prev => (prev > 10 ? prev - 1 : 1785));
-    }, 1000);
-    return () => clearInterval(timerInterval);
-  }, []);
-
-  const formatMockTime = (seconds) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -112,10 +153,10 @@ const LandingPage = ({ onEnterPortal }) => {
 
       <main className="relative">
         
-        {/* Background Ambient Glows & Grid */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute -top-40 left-1/4 w-96 h-96 bg-[#004f90]/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-20 right-1/4 w-96 h-96 bg-[#F7931A]/10 rounded-full blur-3xl"></div>
+        {/* Background Ambient Gradient Glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute -top-40 left-1/4 w-[450px] h-[450px] bg-[#004f90]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-[#F7931A]/10 rounded-full blur-3xl"></div>
         </div>
 
         {/* ========================================================= */}
@@ -124,28 +165,17 @@ const LandingPage = ({ onEnterPortal }) => {
         <section className="relative pt-28 sm:pt-36 pb-16 md:pb-24 overflow-hidden">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 w-full">
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
               
-              {/* Left Column: Headline & Action Points */}
+              {/* Left Column: Headline & Action Points (No top badge pill) */}
               <motion.div 
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="lg:col-span-7 space-y-6 text-left z-10"
+                className="lg:col-span-6 space-y-6 text-left z-10"
               >
-                {/* Top Badge */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 shadow-xs backdrop-blur-md">
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F7931A] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#F7931A]"></span>
-                  </span>
-                  <span className="text-[11px] sm:text-xs font-bold text-slate-700 tracking-wide uppercase">
-                    SDLC Assessment Engine • Enterprise Grade
-                  </span>
-                </div>
-
                 {/* Main Headline */}
-                <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-black leading-[1.12] text-slate-900 tracking-tight">
+                <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-black leading-[1.12] text-slate-900 tracking-tight">
                   Conduct Exams. <br className="hidden sm:block" />
                   <span className="bg-gradient-to-r from-[#004f90] via-blue-600 to-[#F7931A] bg-clip-text text-transparent">
                     Evaluate Smarter.
@@ -157,7 +187,7 @@ const LandingPage = ({ onEnterPortal }) => {
                   A high-integrity online examination platform built for colleges and training institutes to administer secure MCQ assessments with zero-latency grading and tamper-proof proctoring.
                 </p>
                 
-                {/* Dual Buttons */}
+                {/* Dual Action Buttons */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                   <button 
                     onClick={handleStartExam}
@@ -175,146 +205,149 @@ const LandingPage = ({ onEnterPortal }) => {
                   </Link>
                 </div>
 
-                {/* Micro Trust Indicators */}
-                <div className="pt-4 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-500 font-medium">
+                {/* Trust Indicators */}
+                <div className="pt-4 flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-slate-500 font-medium">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
                     <span>Zero-Tolerance Anti-Cheat</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Zap className="h-4 w-4 text-amber-500 shrink-0" />
-                    <span>Instant Grading Matrix</span>
+                    <span>Instant Score Evaluation</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Wifi className="h-4 w-4 text-blue-600 shrink-0" />
-                    <span>Offline-Safe Auto Sync</span>
+                    <span>Offline Resilient Auto-Sync</span>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Right Column: Live Assessment Engine Mockup (Interactive) */}
+              {/* Right Column: Professional Human-Crafted Assessment Console & Telemetry Showcase */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="lg:col-span-5 relative w-full max-w-lg mx-auto"
+                className="lg:col-span-6 relative w-full max-w-[560px] mx-auto select-none"
               >
-                {/* Floating Glow backdrop */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#004f90]/20 to-[#F7931A]/20 rounded-3xl blur-xl opacity-75"></div>
+                {/* Ambient glow behind card */}
+                <div className="absolute -inset-2 bg-gradient-to-tr from-[#004f90]/15 via-blue-500/10 to-[#F7931A]/15 rounded-3xl blur-2xl opacity-80"></div>
 
-                {/* Mockup Card Container */}
-                <div className="relative bg-white border border-slate-200/90 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 select-none">
+                {/* Primary Showcase Card: Real Candidate Exam Console */}
+                <div className="relative bg-white border border-slate-200/90 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
                   
-                  {/* Mock Top Header */}
-                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                    <div className="flex items-center space-x-2.5">
-                      <img src="/logo.png" alt="SDLC Logo" className="h-7 w-auto object-contain" />
-                      <div className="border-l border-slate-200 pl-2">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Assessment</span>
-                        <span className="text-xs font-black text-slate-800 leading-none">Data Structures & Algorithms</span>
+                  {/* Candidate Identity Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#004f90] to-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm uppercase">
+                        YK
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-xs font-black text-slate-800">Candidate Workspace</span>
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[9px] font-black uppercase tracking-wider border border-emerald-200">
+                            Verified
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-mono font-medium block">
+                          Roll: 26CS104 • Computer Science
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span>Live Sync</span>
-                      </div>
-                      <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono text-[11px] font-bold">
-                        <Clock className="h-3 w-3 text-[#F7931A]" />
-                        <span>{formatMockTime(mockTimer)}</span>
-                      </div>
+                    <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                      <span>Live Sync</span>
                     </div>
                   </div>
 
-                  {/* Mock Question Area */}
-                  <div className="space-y-3 pt-1">
+                  {/* Active Assessment Info & Progress */}
+                  <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                      <span className="flex items-center gap-1.5 text-slate-800 font-extrabold">
+                        <GraduationCap className="h-3.5 w-3.5 text-[#004f90]" />
+                        Technical Aptitude & Algorithms
+                      </span>
+                      <span className="font-mono text-slate-500">14 / 30 Solved</span>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#004f90] to-[#F7931A] w-[46%] rounded-full"></div>
+                    </div>
+                  </div>
+
+                  {/* Live Sample Question Presentation */}
+                  <div className="space-y-2.5 pt-1 text-left">
                     <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                      <span>Question 04 of 30</span>
-                      <span className="text-[#004f90]">Marks: 2.0</span>
+                      <span>Question 14</span>
+                      <span className="text-[#004f90] font-black">2.0 Marks</span>
                     </div>
 
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
-                      Which sorting algorithm guarantees a worst-case time complexity of O(N log N) without requiring extra memory proportional to N?
-                    </h4>
+                    <p className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                      What is the worst-case time complexity of searching an element in a balanced Binary Search Tree (AVL Tree)?
+                    </p>
 
-                    {/* Mock Options */}
-                    <div className="space-y-2 pt-1">
-                      {[
-                        { id: 'A', text: 'Quick Sort' },
-                        { id: 'B', text: 'Heap Sort' },
-                        { id: 'C', text: 'Bubble Sort' },
-                        { id: 'D', text: 'Counting Sort' }
-                      ].map((opt) => {
-                        const isSelected = selectedMockOption === opt.id;
-                        return (
-                          <div 
-                            key={opt.id}
-                            onClick={() => setSelectedMockOption(opt.id)}
-                            className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
-                              isSelected 
-                                ? 'bg-blue-50/80 border-[#004f90] text-[#004f90] shadow-xs'
-                                : 'bg-slate-50/70 border-slate-200/80 text-slate-600 hover:bg-slate-100/70'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-2.5">
-                              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold ${
-                                isSelected ? 'bg-[#004f90] text-white' : 'bg-white border border-slate-200 text-slate-500'
-                              }`}>
-                                {opt.id}
-                              </span>
-                              <span>{opt.text}</span>
-                            </div>
-                            {isSelected && <Check className="h-3.5 w-3.5 text-[#004f90]" />}
-                          </div>
-                        );
-                      })}
+                    {/* Options list */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="p-2.5 rounded-xl border border-emerald-300 bg-emerald-50/60 text-emerald-900 text-xs font-bold flex items-center justify-between shadow-2xs">
+                        <div className="flex items-center space-x-2.5">
+                          <span className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">
+                            A
+                          </span>
+                          <span>O(log N)</span>
+                        </div>
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      </div>
+
+                      <div className="p-2.5 rounded-xl border border-slate-200/80 bg-white text-slate-600 text-xs font-medium flex items-center space-x-2.5">
+                        <span className="w-5 h-5 rounded-md bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-bold">
+                          B
+                        </span>
+                        <span>O(N)</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Mock Action Footer */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-1.5 text-[10px] text-emerald-700 font-bold bg-emerald-50/60 px-2 py-0.5 rounded-md border border-emerald-100">
-                      <ShieldCheck className="h-3 w-3 text-emerald-600" />
-                      <span>Proctoring: Active (0 Violations)</span>
+                  {/* Bottom Proctoring & Status Strip */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                    <div className="flex items-center space-x-1.5 text-slate-600 font-bold">
+                      <Lock className="h-3.5 w-3.5 text-[#004f90]" />
+                      <span>Fullscreen Lock: Active</span>
                     </div>
-
-                    <div className="flex items-center space-x-2">
-                      <button className="px-3 py-1.5 rounded-lg bg-[#004f90] hover:bg-blue-800 text-white font-bold text-[11px] flex items-center space-x-1 transition-all">
-                        <span>Next</span>
-                        <ChevronRight className="h-3 w-3" />
-                      </button>
+                    <div className="flex items-center space-x-1 font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
+                      <Clock className="h-3 w-3 text-[#F7931A]" />
+                      <span>24:18 Left</span>
                     </div>
                   </div>
 
                 </div>
 
-                {/* Floating Orbiting Badges */}
+                {/* Floating Micro-Card 1: Real-Time Scorecard Preview (Top Right) */}
                 <motion.div 
                   animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-5 -right-3 sm:-right-5 bg-white border border-slate-200/90 shadow-xl rounded-xl p-2.5 flex items-center space-x-2.5 backdrop-blur-md"
+                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-5 -right-3 sm:-right-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3.5 flex items-center space-x-3 backdrop-blur-md"
                 >
-                  <div className="h-7 w-7 rounded-lg bg-amber-50 text-[#F7931A] flex items-center justify-center font-bold">
-                    <Zap className="h-4 w-4" />
+                  <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black">
+                    <Award className="h-5 w-5" />
                   </div>
                   <div className="text-left">
-                    <div className="text-[10px] font-black text-slate-800 uppercase leading-none">Instant Evaluation</div>
-                    <div className="text-[9px] text-slate-400 font-medium leading-none mt-0.5">Automated Score Matrix</div>
+                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Auto-Evaluation</span>
+                    <span className="text-xs font-black text-emerald-600 font-mono mt-0.5 block">94% • Grade A+ Cleared</span>
                   </div>
                 </motion.div>
 
+                {/* Floating Micro-Card 2: Security & Integrity Telemetry (Bottom Left) */}
                 <motion.div 
                   animate={{ y: [0, 6, 0] }}
-                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -bottom-4 -left-3 sm:-left-5 bg-white border border-slate-200/90 shadow-xl rounded-xl p-2.5 flex items-center space-x-2.5 backdrop-blur-md"
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -bottom-5 -left-3 sm:-left-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3.5 flex items-center space-x-3 backdrop-blur-md"
                 >
-                  <div className="h-7 w-7 rounded-lg bg-blue-50 text-[#004f90] flex items-center justify-center font-bold">
-                    <Award className="h-4 w-4" />
+                  <div className="h-9 w-9 rounded-xl bg-blue-50 border border-blue-100 text-[#004f90] flex items-center justify-center font-black">
+                    <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div className="text-left">
-                    <div className="text-[10px] font-black text-slate-800 uppercase leading-none">Live Rank Generation</div>
-                    <div className="text-[9px] text-slate-400 font-medium leading-none mt-0.5">Instant Batch Insights</div>
+                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Integrity Shield</span>
+                    <span className="text-xs font-black text-slate-700 font-mono mt-0.5 block">0/3 Violations • 100% Focus</span>
                   </div>
                 </motion.div>
 
@@ -326,30 +359,38 @@ const LandingPage = ({ onEnterPortal }) => {
         </section>
 
         {/* ========================================================= */}
-        {/* SECTION 2: FLOATING STATS BAR                             */}
+        {/* SECTION 2: FLOATING STATS BAR WITH ANIMATED COUNTER       */}
         {/* ========================================================= */}
         <section className="py-4 relative z-20">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
             <div className="bg-white/95 border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 backdrop-blur-xl grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               
               <div className="space-y-1">
-                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#004f90]">10,000+</div>
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#004f90]">
+                  <AnimatedCounter target={1000} suffix="+" />
+                </div>
                 <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">Candidate Assessments</div>
               </div>
 
               <div className="space-y-1 border-l border-slate-100 pl-4 md:pl-0">
-                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#F7931A]">0.0s</div>
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#F7931A]">
+                  <AnimatedCounter target={100} suffix="%" />
+                </div>
                 <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">Instant Auto-Grading</div>
               </div>
 
               <div className="space-y-1 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0">
-                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600">99.99%</div>
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600">
+                  <AnimatedCounter target={99.9} decimals={1} suffix="%" />
+                </div>
                 <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">Anti-Cheat Integrity</div>
               </div>
 
               <div className="space-y-1 border-t md:border-t-0 border-l border-slate-100 pt-4 md:pt-0 pl-4 md:pl-0">
-                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800">Dual Track</div>
-                <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">College & Institute Hub</div>
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800">
+                  <AnimatedCounter target={50} suffix="+" />
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">College & Institute Cohorts</div>
               </div>
 
             </div>
@@ -364,10 +405,6 @@ const LandingPage = ({ onEnterPortal }) => {
             
             {/* Section Header */}
             <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
-              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#004f90] text-[11px] font-bold uppercase tracking-wider">
-                <Sparkles className="h-3 w-3" />
-                <span>Next-Gen Platform Power</span>
-              </div>
               <h2 className="font-poppins text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
                 Engineered for Integrity, Speed & Scale.
               </h2>
