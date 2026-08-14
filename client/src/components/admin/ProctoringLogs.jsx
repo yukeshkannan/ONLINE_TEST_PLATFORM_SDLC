@@ -64,14 +64,24 @@ const ProctoringLogs = () => {
       try {
         await api.delete(`/results/student/${studentId}/test/${testId}`);
         cleared = true;
-      } catch (err) {}
-    }
-
-    if (violationId) {
+      } catch (err) {
+        // Fallback: if clearing by student & test fails, try deleting the violation log directly
+        if (violationId) {
+          try {
+            await api.delete(`/violations/${violationId}`);
+            cleared = true;
+          } catch (vErr) {
+            console.error('Failed to delete violation log directly:', vErr);
+          }
+        }
+      }
+    } else if (violationId) {
       try {
         await api.delete(`/violations/${violationId}`);
         cleared = true;
-      } catch (err) {}
+      } catch (err) {
+        console.error('Failed to delete violation log:', err);
+      }
     }
 
     if (cleared) {
