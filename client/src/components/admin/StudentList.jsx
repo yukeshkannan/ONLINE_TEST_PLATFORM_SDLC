@@ -153,9 +153,10 @@ const StudentList = ({ initialTrack }) => {
 
   // SDLC Institute Courses
   const defaultInstituteTracks = [
-    'Full Stack Web Dev (MERN)',
+    'MERN Stack',
     'Python Full Stack',
     'Java Full Stack',
+    'PHP Full Stack',
     'Data Science & AI',
     'UI/UX Design & Figma',
     'Cloud & DevOps Engineering',
