@@ -618,16 +618,16 @@ const LandingPage = ({ onEnterPortal }) => {
         <section className="py-20 sm:py-28 relative" id="contact">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
             
-            <div className="bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-slate-200/60 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-12 shadow-xl shadow-slate-200/40 grid grid-cols-1 lg:grid-cols-12 gap-10">
               
               {/* Left Column: Direct Info */}
               <div className="lg:col-span-5 space-y-7 text-left">
                 <div className="space-y-2">
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold uppercase tracking-wider">
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#004f90] text-[11px] font-bold uppercase tracking-wider">
                     <span>Contact Head Office</span>
                   </div>
                   <h3 className="font-poppins text-2xl sm:text-3xl font-black text-slate-900">
-                    Get in Touch with SDLC
+                    Have Questions? Let's Connect.
                   </h3>
                   <p className="text-slate-500 text-sm leading-relaxed">
                     Have inquiries regarding institutional onboarding, custom assessment batches, or technical support? Our team is here to assist.
@@ -673,8 +673,8 @@ const LandingPage = ({ onEnterPortal }) => {
                 </div>
               </div>
 
-              {/* Right Column: Interactive Clean Form */}
-              <div className="lg:col-span-7 bg-slate-50/60 border border-slate-200/80 rounded-2xl p-6 sm:p-8">
+              {/* Right Column: Clean Interactive Form */}
+              <div className="lg:col-span-7 bg-slate-50/70 border border-slate-200/80 rounded-2xl p-6 sm:p-8">
                 <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1 text-left">
@@ -714,13 +714,14 @@ const LandingPage = ({ onEnterPortal }) => {
                     ></textarea>
                   </div>
 
+                  {/* Solid button without tacky box shadow */}
                   <button 
                     type="submit"
                     disabled={sendingMessage}
-                    className="w-full bg-[#F7931A] hover:bg-[#e08210] text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-[#F7931A]/20 transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50"
+                    className="w-full bg-[#004f90] hover:bg-[#003c6e] active:bg-[#002f57] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50"
                   >
                     <Send className="h-4 w-4" />
-                    <span>{sendingMessage ? 'Sending Message...' : 'Submit Inquiry'}</span>
+                    <span>{sendingMessage ? 'Submitting Message...' : 'Send Inquiry'}</span>
                   </button>
                 </form>
               </div>
