@@ -156,29 +156,41 @@ const AboutPage = () => {
               </div>
 
               {/* Institutional Call To Action Banner */}
-              <div className="bg-gradient-to-r from-[#004f90] to-blue-700 rounded-3xl p-8 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-[#004f90]/15">
-                <div className="space-y-1.5 text-center md:text-left">
-                  <h3 className="font-poppins text-2xl font-black">Ready to experience the platform?</h3>
-                  <p className="text-blue-100 text-sm max-w-lg">
-                    Launch candidate assessments or explore administrative cohort analytics instantly.
-                  </p>
-                </div>
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-[#07254a] to-[#004f90] p-8 sm:p-12 text-white border border-slate-700/50 shadow-2xl">
+                {/* Subtle Ambient Glow Background Orbs */}
+                <div className="absolute -top-24 -right-24 w-72 h-72 bg-[#F7931A]/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-[#004f90]/40 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <button 
-                    onClick={handleAction}
-                    className="bg-[#F7931A] hover:bg-[#e08210] text-white font-extrabold px-6 py-3 rounded-xl text-sm shadow-md transition-all cursor-pointer flex items-center space-x-2"
-                  >
-                    <span>Enter Portal</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+                  <div className="space-y-2 max-w-xl">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-[#F7931A] bg-[#F7931A]/10 border border-[#F7931A]/30 px-3 py-1 rounded-full">
+                      Next-Gen Testing Engine
+                    </span>
+                    <h3 className="font-poppins text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                      Ready to experience the platform?
+                    </h3>
+                    <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                      Launch candidate assessments or explore administrative cohort analytics instantly with zero setup latency.
+                    </p>
+                  </div>
 
-                  <Link 
-                    to="/contact"
-                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-5 py-3 rounded-xl text-sm transition-all"
-                  >
-                    <span>Contact Us</span>
-                  </Link>
+                  <div className="flex flex-col sm:flex-row items-center gap-3.5 shrink-0 w-full sm:w-auto">
+                    <button 
+                      onClick={handleAction}
+                      style={{ backgroundColor: '#F7931A', color: '#ffffff' }}
+                      className="w-full sm:w-auto bg-[#F7931A] hover:bg-[#e08210] active:scale-95 text-white font-bold px-7 py-3.5 rounded-xl text-sm shadow-lg shadow-orange-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <span>Enter Portal</span>
+                      <ArrowRight className="h-4 w-4 text-white" />
+                    </button>
+
+                    <Link 
+                      to="/contact"
+                      className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/25 text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all text-center flex items-center justify-center"
+                    >
+                      <span>Contact Us</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
 

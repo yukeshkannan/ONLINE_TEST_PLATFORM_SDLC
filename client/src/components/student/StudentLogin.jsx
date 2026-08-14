@@ -17,7 +17,6 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -32,7 +31,7 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
 
     setIsSubmitting(true);
     try {
-      await loginStudent(identifier.trim(), password, rememberMe, loginType);
+      await loginStudent(identifier.trim(), password, false, loginType);
       toast.success('Authentication successful. Loading your dashboard...');
       navigate('/student/dashboard');
     } catch (err) {
@@ -206,21 +205,12 @@ const StudentLogin = ({ onClose, onAdminRedirect }) => {
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password Row */}
-              <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 text-slate-600 font-medium cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-[#004f90] focus:ring-[#004f90] h-4 w-4 cursor-pointer"
-                  />
-                  <span>Remember Me</span>
-                </label>
+              {/* Forgot Password Row */}
+              <div className="flex items-center justify-end text-xs pt-0.5">
                 <button 
                   type="button"
                   onClick={() => toast("Please contact your institute center or college administrator to reset your credentials.")}
-                  className="font-bold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left text-xs"
+                  className="font-semibold text-[#004f90] hover:underline bg-transparent border-none p-0 cursor-pointer text-left text-xs transition-colors"
                 >
                   Forgot Password?
                 </button>
