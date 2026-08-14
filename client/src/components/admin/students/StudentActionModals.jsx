@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Send, Mail, AlertTriangle } from 'lucide-react';
+import { Trash2, Send, Mail } from 'lucide-react';
 
 export const DeleteStudentModal = ({
   isOpen,
@@ -32,14 +32,15 @@ export const DeleteStudentModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl cursor-pointer transition font-semibold"
+              className="py-2.5 px-4 bg-slate-100 hover:!bg-rose-600 hover:!text-white text-slate-700 rounded-xl cursor-pointer transition font-semibold"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={onConfirm}
-              className="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-xl cursor-pointer transition shadow-sm font-bold flex items-center justify-center gap-1.5"
+              style={{ backgroundColor: '#e11d48', color: '#ffffff' }}
+              className="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-xl cursor-pointer transition shadow-sm font-bold flex items-center justify-center gap-1.5 !bg-rose-600 !text-white"
             >
               <Trash2 className="w-3.5 h-3.5 text-white" />
               <span className="text-white">Delete</span>
@@ -80,19 +81,23 @@ export const SendCredentialsModal = ({
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2.5 pt-2 text-xs font-semibold">
+            {/* Cancel Button: Turns RED on hover */}
             <button
               type="button"
               onClick={onClose}
               disabled={sendingEmail}
-              className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl cursor-pointer transition disabled:opacity-50 font-semibold"
+              className="py-2.5 px-4 bg-slate-100 hover:!bg-rose-600 hover:!text-white text-slate-700 rounded-xl cursor-pointer transition disabled:opacity-50 font-semibold"
             >
               Cancel
             </button>
+
+            {/* Send Email Button: Solid GREEN background */}
             <button
               type="button"
               onClick={onConfirm}
               disabled={sendingEmail}
-              className="py-2.5 px-4 bg-[#004f90] hover:bg-[#003c6e] active:bg-[#002f57] text-white rounded-xl cursor-pointer transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 font-bold"
+              style={{ backgroundColor: '#16a34a', color: '#ffffff' }}
+              className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl cursor-pointer transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 font-bold !bg-emerald-600 !text-white"
             >
               <Send className="w-3.5 h-3.5 text-white shrink-0" />
               <span className="text-white">{sendingEmail ? 'Sending...' : 'Send Email'}</span>
@@ -132,19 +137,23 @@ export const SendAllCredentialsModal = ({
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2.5 pt-2 text-xs font-semibold">
+            {/* Cancel Button: Turns RED on hover */}
             <button
               type="button"
               onClick={onClose}
               disabled={sendingEmail}
-              className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl cursor-pointer transition disabled:opacity-50 font-semibold"
+              className="py-2.5 px-4 bg-slate-100 hover:!bg-rose-600 hover:!text-white text-slate-700 rounded-xl cursor-pointer transition disabled:opacity-50 font-semibold"
             >
               Cancel
             </button>
+
+            {/* Dispatch All Button: Solid GREEN background */}
             <button
               type="button"
               onClick={onConfirm}
               disabled={sendingEmail}
-              className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl cursor-pointer transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 font-bold"
+              style={{ backgroundColor: '#16a34a', color: '#ffffff' }}
+              className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl cursor-pointer transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 font-bold !bg-emerald-600 !text-white"
             >
               <Send className="w-3.5 h-3.5 text-white shrink-0" />
               <span className="text-white">{sendingEmail ? 'Dispatching...' : 'Dispatch All'}</span>

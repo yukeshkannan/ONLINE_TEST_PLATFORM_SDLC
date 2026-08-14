@@ -170,6 +170,7 @@ const StudentTable = ({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
+                <th className="py-3 px-4 w-14 text-center">S.No</th>
                 <th className="py-3 px-4">Student Info</th>
                 <th className="py-3 px-4">{categoryTab === 'college' ? 'Roll Number' : 'Identifier / DOB'}</th>
                 <th className="py-3 px-4">{categoryTab === 'college' ? 'Department & Track' : 'Course & Center'}</th>
@@ -180,17 +181,23 @@ const StudentTable = ({
             <tbody className="divide-y divide-slate-100">
               {currentStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="py-12 text-center text-slate-400 font-medium">
+                  <td colSpan="6" className="py-12 text-center text-slate-400 font-medium">
                     <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                     <p>No students found matching the selected criteria.</p>
                   </td>
                 </tr>
               ) : (
-                currentStudents.map((student) => {
+                currentStudents.map((student, index) => {
                   const isInstitute = student.studentType === 'institute';
+                  const serialNumber = ((currentPage - 1) * 8) + index + 1;
 
                   return (
                     <tr key={student._id} className="hover:bg-slate-50/60 transition-colors">
+                      {/* S.No */}
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-400">
+                        {serialNumber}
+                      </td>
+
                       {/* Name & Email */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
@@ -256,10 +263,7 @@ const StudentTable = ({
                           </div>
                         ) : (
                           <div className="text-[11px]">
-                            <div className="font-semibold text-slate-700">{student.year || 'N/A'}</div>
-                            {student.batch && student.batch !== 'General' && !student.batch.includes('Batch') && (
-                              <div className="text-slate-400 font-mono text-[10px]">Batch: {student.batch}</div>
-                            )}
+                            <div className="font-semibold text-slate-800">{student.year || 'N/A'}</div>
                           </div>
                         )}
                       </td>

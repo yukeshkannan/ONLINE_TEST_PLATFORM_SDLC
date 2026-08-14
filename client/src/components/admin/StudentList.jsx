@@ -611,22 +611,13 @@ const StudentList = ({ initialTrack }) => {
       if (type === 'college') {
         const rollNumber = rollIdx !== -1 && row[rollIdx] ? row[rollIdx] : '';
         const department = deptIdx !== -1 && row[deptIdx] ? normalizeDept(row[deptIdx]) : 'CSE';
+        const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
+        const year = normalizeYearStr(rawYear);
         const rawBatch = batchIdx !== -1 && row[batchIdx] ? row[batchIdx] : '';
         const rawCourse = courseIdx !== -1 && row[courseIdx] ? row[courseIdx] : '';
         
-        let batch = '2023-2027';
+        let batch = rawBatch ? normalizeBatch(rawBatch) : `${year || '1st Year'} Batch`;
         let courseTrack = normalizeCourseTrackName(rawCourse);
-
-        if (rawBatch) {
-          if (/\d{4}/.test(rawBatch)) {
-            batch = normalizeBatch(rawBatch);
-          } else if (!courseTrack) {
-            courseTrack = normalizeCourseTrackName(rawBatch);
-          }
-        }
-        
-        const rawYear = yearIdx !== -1 && row[yearIdx] ? row[yearIdx] : '';
-        const year = normalizeYearStr(rawYear);
 
         if (name && email && rollNumber) {
           parsed.push({
