@@ -169,7 +169,7 @@ const AboutPage = () => {
                     <h3 className="font-poppins text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
                       Ready to experience the platform?
                     </h3>
-                    <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    <p className="text-white text-sm sm:text-base leading-relaxed">
                       Launch candidate assessments or explore administrative cohort analytics instantly with zero setup latency.
                     </p>
                   </div>
