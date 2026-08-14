@@ -675,35 +675,39 @@ const TestEngine = ({ test, onFinish }) => {
 
       {/* Confirmation Submit Modal Overlay */}
       {showSubmitModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 px-4 blur-none">
-          <div className="glass-effect max-w-sm w-full rounded-2xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-accent"></div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs px-4">
+          <div className="bg-white max-w-sm w-full rounded-2xl p-6 space-y-5 shadow-2xl border border-slate-200 text-center animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+              <AlertTriangle className="w-7 h-7 text-[#F7931A]" />
+            </div>
             
-            <div className="text-center space-y-3">
-              <AlertTriangle className="h-12 w-12 text-accent mx-auto" />
-              <h4 className="text-lg font-bold text-slate-800">Submit Examination?</h4>
-              <p className="text-xs text-softgrey leading-relaxed">
+            <div className="space-y-2">
+              <h4 className="text-lg font-bold text-slate-900 font-poppins">Submit Examination?</h4>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 You have answered <span className="text-[#004f90] font-black text-sm">{Object.values(answers).filter(Boolean).length}</span> out of <span className="text-[#004f90] font-black text-sm">{questions.length}</span> questions. Once submitted, you cannot modify your answers.
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-2.5 pt-1 text-xs">
               <button
+                type="button"
                 onClick={() => setShowSubmitModal(false)}
-                className="flex-1 bg-charcoal-light border border-accent/15 text-softgrey hover:text-white font-bold py-2.5 rounded-lg text-xs transition-colors cursor-pointer"
                 disabled={submitting}
+                className="py-2.5 px-4 bg-slate-100 hover:!bg-rose-600 hover:!text-white text-slate-700 font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
               >
                 Go Back
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setShowSubmitModal(false);
                   handleSubmit(false);
                 }}
-                className="flex-1 bg-accent text-charcoal hover:bg-success hover:text-white font-extrabold py-2.5 rounded-lg text-xs transition-colors shadow-lg cursor-pointer"
                 disabled={submitting}
+                style={{ backgroundColor: '#004f90', color: '#ffffff' }}
+                className="py-2.5 px-4 bg-[#004f90] hover:!bg-[#003c6e] active:!bg-[#002f57] text-white font-bold rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 !bg-[#004f90] !text-white"
               >
-                Yes, Submit
+                <span>Yes, Submit</span>
               </button>
             </div>
           </div>

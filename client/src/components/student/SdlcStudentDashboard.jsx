@@ -199,18 +199,14 @@ const SdlcStudentDashboard = ({ onStartTest, onViewResult }) => {
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Proctored Test</span>
-                    </span>
-
+                  <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-end">
                     <button
                       onClick={() => onStartTest(test)}
-                      className="bg-[#004f90] hover:bg-[#003d70] text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+                      style={{ backgroundColor: '#004f90', color: '#ffffff' }}
+                      className="bg-[#004f90] hover:!bg-[#003c6e] active:!bg-[#002f57] text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.98] !bg-[#004f90] !text-white"
                     >
                       <span>Start Test</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5 text-white" />
                     </button>
                   </div>
                 </div>

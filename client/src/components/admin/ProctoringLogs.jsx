@@ -25,15 +25,17 @@ const ProctoringLogs = () => {
       setLogs(Array.isArray(data) ? data : []);
       setLastRefreshed(new Date());
     } catch (err) {
-      toast.error('Unable to load proctoring audit logs.');
+      if (!silent) {
+        toast.error('Unable to load proctoring audit logs.');
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchLogs();
-    // Auto-refresh every 30 seconds
+    // Auto-refresh every 30 seconds silently
     const interval = setInterval(() => fetchLogs(true), 30000);
     return () => clearInterval(interval);
   }, [fetchLogs]);
@@ -97,13 +99,18 @@ const ProctoringLogs = () => {
     const subType = log.result?.submissionType;
     const hasFullscreen = log.events?.some(e => e.type === 'fullscreen_exit');
     
-    if (log.autoSubmitted || subType === 'security_violation' || hasFullscreen || log.count >= 3) {
+    // 1. Explicit timer expiration takes absolute priority
+    if (subType === 'timer_expired' || log.violationType === 'timer_expired') {
+      return 'timer_expired'; // Clock ran out automatically
+    }
+
+    // 2. ESC / Fullscreen exit / 3 Tab Switches security violation
+    if (subType === 'security_violation' || hasFullscreen || log.violationType === 'fullscreen_exit' || (log.autoSubmitted && log.count >= 3)) {
       return 'esc_security'; // ESC / Fullscreen exit / 3 Tab Switches
     }
-    if (subType === 'timer_expired') {
-      return 'timer_expired'; // Clock ran out
-    }
-    return 'warning'; // Active warning (< 3 switches)
+
+    // 3. Active Warning (< 3 switches)
+    return 'warning';
   };
 
   // Summary Metrics
