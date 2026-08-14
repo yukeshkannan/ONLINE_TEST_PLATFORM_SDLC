@@ -21,11 +21,7 @@ import {
   ShieldAlert,
   GraduationCap,
   Sparkles,
-  Activity,
-  CheckCircle,
-  TrendingUp,
-  Cpu,
-  Trophy
+  ExternalLink
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -157,234 +153,88 @@ const LandingPage = ({ onEnterPortal }) => {
         
         {/* Background Ambient Gradient Glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[700px] pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute -top-40 left-1/4 w-[480px] h-[480px] bg-[#004f90]/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-20 right-1/4 w-[420px] h-[420px] bg-[#F7931A]/10 rounded-full blur-3xl"></div>
+          <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-[#004f90]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-[450px] h-[450px] bg-[#F7931A]/10 rounded-full blur-3xl"></div>
         </div>
 
         {/* ========================================================= */}
-        {/* SECTION 1: HERO SECTION (Full 100vh Viewport Height)       */}
+        {/* SECTION 1: HERO SECTION (Clean, Centered, 100vh Full Fold)*/}
         {/* ========================================================= */}
-        <section className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center pt-28 sm:pt-32 pb-16 lg:pb-20 overflow-hidden">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 w-full my-auto">
+        <section className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center items-center pt-28 sm:pt-36 pb-20 overflow-hidden">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-12 w-full text-center my-auto space-y-8">
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
-              
-              {/* Left Column: Headline & Action Points */}
-              <motion.div 
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="lg:col-span-6 space-y-6 text-left z-10"
+            {/* Main Headline */}
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="font-poppins text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-black leading-[1.08] text-slate-900 tracking-tight"
+            >
+              Conduct Exams. <br />
+              <span className="bg-gradient-to-r from-[#004f90] via-blue-600 to-[#F7931A] bg-clip-text text-transparent">
+                Evaluate Smarter.
+              </span>
+            </motion.h1>
+            
+            {/* Subtitle */}
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="text-base sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal"
+            >
+              A high-integrity online examination platform built for colleges and training institutes to administer secure MCQ assessments with zero-latency grading and tamper-proof proctoring.
+            </motion.p>
+            
+            {/* Centered Dual Action Buttons */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
+            >
+              <button 
+                onClick={handleStartExam}
+                className="w-full sm:w-auto bg-gradient-to-r from-[#004f90] to-blue-700 hover:from-[#003c6e] hover:to-blue-800 text-white px-8 py-4 rounded-xl font-extrabold text-base shadow-lg shadow-[#004f90]/25 transition-all transform hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2.5"
               >
-                {/* Main Headline */}
-                <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-black leading-[1.12] text-slate-900 tracking-tight">
-                  Conduct Exams. <br className="hidden sm:block" />
-                  <span className="bg-gradient-to-r from-[#004f90] via-blue-600 to-[#F7931A] bg-clip-text text-transparent">
-                    Evaluate Smarter.
-                  </span>
-                </h1>
-                
-                {/* Subtitle */}
-                <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal">
-                  A high-integrity online examination platform built for colleges and training institutes to administer secure MCQ assessments with zero-latency grading and tamper-proof proctoring.
-                </p>
-                
-                {/* Dual Action Buttons */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
-                  <button 
-                    onClick={handleStartExam}
-                    className="bg-gradient-to-r from-[#004f90] to-blue-700 hover:from-[#003c6e] hover:to-blue-800 text-white px-7 py-3.5 rounded-xl font-extrabold text-sm sm:text-base shadow-lg shadow-[#004f90]/25 transition-all transform hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2.5"
-                  >
-                    <span>Launch Assessment Portal</span>
-                    <ArrowRight className="h-4.5 w-4.5" />
-                  </button>
+                <span>Launch Assessment Portal</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
 
-                  <Link 
-                    to="/about"
-                    className="border border-slate-200/90 bg-white/80 hover:bg-white text-slate-700 px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base transition-all shadow-xs text-center flex items-center justify-center cursor-pointer hover:border-slate-300"
-                  >
-                    <span>Explore Features</span>
-                  </Link>
-                </div>
-
-                {/* Trust Indicators */}
-                <div className="pt-4 flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-slate-500 font-medium">
-                  <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>Zero-Tolerance Anti-Cheat</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Zap className="h-4 w-4 text-amber-500 shrink-0" />
-                    <span>Instant Score Evaluation</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Wifi className="h-4 w-4 text-blue-600 shrink-0" />
-                    <span>Offline Resilient Auto-Sync</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Right Column: Modern Assessment & Proctoring Command Center Suite */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.96, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="lg:col-span-6 relative w-full max-w-[560px] mx-auto select-none"
+              <Link 
+                to="/about"
+                className="w-full sm:w-auto border border-slate-200/90 bg-white/90 hover:bg-white text-slate-700 px-7 py-4 rounded-xl font-bold text-base transition-all shadow-xs text-center flex items-center justify-center cursor-pointer hover:border-slate-300"
               >
-                {/* Ambient glow backdrop */}
-                <div className="absolute -inset-2 bg-gradient-to-tr from-[#004f90]/15 via-blue-500/10 to-[#F7931A]/15 rounded-3xl blur-2xl opacity-80"></div>
+                <span>Explore Features</span>
+              </Link>
+            </motion.div>
 
-                {/* Main Command Dashboard Card */}
-                <div className="relative bg-white border border-slate-200/90 rounded-3xl shadow-2xl p-6 sm:p-7 space-y-5 text-left">
-                  
-                  {/* Top Bar: Session & Institutional Telemetry */}
-                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 rounded-2xl bg-[#004f90] text-white flex items-center justify-center font-bold text-sm shadow-md">
-                        <Activity className="h-5 w-5 text-amber-400" />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-xs font-black text-slate-800">Exam Command Hub</span>
-                          <span className="px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[9px] font-black uppercase tracking-wider border border-emerald-200">
-                            Active Session
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          Campus Cohort Evaluation • Batch 2026
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                      <span>Live Sync Active</span>
-                    </div>
-                  </div>
-
-                  {/* Candidate Performance & Skill Matrix */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-slate-700 uppercase tracking-wide">
-                        Candidate Competency Spectrum
-                      </span>
-                      <span className="text-xs font-bold text-[#004f90] font-mono">
-                        96.5% Overall Calibration
-                      </span>
-                    </div>
-
-                    {/* 4 Skill Mastery Bars */}
-                    <div className="space-y-2.5 bg-slate-50/80 border border-slate-100 p-3.5 rounded-2xl">
-                      
-                      {/* Skill 1 */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                          <span>Data Structures & Algorithms</span>
-                          <span className="text-emerald-700 font-mono font-black">95%</span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500 w-[95%] rounded-full"></div>
-                        </div>
-                      </div>
-
-                      {/* Skill 2 */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                          <span>Logical Reasoning & Problem Solving</span>
-                          <span className="text-blue-700 font-mono font-black">92%</span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-600 w-[92%] rounded-full"></div>
-                        </div>
-                      </div>
-
-                      {/* Skill 3 */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                          <span>Core Computer Science Fundamentals</span>
-                          <span className="text-indigo-700 font-mono font-black">98%</span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
-                          <div className="h-full bg-indigo-600 w-[98%] rounded-full"></div>
-                        </div>
-                      </div>
-
-                      {/* Skill 4 */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                          <span>Speed, Focus & Accuracy</span>
-                          <span className="text-amber-700 font-mono font-black">96%</span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-amber-500 to-[#F7931A] w-[96%] rounded-full"></div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Proctoring & Integrity Telemetry Grid */}
-                  <div className="grid grid-cols-3 gap-2.5 pt-1 text-center">
-                    <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
-                      <Lock className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Fullscreen</span>
-                      <span className="text-[11px] font-black text-slate-800">Locked 100%</span>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600 mx-auto mb-1" />
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tab Guard</span>
-                      <span className="text-[11px] font-black text-slate-800">0 Violations</span>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
-                      <Zap className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Grading</span>
-                      <span className="text-[11px] font-black text-slate-800">Instant (0.04s)</span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Floating Micro-Card 1: Live Batch Leaderboard (Top Right) */}
-                <motion.div 
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-5 -right-3 sm:-right-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3 flex items-center space-x-3 backdrop-blur-md"
-                >
-                  <div className="h-9 w-9 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center font-black">
-                    <Trophy className="h-5 w-5 text-[#F7931A]" />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Batch Leaderboard</span>
-                    <span className="text-xs font-black text-slate-700 font-mono mt-0.5 block">Rank #1 • 98.5th Percentile</span>
-                  </div>
-                </motion.div>
-
-                {/* Floating Micro-Card 2: Security & Integrity Telemetry (Bottom Left) */}
-                <motion.div 
-                  animate={{ y: [0, 6, 0] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -bottom-5 -left-3 sm:-left-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3 flex items-center space-x-3 backdrop-blur-md"
-                >
-                  <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Anti-Cheat Shield</span>
-                    <span className="text-xs font-black text-emerald-700 font-mono mt-0.5 block">100% Integrity Verified</span>
-                  </div>
-                </motion.div>
-
-              </motion.div>
-
-            </div>
+            {/* Centered Trust Indicators */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="pt-6 flex flex-wrap items-center justify-center gap-y-3 gap-x-8 text-xs sm:text-sm text-slate-500 font-medium"
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4.5 w-4.5 text-emerald-600 shrink-0" />
+                <span>Zero-Tolerance Anti-Cheat</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-4.5 w-4.5 text-[#F7931A] shrink-0" />
+                <span>Instant Score Evaluation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Wifi className="h-4.5 w-4.5 text-[#004f90] shrink-0" />
+                <span>Offline Resilient Auto-Sync</span>
+              </div>
+            </motion.div>
 
           </div>
         </section>
 
         {/* ========================================================= */}
-        {/* SECTION 2: FLOATING STATS BAR (Appears on Scroll)         */}
+        {/* SECTION 2: FLOATING STATS BAR (Revealed on Scroll)        */}
         {/* ========================================================= */}
         <section className="py-16 md:py-20 relative z-20">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
@@ -443,7 +293,7 @@ const LandingPage = ({ onEnterPortal }) => {
               
               {/* Card 1 (Large - 2 Columns): Zero-Tolerance Proctoring */}
               <div className="md:col-span-2 bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
-                <div className="space-y-4 z-10 max-w-xl">
+                <div className="space-y-4 z-10 max-w-xl text-left">
                   <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center">
                     <ShieldAlert className="h-6 w-6" />
                   </div>
@@ -481,7 +331,7 @@ const LandingPage = ({ onEnterPortal }) => {
               </div>
 
               {/* Card 2: Network Resilient Auto-Save */}
-              <div className="bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group text-left">
                 <div className="space-y-4">
                   <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-[#004f90] flex items-center justify-center">
                     <Wifi className="h-6 w-6" />
@@ -501,7 +351,7 @@ const LandingPage = ({ onEnterPortal }) => {
               </div>
 
               {/* Card 3: Automated Instant Evaluation */}
-              <div className="bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group text-left">
                 <div className="space-y-4">
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 text-[#F7931A] flex items-center justify-center">
                     <Zap className="h-6 w-6" />
@@ -521,7 +371,7 @@ const LandingPage = ({ onEnterPortal }) => {
               </div>
 
               {/* Card 4 (Large - 2 Columns): Dual Track Architecture */}
-              <div className="md:col-span-2 bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+              <div className="md:col-span-2 bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group text-left">
                 <div className="space-y-4 max-w-xl">
                   <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center">
                     <Layers className="h-6 w-6" />
@@ -714,14 +564,14 @@ const LandingPage = ({ onEnterPortal }) => {
                     ></textarea>
                   </div>
 
-                  {/* Solid button without tacky box shadow */}
+                  {/* Solid Orange Background Submit Button */}
                   <button 
                     type="submit"
                     disabled={sendingMessage}
-                    className="w-full bg-[#004f90] hover:bg-[#003c6e] active:bg-[#002f57] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50"
+                    className="w-full bg-[#F7931A] hover:bg-[#e08210] active:bg-[#c97208] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50 shadow-sm"
                   >
-                    <Send className="h-4 w-4" />
-                    <span>{sendingMessage ? 'Submitting Message...' : 'Send Inquiry'}</span>
+                    <Send className="h-4 w-4 text-white" />
+                    <span className="text-white">{sendingMessage ? 'Submitting Message...' : 'Send Inquiry'}</span>
                   </button>
                 </form>
               </div>

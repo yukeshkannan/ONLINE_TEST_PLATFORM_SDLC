@@ -202,14 +202,14 @@ const ContactPage = () => {
                       ></textarea>
                     </div>
 
-                    {/* Solid Background Button without tacky box shadow */}
+                    {/* Solid Orange Background Button */}
                     <button 
                       type="submit"
                       disabled={sendingMessage}
-                      className="w-full bg-[#004f90] hover:bg-[#003c6e] active:bg-[#002f57] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50"
+                      className="w-full bg-[#F7931A] hover:bg-[#e08210] active:bg-[#c97208] text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50 shadow-sm"
                     >
-                      <Send className="h-4 w-4" />
-                      <span>{sendingMessage ? 'Submitting Message...' : 'Send Inquiry'}</span>
+                      <Send className="h-4 w-4 text-white" />
+                      <span className="text-white">{sendingMessage ? 'Submitting Message...' : 'Send Inquiry'}</span>
                     </button>
                   </form>
                 </div>
