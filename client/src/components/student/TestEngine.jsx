@@ -19,17 +19,18 @@ const TestEngine = ({ test, onFinish }) => {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   
   const submitLock = useRef(false);
   const hasStartedExam = useRef(false);
   const isAttemptingPageExit = useRef(false);
 
-  // Network State & Periodic Health Ping
+  // Network State
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      toast.success('Internet connection restored. Live sync active.', { id: 'network-status', duration: 3000 });
+      toast.success('Internet connection active.', { id: 'network-status', duration: 3000 });
     };
 
     const handleOffline = () => {
@@ -40,25 +41,9 @@ const TestEngine = ({ test, onFinish }) => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    const heartbeatInterval = setInterval(async () => {
-      if (!navigator.onLine) {
-        setIsOnline(false);
-        return;
-      }
-      try {
-        await api.get('/health', { timeout: 3500 });
-        setIsOnline(true);
-      } catch (err) {
-        if (!err.response || err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED') {
-          setIsOnline(false);
-        }
-      }
-    }, 30000);
-
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      clearInterval(heartbeatInterval);
     };
   }, []);
 
