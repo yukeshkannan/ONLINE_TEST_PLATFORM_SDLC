@@ -22,7 +22,10 @@ import {
   GraduationCap,
   Sparkles,
   Activity,
-  CheckCircle
+  CheckCircle,
+  TrendingUp,
+  Cpu,
+  Trophy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -42,7 +45,7 @@ const AnimatedCounter = ({ target, duration = 1800, prefix = '', suffix = '', de
           setHasAnimated(true);
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.2 }
     );
 
     if (ref.current) {
@@ -61,7 +64,6 @@ const AnimatedCounter = ({ target, duration = 1800, prefix = '', suffix = '', de
     const updateCounter = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Easing function (easeOutExpo)
       const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
       const current = easeOut * end;
       
@@ -154,20 +156,20 @@ const LandingPage = ({ onEnterPortal }) => {
       <main className="relative">
         
         {/* Background Ambient Gradient Glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute -top-40 left-1/4 w-[450px] h-[450px] bg-[#004f90]/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-[#F7931A]/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[700px] pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute -top-40 left-1/4 w-[480px] h-[480px] bg-[#004f90]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-[420px] h-[420px] bg-[#F7931A]/10 rounded-full blur-3xl"></div>
         </div>
 
         {/* ========================================================= */}
-        {/* SECTION 1: HERO SECTION                                   */}
+        {/* SECTION 1: HERO SECTION (Full 100vh Viewport Height)       */}
         {/* ========================================================= */}
-        <section className="relative pt-28 sm:pt-36 pb-16 md:pb-24 overflow-hidden">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 w-full">
+        <section className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center pt-28 sm:pt-32 pb-16 lg:pb-20 overflow-hidden">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 w-full my-auto">
             
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
               
-              {/* Left Column: Headline & Action Points (No top badge pill) */}
+              {/* Left Column: Headline & Action Points */}
               <motion.div 
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -222,117 +224,140 @@ const LandingPage = ({ onEnterPortal }) => {
                 </div>
               </motion.div>
 
-              {/* Right Column: Professional Human-Crafted Assessment Console & Telemetry Showcase */}
+              {/* Right Column: Modern Assessment & Proctoring Command Center Suite */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="lg:col-span-6 relative w-full max-w-[560px] mx-auto select-none"
               >
-                {/* Ambient glow behind card */}
+                {/* Ambient glow backdrop */}
                 <div className="absolute -inset-2 bg-gradient-to-tr from-[#004f90]/15 via-blue-500/10 to-[#F7931A]/15 rounded-3xl blur-2xl opacity-80"></div>
 
-                {/* Primary Showcase Card: Real Candidate Exam Console */}
-                <div className="relative bg-white border border-slate-200/90 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
+                {/* Main Command Dashboard Card */}
+                <div className="relative bg-white border border-slate-200/90 rounded-3xl shadow-2xl p-6 sm:p-7 space-y-5 text-left">
                   
-                  {/* Candidate Identity Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  {/* Top Bar: Session & Institutional Telemetry */}
+                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
                     <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#004f90] to-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm uppercase">
-                        YK
+                      <div className="h-10 w-10 rounded-2xl bg-[#004f90] text-white flex items-center justify-center font-bold text-sm shadow-md">
+                        <Activity className="h-5 w-5 text-amber-400" />
                       </div>
                       <div>
                         <div className="flex items-center space-x-1.5">
-                          <span className="text-xs font-black text-slate-800">Candidate Workspace</span>
-                          <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[9px] font-black uppercase tracking-wider border border-emerald-200">
-                            Verified
+                          <span className="text-xs font-black text-slate-800">Exam Command Hub</span>
+                          <span className="px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[9px] font-black uppercase tracking-wider border border-emerald-200">
+                            Active Session
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-400 font-mono font-medium block">
-                          Roll: 26CS104 • Computer Science
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          Campus Cohort Evaluation • Batch 2026
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                      <span>Live Sync</span>
+                      <span>Live Sync Active</span>
                     </div>
                   </div>
 
-                  {/* Active Assessment Info & Progress */}
-                  <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-3.5 space-y-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                      <span className="flex items-center gap-1.5 text-slate-800 font-extrabold">
-                        <GraduationCap className="h-3.5 w-3.5 text-[#004f90]" />
-                        Technical Aptitude & Algorithms
+                  {/* Candidate Performance & Skill Matrix */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-slate-700 uppercase tracking-wide">
+                        Candidate Competency Spectrum
                       </span>
-                      <span className="font-mono text-slate-500">14 / 30 Solved</span>
-                    </div>
-                    {/* Progress Bar */}
-                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#004f90] to-[#F7931A] w-[46%] rounded-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Live Sample Question Presentation */}
-                  <div className="space-y-2.5 pt-1 text-left">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                      <span>Question 14</span>
-                      <span className="text-[#004f90] font-black">2.0 Marks</span>
+                      <span className="text-xs font-bold text-[#004f90] font-mono">
+                        96.5% Overall Calibration
+                      </span>
                     </div>
 
-                    <p className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
-                      What is the worst-case time complexity of searching an element in a balanced Binary Search Tree (AVL Tree)?
-                    </p>
-
-                    {/* Options list */}
-                    <div className="space-y-1.5 pt-1">
-                      <div className="p-2.5 rounded-xl border border-emerald-300 bg-emerald-50/60 text-emerald-900 text-xs font-bold flex items-center justify-between shadow-2xs">
-                        <div className="flex items-center space-x-2.5">
-                          <span className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">
-                            A
-                          </span>
-                          <span>O(log N)</span>
+                    {/* 4 Skill Mastery Bars */}
+                    <div className="space-y-2.5 bg-slate-50/80 border border-slate-100 p-3.5 rounded-2xl">
+                      
+                      {/* Skill 1 */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
+                          <span>Data Structures & Algorithms</span>
+                          <span className="text-emerald-700 font-mono font-black">95%</span>
                         </div>
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500 w-[95%] rounded-full"></div>
+                        </div>
                       </div>
 
-                      <div className="p-2.5 rounded-xl border border-slate-200/80 bg-white text-slate-600 text-xs font-medium flex items-center space-x-2.5">
-                        <span className="w-5 h-5 rounded-md bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-bold">
-                          B
-                        </span>
-                        <span>O(N)</span>
+                      {/* Skill 2 */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
+                          <span>Logical Reasoning & Problem Solving</span>
+                          <span className="text-blue-700 font-mono font-black">92%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-600 w-[92%] rounded-full"></div>
+                        </div>
                       </div>
+
+                      {/* Skill 3 */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
+                          <span>Core Computer Science Fundamentals</span>
+                          <span className="text-indigo-700 font-mono font-black">98%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-600 w-[98%] rounded-full"></div>
+                        </div>
+                      </div>
+
+                      {/* Skill 4 */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-600">
+                          <span>Speed, Focus & Accuracy</span>
+                          <span className="text-amber-700 font-mono font-black">96%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-amber-500 to-[#F7931A] w-[96%] rounded-full"></div>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
 
-                  {/* Bottom Proctoring & Status Strip */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <div className="flex items-center space-x-1.5 text-slate-600 font-bold">
-                      <Lock className="h-3.5 w-3.5 text-[#004f90]" />
-                      <span>Fullscreen Lock: Active</span>
+                  {/* Proctoring & Integrity Telemetry Grid */}
+                  <div className="grid grid-cols-3 gap-2.5 pt-1 text-center">
+                    <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
+                      <Lock className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Fullscreen</span>
+                      <span className="text-[11px] font-black text-slate-800">Locked 100%</span>
                     </div>
-                    <div className="flex items-center space-x-1 font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
-                      <Clock className="h-3 w-3 text-[#F7931A]" />
-                      <span>24:18 Left</span>
+
+                    <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600 mx-auto mb-1" />
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tab Guard</span>
+                      <span className="text-[11px] font-black text-slate-800">0 Violations</span>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
+                      <Zap className="h-4 w-4 text-amber-500 mx-auto mb-1" />
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Grading</span>
+                      <span className="text-[11px] font-black text-slate-800">Instant (0.04s)</span>
                     </div>
                   </div>
 
                 </div>
 
-                {/* Floating Micro-Card 1: Real-Time Scorecard Preview (Top Right) */}
+                {/* Floating Micro-Card 1: Live Batch Leaderboard (Top Right) */}
                 <motion.div 
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-5 -right-3 sm:-right-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3.5 flex items-center space-x-3 backdrop-blur-md"
+                  className="absolute -top-5 -right-3 sm:-right-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3 flex items-center space-x-3 backdrop-blur-md"
                 >
-                  <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black">
-                    <Award className="h-5 w-5" />
+                  <div className="h-9 w-9 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center font-black">
+                    <Trophy className="h-5 w-5 text-[#F7931A]" />
                   </div>
                   <div className="text-left">
-                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Auto-Evaluation</span>
-                    <span className="text-xs font-black text-emerald-600 font-mono mt-0.5 block">94% • Grade A+ Cleared</span>
+                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Batch Leaderboard</span>
+                    <span className="text-xs font-black text-slate-700 font-mono mt-0.5 block">Rank #1 • 98.5th Percentile</span>
                   </div>
                 </motion.div>
 
@@ -340,14 +365,14 @@ const LandingPage = ({ onEnterPortal }) => {
                 <motion.div 
                   animate={{ y: [0, 6, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -bottom-5 -left-3 sm:-left-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3.5 flex items-center space-x-3 backdrop-blur-md"
+                  className="absolute -bottom-5 -left-3 sm:-left-6 bg-white border border-slate-200/90 shadow-xl rounded-2xl p-3 flex items-center space-x-3 backdrop-blur-md"
                 >
-                  <div className="h-9 w-9 rounded-xl bg-blue-50 border border-blue-100 text-[#004f90] flex items-center justify-center font-black">
+                  <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div className="text-left">
-                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Integrity Shield</span>
-                    <span className="text-xs font-black text-slate-700 font-mono mt-0.5 block">0/3 Violations • 100% Focus</span>
+                    <span className="text-[10px] font-black text-slate-800 uppercase leading-none block">Anti-Cheat Shield</span>
+                    <span className="text-xs font-black text-emerald-700 font-mono mt-0.5 block">100% Integrity Verified</span>
                   </div>
                 </motion.div>
 
@@ -359,11 +384,11 @@ const LandingPage = ({ onEnterPortal }) => {
         </section>
 
         {/* ========================================================= */}
-        {/* SECTION 2: FLOATING STATS BAR WITH ANIMATED COUNTER       */}
+        {/* SECTION 2: FLOATING STATS BAR (Appears on Scroll)         */}
         {/* ========================================================= */}
-        <section className="py-4 relative z-20">
+        <section className="py-16 md:py-20 relative z-20">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
-            <div className="bg-white/95 border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 backdrop-blur-xl grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="bg-white/95 border border-slate-200/90 rounded-3xl p-7 sm:p-10 shadow-xl shadow-slate-200/40 backdrop-blur-xl grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               
               <div className="space-y-1">
                 <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#004f90]">
