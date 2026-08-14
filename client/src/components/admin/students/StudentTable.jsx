@@ -221,7 +221,13 @@ const StudentTable = ({
                         {isInstitute ? (
                           <div>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-orange-50 text-[#F7931A] border border-orange-200">
-                              {student.courseTrack || student.department || 'SDLC'}
+                              {student.courseTrack && student.courseTrack !== 'General' && student.courseTrack !== '-'
+                                ? student.courseTrack
+                                : (student.department && student.department !== 'Institute' && student.department !== 'General'
+                                    ? student.department
+                                    : (student.batch && !student.batch.includes('Batch') && student.batch !== 'General'
+                                        ? student.batch
+                                        : 'SDLC Course'))}
                             </span>
                             <div className="text-[11px] text-slate-500 font-medium mt-0.5">
                               {student.center || 'Karur'} Center

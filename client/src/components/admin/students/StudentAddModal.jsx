@@ -246,10 +246,12 @@ const StudentAddModal = ({
                       </label>
                       <div className="relative flex items-center">
                         <select
+                          required
                           value={formData.courseTrack}
                           onChange={(e) => setFormData(prev => ({ ...prev, courseTrack: e.target.value }))}
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9.5 pl-3.5 pr-8 text-slate-800 outline-none appearance-none cursor-pointer"
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9.5 pl-3.5 pr-8 text-slate-800 outline-none appearance-none cursor-pointer font-medium"
                         >
+                          <option value="" disabled>-- Select SDLC Course Track * --</option>
                           {instituteCourseTracks.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />

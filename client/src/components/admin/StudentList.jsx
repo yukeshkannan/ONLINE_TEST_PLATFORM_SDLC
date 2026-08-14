@@ -152,9 +152,23 @@ const StudentList = ({ initialTrack }) => {
     .map(b => b.name);
 
   // SDLC Institute Courses
-  const instituteCourseTracks = allBatches
-    .filter(b => b.category !== 'college')
-    .map(b => b.name);
+  const defaultInstituteTracks = [
+    'Full Stack Web Dev (MERN)',
+    'Python Full Stack',
+    'Java Full Stack',
+    'Data Science & AI',
+    'UI/UX Design & Figma',
+    'Cloud & DevOps Engineering',
+    'Cybersecurity & Networking',
+    'AutoCAD',
+    'SolidWorks'
+  ];
+
+  const instituteCourseTracks = Array.from(new Set([
+    ...allBatches.filter(b => b.category !== 'college').map(b => b.name),
+    ...students.filter(s => s.studentType === 'institute' && s.courseTrack && s.courseTrack !== 'General' && s.courseTrack !== '-').map(s => s.courseTrack),
+    ...defaultInstituteTracks
+  ])).filter(Boolean);
 
   // Fetch student roster from server
   const fetchStudents = async () => {
@@ -298,9 +312,15 @@ const StudentList = ({ initialTrack }) => {
 
   const handleUpdateStudent = async (e) => {
     e.preventDefault();
+    const isInstitute = editFormData.studentType === 'institute';
+    if (isInstitute) {
+      if (!editFormData.courseTrack || editFormData.courseTrack.trim() === '' || editFormData.courseTrack === 'General') {
+        return toast.error('Please select an SDLC Course Track for this student.');
+      }
+    }
+
     const loader = toast.loading('Updating student profile...');
     try {
-      const isInstitute = editFormData.studentType === 'institute';
       const payload = {
         name: editFormData.name.trim(),
         email: editFormData.email.trim().toLowerCase(),
@@ -308,19 +328,24 @@ const StudentList = ({ initialTrack }) => {
         ...(isInstitute ? {
           dob: editFormData.dob ? editFormData.dob.trim() : '',
           enrollmentId: editFormData.enrollmentId.trim().toUpperCase(),
-          courseTrack: editFormData.courseTrack,
+          courseTrack: editFormData.courseTrack.trim(),
           center: editFormData.center || 'Karur'
         } : {
           rollNumber: editFormData.rollNumber.trim().toUpperCase(),
           department: editFormData.department,
           batch: editFormData.batch ? editFormData.batch.trim() : (editFormData.year ? `${editFormData.year} Batch` : 'General'),
           year: editFormData.year,
-          courseTrack: editFormData.courseTrack
+          courseTrack: editFormData.courseTrack ? editFormData.courseTrack.trim() : ''
         })
       };
 
-      await api.put(`/auth/students/${studentToEdit._id}`, payload);
-      toast.success('Student profile updated.', { id: loader });
+      const { data } = await api.put(`/auth/students/${studentToEdit._id}`, payload);
+      
+      // Update local state immediately so UI updates in real-time without delay!
+      const updatedDoc = data?.student || { ...studentToEdit, ...payload };
+      setStudents(prev => prev.map(s => s._id === studentToEdit._id ? { ...s, ...updatedDoc } : s));
+
+      toast.success('Student profile updated successfully.', { id: loader });
       setShowEditModal(false);
       setStudentToEdit(null);
       fetchStudents();
@@ -335,13 +360,16 @@ const StudentList = ({ initialTrack }) => {
     if (categoryTab === 'college' && stType !== 'college') return false;
     if (categoryTab === 'institute' && stType !== 'institute') return false;
 
-    const term = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const term = searchTerm.toLowerCase().trim();
+    const matchesSearch = !term || (
       (student.name || '').toLowerCase().includes(term) ||
       (student.rollNumber || '').toLowerCase().includes(term) ||
       (student.enrollmentId || '').toLowerCase().includes(term) ||
       (student.email || '').toLowerCase().includes(term) ||
-      (student.center || '').toLowerCase().includes(term);
+      (student.courseTrack || '').toLowerCase().includes(term) ||
+      (student.center || '').toLowerCase().includes(term) ||
+      (student.department || '').toLowerCase().includes(term)
+    );
 
     if (!matchesSearch) return false;
 
@@ -416,7 +444,7 @@ const StudentList = ({ initialTrack }) => {
     const type = categoryTab;
     setAddStudentType(type);
     setDobError('');
-    setFormData(getInitialFormData(type));
+    setFormData(getInitialFormData(type, '', '', type === 'institute' ? (instituteCourseTracks[0] || '') : ''));
     setShowAddModal(true);
   };
 
@@ -429,14 +457,20 @@ const StudentList = ({ initialTrack }) => {
   const handleSwitchAddStudentType = (newType) => {
     setAddStudentType(newType);
     setDobError('');
-    setFormData(getInitialFormData(newType));
+    setFormData(getInitialFormData(newType, '', '', newType === 'institute' ? (instituteCourseTracks[0] || '') : ''));
   };
 
   const handleSaveStudent = async (e) => {
     e.preventDefault();
+    const isInstitute = addStudentType === 'institute';
+    if (isInstitute) {
+      if (!formData.courseTrack || formData.courseTrack.trim() === '' || formData.courseTrack === 'General') {
+        return toast.error('Please select an SDLC Course Track for this student.');
+      }
+    }
+
     const loader = toast.loading('Adding student...');
     try {
-      const isInstitute = addStudentType === 'institute';
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
@@ -444,20 +478,23 @@ const StudentList = ({ initialTrack }) => {
         ...(isInstitute ? {
           dob: formData.dob ? formData.dob.trim() : '',
           enrollmentId: formData.enrollmentId ? formData.enrollmentId.trim().toUpperCase() : '',
-          courseTrack: formData.courseTrack,
+          courseTrack: formData.courseTrack.trim(),
           center: formData.center || 'Karur'
         } : {
           rollNumber: formData.rollNumber.trim().toUpperCase(),
           department: formData.department,
           batch: formData.batch ? formData.batch.trim() : (formData.year ? `${formData.year} Batch` : 'General'),
           year: formData.year,
-          courseTrack: formData.courseTrack
+          courseTrack: formData.courseTrack ? formData.courseTrack.trim() : ''
         })
       };
 
-      await api.post('/auth/students', payload);
-      toast.success(`${isInstitute ? 'SDLC' : 'College'} student added.`, { id: loader });
+      const { data } = await api.post('/auth/students', payload);
+      toast.success(`${isInstitute ? 'SDLC' : 'College'} student added successfully.`, { id: loader });
       handleCloseAddModal();
+      if (data?.student) {
+        setStudents(prev => [data.student, ...prev]);
+      }
       fetchStudents();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add student.', { id: loader });

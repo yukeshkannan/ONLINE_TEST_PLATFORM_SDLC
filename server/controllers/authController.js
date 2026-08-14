@@ -190,6 +190,9 @@ export const createStudent = async (req, res, next) => {
       }
       identifier = rollNumber.trim().toUpperCase();
     } else {
+      if (!courseTrack || !courseTrack.trim() || courseTrack.trim() === 'General') {
+        return res.status(400).json({ message: 'SDLC Course Track is required for Institute students' });
+      }
       // Auto-generate Enrollment ID if not provided
       if (!enrollmentId || enrollmentId.trim() === '') {
         const distCode = getDistrictCode(center);
@@ -523,11 +526,14 @@ export const updateStudent = async (req, res, next) => {
         student.password = await bcrypt.hash(identifier, salt);
       }
     } else {
+      if (!courseTrack || !courseTrack.trim() || courseTrack.trim() === 'General') {
+        return res.status(400).json({ message: 'SDLC Course Track is required for Institute students' });
+      }
       const oldEnroll = student.enrollmentId || student.rollNumber;
       student.center = center || student.center || 'Karur';
       student.enrollmentId = identifier;
       student.rollNumber = identifier;
-      student.courseTrack = courseTrack ? courseTrack.trim() : (student.courseTrack || 'General');
+      student.courseTrack = courseTrack.trim();
       student.batchTime = batchTime ? batchTime.trim() : (student.batchTime || 'Standard Batch');
       student.department = student.courseTrack;
       student.batch = student.batchTime;

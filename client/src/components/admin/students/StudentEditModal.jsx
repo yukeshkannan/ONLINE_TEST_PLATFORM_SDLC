@@ -148,14 +148,16 @@ const StudentEditModal = ({
                     {/* Course Track */}
                     <div className="space-y-1.5">
                       <label className="font-bold text-slate-600 uppercase tracking-wider text-[10px]">
-                        SDLC Course Track
+                        SDLC Course Track *
                       </label>
                       <div className="relative flex items-center">
                         <select
+                          required
                           value={editFormData.courseTrack}
                           onChange={(e) => setEditFormData(prev => ({ ...prev, courseTrack: e.target.value }))}
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9.5 pl-3.5 pr-8 text-slate-800 outline-none appearance-none cursor-pointer"
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-[#004f90] rounded-lg h-9.5 pl-3.5 pr-8 text-slate-800 outline-none appearance-none cursor-pointer font-medium"
                         >
+                          <option value="" disabled>-- Select SDLC Course Track * --</option>
                           {instituteCourseTracks.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
