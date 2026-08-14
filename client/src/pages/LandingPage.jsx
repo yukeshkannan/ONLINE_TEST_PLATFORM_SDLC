@@ -1,7 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { 
+  ArrowRight, 
+  ShieldCheck, 
+  Lock, 
+  Zap, 
+  Wifi, 
+  BarChart3, 
+  Layers, 
+  CheckCircle2, 
+  Clock, 
+  Sparkles, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Send,
+  Award,
+  Users,
+  Check,
+  ShieldAlert,
+  ChevronRight
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import MainNavbar from '../components/shared/MainNavbar.jsx';
@@ -17,9 +37,29 @@ const LandingPage = ({ onEnterPortal }) => {
     email: '',
     message: ''
   });
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Interactive Live Simulator state
+  const [selectedMockOption, setSelectedMockOption] = useState('B');
+  const [mockTimer, setMockTimer] = useState(1785); // 29:45 in seconds
+
+  // Tick the live mockup timer for realism
+  useEffect(() => {
+    const timerInterval = setInterval(() => {
+      setMockTimer(prev => (prev > 10 ? prev - 1 : 1785));
+    }, 1000);
+    return () => clearInterval(timerInterval);
+  }, []);
+
+  const formatMockTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
+    setSendingMessage(true);
     const loadingToast = toast.loading("Sending your message...");
     try {
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -41,6 +81,8 @@ const LandingPage = ({ onEnterPortal }) => {
     } catch (error) {
       console.error("Error submitting contact form:", error);
       toast.error("Network error. Please check your connection and try again.", { id: loadingToast });
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -64,259 +106,568 @@ const LandingPage = ({ onEnterPortal }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed relative overflow-x-hidden"
+      className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#F7931A]/20 selection:text-slate-900 relative overflow-x-hidden"
     >
       <MainNavbar onEnterPortal={onEnterPortal} />
 
-      <main>
-        <section className="relative min-h-screen flex items-center pt-20 sm:pt-24 pb-12 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-surface via-surface-bright to-primary-fixed/20 -z-20"></div>
-          <div className="absolute inset-0 grid-texture opacity-30 -z-10"></div>
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-16 lg:px-20 w-full">
+      <main className="relative">
+        
+        {/* Background Ambient Glows & Grid */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute -top-40 left-1/4 w-96 h-96 bg-[#004f90]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-1/4 w-96 h-96 bg-[#F7931A]/10 rounded-full blur-3xl"></div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* SECTION 1: HERO SECTION                                   */}
+        {/* ========================================================= */}
+        <section className="relative pt-28 sm:pt-36 pb-16 md:pb-24 overflow-hidden">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 w-full">
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              
+              {/* Left Column: Headline & Action Points */}
               <motion.div 
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-6 text-left z-10"
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="lg:col-span-7 space-y-6 text-left z-10"
               >
-                <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-slate-900">
-                  Conduct Exams. <span className="orange-underline">Evaluate Smarter.</span>
+                {/* Top Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 shadow-xs backdrop-blur-md">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F7931A] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#F7931A]"></span>
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-700 tracking-wide uppercase">
+                    SDLC Assessment Engine • Enterprise Grade
+                  </span>
+                </div>
+
+                {/* Main Headline */}
+                <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-black leading-[1.12] text-slate-900 tracking-tight">
+                  Conduct Exams. <br className="hidden sm:block" />
+                  <span className="bg-gradient-to-r from-[#004f90] via-blue-600 to-[#F7931A] bg-clip-text text-transparent">
+                    Evaluate Smarter.
+                  </span>
                 </h1>
                 
-                <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
-                  A professional online assessment platform designed for training institutes and colleges to conduct secure MCQ-based examinations and generate instant reports.
+                {/* Subtitle */}
+                <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal">
+                  A high-integrity online examination platform built for colleges and training institutes to administer secure MCQ assessments with zero-latency grading and tamper-proof proctoring.
                 </p>
                 
-                <div className="flex flex-wrap gap-4 pt-2">
+                {/* Dual Buttons */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                   <button 
                     onClick={handleStartExam}
-                    className="!bg-[#F7931A] text-white px-8 py-3.5 rounded-xl font-bold text-base hover:!bg-[#e08210] shadow-lg shadow-[#F7931A]/20 transition-all transform hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto text-center"
+                    className="bg-gradient-to-r from-[#004f90] to-blue-700 hover:from-[#003c6e] hover:to-blue-800 text-white px-7 py-3.5 rounded-xl font-extrabold text-sm sm:text-base shadow-lg shadow-[#004f90]/25 transition-all transform hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-2.5"
                   >
-                    Start Assessment
+                    <span>Launch Assessment Portal</span>
+                    <ArrowRight className="h-4.5 w-4.5" />
                   </button>
+
                   <Link 
                     to="/about"
-                    className="border-2 border-slate-300 text-slate-700 px-8 py-3.5 rounded-xl font-bold text-base hover:bg-slate-100 transition-all text-center flex items-center justify-center cursor-pointer w-full sm:w-auto"
+                    className="border border-slate-200/90 bg-white/80 hover:bg-white text-slate-700 px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base transition-all shadow-xs text-center flex items-center justify-center cursor-pointer hover:border-slate-300"
                   >
-                    Explore Platform
+                    <span>Explore Features</span>
                   </Link>
                 </div>
-              </motion.div>
 
-              {/* Right Column Dashboard Mock Graphic */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="relative mt-6 lg:mt-0 w-full max-w-lg lg:max-w-[560px] xl:max-w-[660px] mx-auto flex justify-center"
-              >
-                <div className="relative z-10 p-2 animate-float-slow w-full">
-                  <img 
-                    alt="Student taking online exam" 
-                    className="rounded-2xl shadow-2xl w-full border border-outline-variant/10 aspect-[4/3] object-cover" 
-                    src="/hero_user.jpg" 
-                  />
+                {/* Micro Trust Indicators */}
+                <div className="pt-4 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-500 font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Zero-Tolerance Anti-Cheat</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+                    <span>Instant Grading Matrix</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Wifi className="h-4 w-4 text-blue-600 shrink-0" />
+                    <span>Offline-Safe Auto Sync</span>
+                  </div>
                 </div>
               </motion.div>
+
+              {/* Right Column: Live Assessment Engine Mockup (Interactive) */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.96, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="lg:col-span-5 relative w-full max-w-lg mx-auto"
+              >
+                {/* Floating Glow backdrop */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#004f90]/20 to-[#F7931A]/20 rounded-3xl blur-xl opacity-75"></div>
+
+                {/* Mockup Card Container */}
+                <div className="relative bg-white border border-slate-200/90 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 select-none">
+                  
+                  {/* Mock Top Header */}
+                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                    <div className="flex items-center space-x-2.5">
+                      <img src="/logo.png" alt="SDLC Logo" className="h-7 w-auto object-contain" />
+                      <div className="border-l border-slate-200 pl-2">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Assessment</span>
+                        <span className="text-xs font-black text-slate-800 leading-none">Data Structures & Algorithms</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span>Live Sync</span>
+                      </div>
+                      <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono text-[11px] font-bold">
+                        <Clock className="h-3 w-3 text-[#F7931A]" />
+                        <span>{formatMockTime(mockTimer)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mock Question Area */}
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                      <span>Question 04 of 30</span>
+                      <span className="text-[#004f90]">Marks: 2.0</span>
+                    </div>
+
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                      Which sorting algorithm guarantees a worst-case time complexity of O(N log N) without requiring extra memory proportional to N?
+                    </h4>
+
+                    {/* Mock Options */}
+                    <div className="space-y-2 pt-1">
+                      {[
+                        { id: 'A', text: 'Quick Sort' },
+                        { id: 'B', text: 'Heap Sort' },
+                        { id: 'C', text: 'Bubble Sort' },
+                        { id: 'D', text: 'Counting Sort' }
+                      ].map((opt) => {
+                        const isSelected = selectedMockOption === opt.id;
+                        return (
+                          <div 
+                            key={opt.id}
+                            onClick={() => setSelectedMockOption(opt.id)}
+                            className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between cursor-pointer transition-all ${
+                              isSelected 
+                                ? 'bg-blue-50/80 border-[#004f90] text-[#004f90] shadow-xs'
+                                : 'bg-slate-50/70 border-slate-200/80 text-slate-600 hover:bg-slate-100/70'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2.5">
+                              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold ${
+                                isSelected ? 'bg-[#004f90] text-white' : 'bg-white border border-slate-200 text-slate-500'
+                              }`}>
+                                {opt.id}
+                              </span>
+                              <span>{opt.text}</span>
+                            </div>
+                            {isSelected && <Check className="h-3.5 w-3.5 text-[#004f90]" />}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Mock Action Footer */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-1.5 text-[10px] text-emerald-700 font-bold bg-emerald-50/60 px-2 py-0.5 rounded-md border border-emerald-100">
+                      <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                      <span>Proctoring: Active (0 Violations)</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <button className="px-3 py-1.5 rounded-lg bg-[#004f90] hover:bg-blue-800 text-white font-bold text-[11px] flex items-center space-x-1 transition-all">
+                        <span>Next</span>
+                        <ChevronRight className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Floating Orbiting Badges */}
+                <motion.div 
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-5 -right-3 sm:-right-5 bg-white border border-slate-200/90 shadow-xl rounded-xl p-2.5 flex items-center space-x-2.5 backdrop-blur-md"
+                >
+                  <div className="h-7 w-7 rounded-lg bg-amber-50 text-[#F7931A] flex items-center justify-center font-bold">
+                    <Zap className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-[10px] font-black text-slate-800 uppercase leading-none">Instant Evaluation</div>
+                    <div className="text-[9px] text-slate-400 font-medium leading-none mt-0.5">Automated Score Matrix</div>
+                  </div>
+                </motion.div>
+
+                <motion.div 
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -bottom-4 -left-3 sm:-left-5 bg-white border border-slate-200/90 shadow-xl rounded-xl p-2.5 flex items-center space-x-2.5 backdrop-blur-md"
+                >
+                  <div className="h-7 w-7 rounded-lg bg-blue-50 text-[#004f90] flex items-center justify-center font-bold">
+                    <Award className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-[10px] font-black text-slate-800 uppercase leading-none">Live Rank Generation</div>
+                    <div className="text-[9px] text-slate-400 font-medium leading-none mt-0.5">Instant Batch Insights</div>
+                  </div>
+                </motion.div>
+
+              </motion.div>
+
             </div>
 
           </div>
         </section>
 
-        {/* ABOUT US SECTION */}
-        <section className="py-16 sm:py-24 bg-surface" id="about">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-16 lg:px-20">
-            
-            {/* Centered Heading */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-20px" }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-center mb-12 sm:mb-16"
-            >
-              <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-3">
-                Built for Next-Gen <span className="orange-underline">Assessments</span>
-              </h2>
-              <p className="text-slate-500 text-base sm:text-lg max-w-2xl mx-auto">
-                SDLC Platform simplifies examination workflows with automated grading and uncompromised security.
-              </p>
-            </motion.div>
-            
-            {/* 3 Sleek Core Pillar Cards with Smooth Hover Zoom & Box Shadow */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-2xl hover:shadow-primary/15 transform hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/40 transition-all duration-300 group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-2xl font-bold">verified_user</span>
-                </div>
-                <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">Secure Proctoring</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">
-                  Advanced anti-cheating mechanisms with tab-switch monitoring and secure test session enforcement.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-2xl hover:shadow-[#F7931A]/15 transform hover:-translate-y-2 hover:scale-[1.03] hover:border-[#F7931A]/40 transition-all duration-300 group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#F7931A]/10 text-[#F7931A] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-2xl font-bold">bolt</span>
-                </div>
-                <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2 group-hover:text-[#F7931A] transition-colors">Instant Analytics</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">
-                  Automated scoring and real-time rank list generation instantly after candidate submission.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-2xl hover:shadow-primary/15 transform hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/40 transition-all duration-300 group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-2xl font-bold">cloud_sync</span>
-                </div>
-                <h3 className="font-poppins text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">Cloud Scale</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">
-                  Seamlessly handle thousands of concurrent test takers with zero latency and 99.9% uptime.
-                </p>
-              </motion.div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* CONTACT US SECTION */}
-        <section className="py-20 bg-surface-container-low" id="contact">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-16 lg:px-20">
-            <div className="max-w-6xl mx-auto">
+        {/* ========================================================= */}
+        {/* SECTION 2: FLOATING STATS BAR                             */}
+        {/* ========================================================= */}
+        <section className="py-4 relative z-20">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
+            <div className="bg-white/95 border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 backdrop-blur-xl grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               
-              {/* Centered Heading */}
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px" }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-                className="text-center mb-12"
-              >
-                <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-3">Get in Touch</h2>
-                <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto">Have questions? We're here to help your institute grow with the best-in-class assessment tools.</p>
-              </motion.div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                {/* Contact details sidebar */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "0px" }}
-                  transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-                  className="lg:col-span-1 space-y-6 sm:space-y-8 py-4"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/5 p-3 rounded-xl text-primary flex items-center justify-center border border-primary/10">
-                      <span className="material-symbols-outlined text-2xl">location_on</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-base">Head Office</h4>
-                      <p className="text-sm text-slate-500 leading-relaxed mt-1">1st Floor , V.V Towers , Opp LGB Petrol Bunk<br/>Kovai Road , Karur-639002</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/5 p-3 rounded-xl text-primary flex items-center justify-center border border-primary/10">
-                      <span className="material-symbols-outlined text-2xl">call</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-base">Phone</h4>
-                      <p className="text-sm text-slate-500 mt-1">+91 9842662681</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/5 p-3 rounded-xl text-primary flex items-center justify-center border border-primary/10">
-                      <span className="material-symbols-outlined text-2xl">mail</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-base">Email</h4>
-                      <p className="text-sm text-slate-500 mt-1">info@sdlcskills.com</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Interactive Contact Form */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "0px" }}
-                  transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-                  className="lg:col-span-2 bg-white rounded-2xl p-6 sm:p-8 border border-outline-variant/30 shadow-md"
-                >
-                  <form onSubmit={handleContactSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <div className="space-y-1.5 flex flex-col">
-                        <label className="text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
-                        <input 
-                          required
-                          value={contactForm.name}
-                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                          className="w-full bg-background border border-outline-variant/40 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-outline/50 outline-none" 
-                          placeholder="John Doe" 
-                          type="text"
-                        />
-                      </div>
-                      
-                      <div className="space-y-1.5 flex flex-col">
-                        <label className="text-sm font-semibold text-slate-700 mb-1.5">Email Address</label>
-                        <input 
-                          required
-                          value={contactForm.email}
-                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                          className="w-full bg-background border border-outline-variant/40 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-outline/50 outline-none" 
-                          placeholder="john@institute.com" 
-                          type="email"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1.5 flex flex-col">
-                      <label className="text-sm font-semibold text-slate-700 mb-1.5">Message</label>
-                      <textarea 
-                        required
-                        value={contactForm.message}
-                        onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                        className="w-full bg-background border border-outline-variant/40 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-outline/50 outline-none" 
-                        placeholder="How can we help your institute?" 
-                        rows="4"
-                      ></textarea>
-                    </div>
-                    
-                    <button 
-                      type="submit"
-                      className="w-full !bg-[#F7931A] text-white font-bold py-3.5 rounded-lg hover:!bg-[#e08210] shadow-lg shadow-[#F7931A]/20 transition-all cursor-pointer"
-                    >
-                      Send Message
-                    </button>
-                  </form>
-                </motion.div>
-
+              <div className="space-y-1">
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#004f90]">10,000+</div>
+                <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">Candidate Assessments</div>
               </div>
+
+              <div className="space-y-1 border-l border-slate-100 pl-4 md:pl-0">
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-[#F7931A]">0.0s</div>
+                <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">Instant Auto-Grading</div>
+              </div>
+
+              <div className="space-y-1 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0">
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600">99.99%</div>
+                <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">Anti-Cheat Integrity</div>
+              </div>
+
+              <div className="space-y-1 border-t md:border-t-0 border-l border-slate-100 pt-4 md:pt-0 pl-4 md:pl-0">
+                <div className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800">Dual Track</div>
+                <div className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wide">College & Institute Hub</div>
+              </div>
+
             </div>
           </div>
         </section>
+
+        {/* ========================================================= */}
+        {/* SECTION 3: BENTO GRID - ENTERPRISE CAPABILITIES            */}
+        {/* ========================================================= */}
+        <section className="py-20 sm:py-28 relative" id="features">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
+            
+            {/* Section Header */}
+            <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#004f90] text-[11px] font-bold uppercase tracking-wider">
+                <Sparkles className="h-3 w-3" />
+                <span>Next-Gen Platform Power</span>
+              </div>
+              <h2 className="font-poppins text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                Engineered for Integrity, Speed & Scale.
+              </h2>
+              <p className="text-sm sm:text-base text-slate-500 leading-relaxed font-normal">
+                Everything educators and corporate trainers need to manage candidate cohorts, conduct secure examinations, and generate deep actionable analytics.
+              </p>
+            </div>
+
+            {/* Bento Grid Layout (4 Cards) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* Card 1 (Large - 2 Columns): Zero-Tolerance Proctoring */}
+              <div className="md:col-span-2 bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+                <div className="space-y-4 z-10 max-w-xl">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center">
+                    <ShieldAlert className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-poppins text-xl sm:text-2xl font-black text-slate-900">
+                      Zero-Tolerance Proctoring & Integrity Shield
+                    </h3>
+                    <p className="text-slate-500 text-sm sm:text-base leading-relaxed mt-2">
+                      Strict fullscreen lockdown, multi-monitor restriction, and real-time tab switch tracking with automated 3-warning enforcement. Exams auto-submit upon security breach with comprehensive audit logs.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Visual Widget inside Card 1 */}
+                <div className="mt-8 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Fullscreen Lock</span>
+                    <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 mt-0.5">
+                      <Lock className="h-3.5 w-3.5 text-blue-600" /> Active Focus
+                    </span>
+                  </div>
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tab Switch Guard</span>
+                    <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 mt-0.5">
+                      <ShieldAlert className="h-3.5 w-3.5 text-amber-500" /> Max 3 Warnings
+                    </span>
+                  </div>
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Audit Trail</span>
+                    <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 mt-0.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Time-Stamped
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Network Resilient Auto-Save */}
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-[#004f90] flex items-center justify-center">
+                    <Wifi className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-poppins text-xl font-black text-slate-900">
+                    Dropout & Offline Resilience
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Student responses are cached securely in local memory. If college lab WiFi drops, candidate progress is preserved with zero loss, auto-syncing seamlessly on reconnect.
+                  </p>
+                </div>
+
+                <div className="mt-6 bg-emerald-50 border border-emerald-200/80 p-3 rounded-xl flex items-center space-x-2.5 text-xs text-emerald-800 font-bold">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>Continuous Local Auto-Save Active</span>
+                </div>
+              </div>
+
+              {/* Card 3: Automated Instant Evaluation */}
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 text-[#F7931A] flex items-center justify-center">
+                    <Zap className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-poppins text-xl font-black text-slate-900">
+                    Instant Auto-Grading Matrix
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Zero manual paper checking. Test scores, pass/fail clearances, subject breakdowns, and percentile rankings generate the exact millisecond a student submits.
+                  </p>
+                </div>
+
+                <div className="mt-6 bg-slate-50 border border-slate-200/80 p-3 rounded-xl flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700">Evaluation Speed:</span>
+                  <span className="font-mono font-black text-[#F7931A]">&lt; 0.05 seconds</span>
+                </div>
+              </div>
+
+              {/* Card 4 (Large - 2 Columns): Dual Track Architecture */}
+              <div className="md:col-span-2 bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4 max-w-xl">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center">
+                    <Layers className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-poppins text-xl sm:text-2xl font-black text-slate-900">
+                      College & SDLC Institute Dual-Track Control
+                    </h3>
+                    <p className="text-slate-500 text-sm sm:text-base leading-relaxed mt-2">
+                      Tailored cohort mapping designed specifically for academic institutions. Assign assessments precisely by Department, Academic Year, and Batch, or manage corporate training tracks with customized passing criteria.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center gap-3">
+                  <span className="px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700">
+                    🎓 College Cohorts (Dept / Batch / Year)
+                  </span>
+                  <span className="px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-bold text-[#004f90]">
+                    🏢 SDLC Trainee Track
+                  </span>
+                  <span className="px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-700">
+                    📊 Downloadable CSV Reports
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* SECTION 4: 3-STEP SEAMLESS WORKFLOW                       */}
+        {/* ========================================================= */}
+        <section className="py-16 sm:py-24 bg-white border-y border-slate-200/80">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
+            
+            <div className="text-center max-w-2xl mx-auto space-y-2 mb-14">
+              <h2 className="font-poppins text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                How the Platform Works
+              </h2>
+              <p className="text-sm text-slate-500">
+                Frictionless experience for both candidates and assessment administrators.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              
+              {/* Step 1 */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-6 sm:p-7 space-y-4 text-left relative">
+                <span className="font-poppins text-3xl font-black text-[#004f90]/20 absolute top-5 right-6">01</span>
+                <div className="h-10 w-10 rounded-xl bg-[#004f90] text-white flex items-center justify-center font-bold text-sm">
+                  1
+                </div>
+                <h4 className="font-poppins text-lg font-black text-slate-800">Clearance & Entry</h4>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                  Candidate logs in with authorized Roll Number / ID. System clears security protocols and preloads question papers.
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-6 sm:p-7 space-y-4 text-left relative">
+                <span className="font-poppins text-3xl font-black text-[#F7931A]/25 absolute top-5 right-6">02</span>
+                <div className="h-10 w-10 rounded-xl bg-[#F7931A] text-white flex items-center justify-center font-bold text-sm">
+                  2
+                </div>
+                <h4 className="font-poppins text-lg font-black text-slate-800">Secure Assessment</h4>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                  Fullscreen mode engages with active timer countdown, randomized question sequence, and local auto-save protection.
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-6 sm:p-7 space-y-4 text-left relative">
+                <span className="font-poppins text-3xl font-black text-emerald-600/20 absolute top-5 right-6">03</span>
+                <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+                  3
+                </div>
+                <h4 className="font-poppins text-lg font-black text-slate-800">Instant Evaluation</h4>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                  System grades responses against answer keys, logs security records, and presents instant scorecards & administrative rankings.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* SECTION 5: CONTACT & QUICK ACCESS CARD                    */}
+        {/* ========================================================= */}
+        <section className="py-20 sm:py-28 relative" id="contact">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
+            
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-slate-200/60 grid grid-cols-1 lg:grid-cols-12 gap-10">
+              
+              {/* Left Column: Direct Info */}
+              <div className="lg:col-span-5 space-y-7 text-left">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold uppercase tracking-wider">
+                    <span>Contact Head Office</span>
+                  </div>
+                  <h3 className="font-poppins text-2xl sm:text-3xl font-black text-slate-900">
+                    Get in Touch with SDLC
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Have inquiries regarding institutional onboarding, custom assessment batches, or technical support? Our team is here to assist.
+                  </p>
+                </div>
+
+                <div className="space-y-4 text-sm text-slate-600">
+                  <div className="flex items-start space-x-3.5">
+                    <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#004f90] shrink-0 mt-0.5">
+                      <MapPin className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <strong className="text-slate-800 block text-xs uppercase tracking-wider">Head Office</strong>
+                      <span className="text-slate-500 leading-relaxed text-xs">
+                        1st Floor, V.V Towers, Opp LGB Petrol Bunk, Kovai Road, Karur - 639002
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3.5">
+                    <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#004f90] shrink-0">
+                      <Phone className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <strong className="text-slate-800 block text-xs uppercase tracking-wider">Direct Line</strong>
+                      <a href="tel:+919842662681" className="text-slate-500 hover:text-[#004f90] text-xs font-semibold">
+                        +91 98426 62681
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3.5">
+                    <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#004f90] shrink-0">
+                      <Mail className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <strong className="text-slate-800 block text-xs uppercase tracking-wider">Email Support</strong>
+                      <a href="mailto:info@sdlcskills.com" className="text-slate-500 hover:text-[#004f90] text-xs font-semibold">
+                        info@sdlcskills.com
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Interactive Clean Form */}
+              <div className="lg:col-span-7 bg-slate-50/60 border border-slate-200/80 rounded-2xl p-6 sm:p-8">
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1 text-left">
+                      <label className="text-xs font-bold text-slate-700">Full Name</label>
+                      <input 
+                        required
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#004f90]/20 focus:border-[#004f90] outline-none transition-all placeholder:text-slate-400 font-medium" 
+                        placeholder="Enter your name" 
+                        type="text"
+                      />
+                    </div>
+
+                    <div className="space-y-1 text-left">
+                      <label className="text-xs font-bold text-slate-700">Email Address</label>
+                      <input 
+                        required
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#004f90]/20 focus:border-[#004f90] outline-none transition-all placeholder:text-slate-400 font-medium" 
+                        placeholder="e.g. name@college.edu" 
+                        type="email"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 text-left">
+                    <label className="text-xs font-bold text-slate-700">Message / Inquiry</label>
+                    <textarea 
+                      required
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:ring-2 focus:ring-[#004f90]/20 focus:border-[#004f90] outline-none transition-all placeholder:text-slate-400 font-medium" 
+                      placeholder="How can we assist your institution or training program?" 
+                      rows="3"
+                    ></textarea>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={sendingMessage}
+                    className="w-full bg-[#F7931A] hover:bg-[#e08210] text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-[#F7931A]/20 transition-all cursor-pointer flex items-center justify-center space-x-2 text-sm disabled:opacity-50"
+                  >
+                    <Send className="h-4 w-4" />
+                    <span>{sendingMessage ? 'Sending Message...' : 'Submit Inquiry'}</span>
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
       </main>
 
       <Footer onEnterPortal={onEnterPortal} />
