@@ -56,6 +56,20 @@ const refreshAuthToken = async () => {
       throw new Error('No access token returned');
     }
   } catch (refreshErr) {
+    const isNetworkError = !refreshErr.response || 
+      refreshErr.code === 'ERR_NETWORK' || 
+      refreshErr.code === 'ECONNABORTED' ||
+      refreshErr.message?.toLowerCase().includes('network') ||
+      (typeof navigator !== 'undefined' && !navigator.onLine);
+
+    if (isNetworkError) {
+      // Do NOT log out or wipe tokens on temporary network connection drops
+      const netErr = new Error('Network disconnected during authentication check.');
+      netErr.isNetworkError = true;
+      throw netErr;
+    }
+
+    // Only wipe tokens and force logout if server explicitly rejected with auth error (401/403)
     setAccessToken('');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_user');

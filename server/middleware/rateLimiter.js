@@ -6,21 +6,21 @@ import rateLimit from 'express-rate-limit';
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 login requests per windowMs
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  max: 150, // Allows entire classroom / lab batches on shared IP to log in comfortably
+  standardHeaders: true,
+  legacyHeaders: false,
   message: {
-    message: 'Too many login attempts from this IP address. Please try again after 15 minutes.'
+    message: 'Too many login attempts from this network. Please try again in a few minutes.'
   }
 });
 
 /**
  * Ultra-strict Rate Limiter for Sensitive Password Reset / OTP endpoints
- * Allows max 5 attempts per 15 minutes to prevent OTP guessing
+ * Allows max 10 attempts per 15 minutes to prevent OTP guessing
  */
 export const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -30,15 +30,16 @@ export const otpLimiter = rateLimit({
 
 /**
  * Rate Limiter for Assessment Submission Endpoint
- * Allows up to 10 submissions per minute per IP (prevents script spam / accidental double rapid firing)
+ * Allows up to 300 submissions per minute per IP so college labs sharing one public IP can all submit safely
  */
 export const submitLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10,
+  max: 300, // Accommodates large classroom/lab concurrent submissions
+  keyGenerator: (req) => req.user?.id || req.ip,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    message: 'Too many test submission requests received. Please wait a moment.'
+    message: 'Server is processing high volume of test submissions. Please wait a moment.'
   }
 });
 

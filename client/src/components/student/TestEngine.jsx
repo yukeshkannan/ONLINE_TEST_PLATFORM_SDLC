@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../utils/api.js';
 import QuestionCard from '../shared/QuestionCard.jsx';
 import Timer from '../shared/Timer.jsx';
-import { ShieldAlert, AlertTriangle, ChevronLeft, ChevronRight, Bookmark, CheckCircle2, Maximize, Lock, LayoutGrid } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, ChevronLeft, ChevronRight, Bookmark, CheckCircle2, Maximize, Lock, LayoutGrid, Wifi, WifiOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ClockLoader from '../shared/ClockLoader.jsx';
 
@@ -19,10 +19,48 @@ const TestEngine = ({ test, onFinish }) => {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   
   const submitLock = useRef(false);
   const hasStartedExam = useRef(false);
   const isAttemptingPageExit = useRef(false);
+
+  // Network State & Periodic Health Ping
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success('Internet connection restored. Live sync active.', { id: 'network-status', duration: 3000 });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error('Internet connection lost. Local backup active.', { id: 'network-status', duration: 4000 });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    const heartbeatInterval = setInterval(async () => {
+      if (!navigator.onLine) {
+        setIsOnline(false);
+        return;
+      }
+      try {
+        await api.get('/health', { timeout: 3500 });
+        setIsOnline(true);
+      } catch (err) {
+        if (!err.response || err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED') {
+          setIsOnline(false);
+        }
+      }
+    }, 30000);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      clearInterval(heartbeatInterval);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -93,10 +131,15 @@ const TestEngine = ({ test, onFinish }) => {
   const [fullscreenWarningCountdown, setFullscreenWarningCountdown] = useState(null);
   const fullscreenWarningTimer = useRef(null);
 
-  const handleSubmit = async (isAuto = false, subReason = 'manual') => {
-    if (submitLock.current) return;
+  const handleSubmit = async (isAuto = false, subReason = 'manual', retryCount = 0) => {
+    if (submitLock.current && retryCount === 0) return;
     
     if (!isAuto && isSubmitLocked) {
+      return;
+    }
+
+    if (!isOnline && !isAuto) {
+      toast.error('Network is offline. Your answers are saved locally. Please reconnect before submitting.', { id: 'submit-exam', duration: 5000 });
       return;
     }
 
@@ -105,7 +148,9 @@ const TestEngine = ({ test, onFinish }) => {
     if (fullscreenWarningTimer.current) clearInterval(fullscreenWarningTimer.current);
     setFullscreenWarningCountdown(null);
 
-    const toastMsg = subReason === 'timer_expired' 
+    const toastMsg = retryCount > 0
+      ? `Re-attempting secure submission (Attempt ${retryCount + 1}/3)...`
+      : subReason === 'timer_expired' 
       ? 'Time limit reached. Submitting examination automatically...' 
       : subReason === 'security_violation'
       ? 'Security violation recorded. Submitting examination responses...'
@@ -119,7 +164,8 @@ const TestEngine = ({ test, onFinish }) => {
         selectedOption: answers[q._id] || savedAnswers[q._id] || ''
       }));
 
-      const maxSeconds = test.duration * 60;
+      const testDurationMinutes = Number(test?.duration) > 0 ? Number(test.duration) : 30;
+      const maxSeconds = testDurationMinutes * 60;
       const secondsSpent = Math.max(0, maxSeconds - timeRemaining);
 
       const finalSubType = subReason || (isAuto ? 'timer_expired' : 'manual');
@@ -144,10 +190,26 @@ const TestEngine = ({ test, onFinish }) => {
       
       onFinish(data.result._id);
     } catch (err) {
+      const isRetryable = retryCount < 2 && (
+        !err.response || 
+        err.code === 'ERR_NETWORK' || 
+        err.code === 'ECONNABORTED' ||
+        err.response?.status === 429 || 
+        err.response?.status >= 500
+      );
+
+      if (isRetryable) {
+        const delayMs = (retryCount + 1) * 2000;
+        toast.loading(`Network hiccup detected. Retrying submission (${retryCount + 1}/3)...`, { id: 'submit-exam' });
+        setTimeout(() => {
+          handleSubmit(isAuto, subReason, retryCount + 1);
+        }, delayMs);
+        return;
+      }
+
       submitLock.current = false;
-      toast.error(err.response?.data?.message || 'Submission failed. Please check your connection and try again.', { id: 'submit-exam' });
-    } finally {
       setSubmitting(false);
+      toast.error(err.response?.data?.message || 'Submission failed. Your answers are saved locally. Please check your connection and try again.', { id: 'submit-exam', duration: 7000 });
     }
   };
 
@@ -395,6 +457,29 @@ const TestEngine = ({ test, onFinish }) => {
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* Live Network & Sync Status Pill */}
+          {isOnline ? (
+            <div 
+              className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50/90 border border-emerald-200 text-emerald-700 text-[11px] font-bold shadow-2xs select-none"
+              title="Network connected. Responses are continuously auto-saved locally."
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <Wifi className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="tracking-wide">Live Sync</span>
+            </div>
+          ) : (
+            <div 
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[11px] font-bold shadow-2xs animate-pulse select-none"
+              title="Internet disconnected. Local backup active."
+            >
+              <WifiOff className="h-3.5 w-3.5 text-rose-600" />
+              <span className="tracking-wide">Offline</span>
+            </div>
+          )}
+
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="lg:hidden flex items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 p-2 rounded-xl transition-all cursor-pointer shadow-sm shrink-0"
@@ -407,6 +492,18 @@ const TestEngine = ({ test, onFinish }) => {
           <Timer formatTime={formatTime} timeRemaining={timeRemaining} />
         </div>
       </header>
+
+      {/* Offline Notice Banner (Visible when network drops during exam) */}
+      {!isOnline && (
+        <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-md z-20 shrink-0 select-none">
+          <div className="flex items-center space-x-2.5 mx-auto text-center">
+            <WifiOff className="h-4 w-4 shrink-0 animate-pulse text-rose-200" />
+            <span>
+              <strong>Connection Offline:</strong> Responses are securely saved on this device. Do not close or refresh this tab. Online sync will resume automatically once connected.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Main Workspace Layout */}
       <div className="flex-grow flex flex-col lg:flex-row relative min-h-0 overflow-hidden bg-charcoal">
@@ -543,7 +640,16 @@ const TestEngine = ({ test, onFinish }) => {
                   </button>
                 )}
 
-                {isSubmitLocked ? (
+                {!isOnline ? (
+                  <button
+                    disabled={true}
+                    className="flex items-center space-x-2 bg-slate-100 border border-slate-200 text-slate-400 font-extrabold px-6 py-2.5 rounded-xl text-xs cursor-not-allowed shrink-0"
+                    title="Submission paused because internet is offline. Reconnect to submit your test. Your answers are stored safely in local memory."
+                  >
+                    <WifiOff className="h-4 w-4 text-slate-400 animate-pulse" />
+                    <span>Waiting for Network...</span>
+                  </button>
+                ) : isSubmitLocked ? (
                   <button
                     disabled={true}
                     className="flex items-center space-x-2 bg-slate-100 border border-slate-200 text-slate-400 font-extrabold px-6 py-2.5 rounded-xl text-xs cursor-not-allowed shrink-0"
