@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-
 import Admin from './models/Admin.js';
 import Student from './models/Student.js';
 import Test from './models/Test.js';
