@@ -5,6 +5,77 @@ import Question from '../models/Question.js';
 import Student from '../models/Student.js';
 import ViolationLog from '../models/ViolationLog.js';
 
+// Helper to auto-heal orphaned or corrupted result records
+const healResultRecord = async (resultDoc) => {
+  if (!resultDoc || !resultDoc.testId) return resultDoc;
+
+  try {
+    const testId = resultDoc.testId._id ? resultDoc.testId._id : resultDoc.testId;
+    const questions = await Question.find({ testId }).sort({ order: 1 }).lean();
+    if (questions.length === 0) return resultDoc;
+
+    let needsSave = false;
+    let score = 0;
+    let totalMarks = 0;
+
+    const questionMap = new Map();
+    questions.forEach(q => questionMap.set(q._id.toString(), q));
+
+    const updatedAnswers = (resultDoc.answers || []).map((ans, idx) => {
+      const qIdStr = ans.questionId ? (ans.questionId._id ? ans.questionId._id.toString() : ans.questionId.toString()) : '';
+      let q = questionMap.get(qIdStr);
+
+      // Fallback matching by index or order if ObjectId reference was lost
+      if (!q) {
+        if (questions[idx]) {
+          q = questions[idx];
+          ans.questionId = q._id;
+          needsSave = true;
+        }
+      }
+
+      if (q) {
+        const studentChoice = (ans.selectedOption || '').trim();
+        const isCorrect = studentChoice.toUpperCase() === (q.correctAnswer || '').trim().toUpperCase();
+        if (ans.isCorrect !== isCorrect) {
+          ans.isCorrect = isCorrect;
+          needsSave = true;
+        }
+        const qMarks = q.marks || 1;
+        if (isCorrect) {
+          score += qMarks;
+        }
+        totalMarks += qMarks;
+      }
+
+      return ans;
+    });
+
+    if (totalMarks > 0) {
+      const percentage = Number(((score / totalMarks) * 100).toFixed(2));
+      const testPassMark = resultDoc.testId?.passMark || 0;
+      const passed = score >= testPassMark;
+
+      if (resultDoc.score !== score || resultDoc.totalMarks !== totalMarks || resultDoc.percentage !== percentage || resultDoc.passed !== passed) {
+        resultDoc.score = score;
+        resultDoc.totalMarks = totalMarks;
+        resultDoc.percentage = percentage;
+        resultDoc.passed = passed;
+        needsSave = true;
+      }
+    }
+
+    if (needsSave && typeof resultDoc.save === 'function') {
+      resultDoc.answers = updatedAnswers;
+      await resultDoc.save();
+    }
+  } catch (err) {
+    console.error('Error auto-healing result record:', err);
+  }
+
+  return resultDoc;
+};
+
 export const submitTest = async (req, res, next) => {
   const { testId, answers: studentAnswers, timeTaken } = req.body;
   const studentId = req.user.id;
@@ -41,15 +112,21 @@ export const submitTest = async (req, res, next) => {
 
     const processedQuestionIds = new Set();
 
-    // Preserve the exact sequence in which the student attended/viewed questions
+    // Preserve the exact sequence in which the student attended/viewed questions with fallback matching
     if (Array.isArray(studentAnswers)) {
-      studentAnswers.forEach(ans => {
+      studentAnswers.forEach((ans, idx) => {
         const qId = ans.questionId ? ans.questionId.toString() : '';
-        const q = questionMap.get(qId);
-        if (q && !processedQuestionIds.has(qId)) {
-          processedQuestionIds.add(qId);
+        let q = questionMap.get(qId);
+
+        // Fallback 1: Match by array index if questionId mismatch occurred due to resync
+        if (!q && idx < questions.length) {
+          q = questions[idx];
+        }
+
+        if (q && !processedQuestionIds.has(q._id.toString())) {
+          processedQuestionIds.add(q._id.toString());
           const studentChoice = (ans.selectedOption || '').trim();
-          const isCorrect = studentChoice.toUpperCase() === (q.correctAnswer || '').toUpperCase();
+          const isCorrect = studentChoice.toUpperCase() === (q.correctAnswer || '').trim().toUpperCase();
           if (isCorrect) {
             score += q.marks || 1;
           }
@@ -77,7 +154,7 @@ export const submitTest = async (req, res, next) => {
       }
     });
 
-    const percentage = Number(((score / totalMarks) * 100).toFixed(2));
+    const percentage = totalMarks > 0 ? Number(((score / totalMarks) * 100).toFixed(2)) : 0;
     const passed = score >= test.passMark;
 
     const subType = req.body.submissionType || (req.body.isAutoSubmit ? 'security_violation' : 'manual');
@@ -134,6 +211,11 @@ export const getResultsByTest = async (req, res, next) => {
     }
 
     const validResults = results.filter(r => r.studentId);
+
+    // Auto-heal any corrupted or orphaned result scores in background
+    for (let r of validResults) {
+      await healResultRecord(r);
+    }
 
     // Determine eligible cohort students based on test.assignedTo
     let eligibleStudents = [];
@@ -206,6 +288,10 @@ export const getResultsByStudent = async (req, res, next) => {
       })
       .sort({ submittedAt: -1 });
 
+    for (let r of results) {
+      await healResultRecord(r);
+    }
+
     res.status(200).json(results);
   } catch (error) {
     next(error);
@@ -214,7 +300,7 @@ export const getResultsByStudent = async (req, res, next) => {
 
 export const getResultById = async (req, res, next) => {
   try {
-    const result = await Result.findById(req.params.id)
+    let result = await Result.findById(req.params.id)
       .populate('studentId', 'name rollNumber department batch year')
       .populate('testId', 'title subject duration passMark totalMarks instructions showResultsToStudents')
       .populate({
@@ -225,6 +311,18 @@ export const getResultById = async (req, res, next) => {
     if (!result) {
       return res.status(404).json({ message: 'Result record not found' });
     }
+
+    // Auto-heal orphaned or corrupted score data
+    await healResultRecord(result);
+
+    // Re-fetch populated result after auto-heal
+    result = await Result.findById(req.params.id)
+      .populate('studentId', 'name rollNumber department batch year')
+      .populate('testId', 'title subject duration passMark totalMarks instructions showResultsToStudents')
+      .populate({
+        path: 'answers.questionId',
+        select: 'questionText options correctAnswer marks order'
+      });
 
     // Security: Students can only view their own results
     if (req.user.role !== 'admin' && req.user.role !== 'trainer' && req.user.id !== result.studentId._id.toString()) {

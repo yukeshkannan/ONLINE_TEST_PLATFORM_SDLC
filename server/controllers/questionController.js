@@ -134,7 +134,7 @@ export const deleteQuestion = async (req, res, next) => {
 
 export const syncQuestions = async (req, res, next) => {
   const { testId } = req.params;
-  const questionsData = req.body;
+  const questionsData = req.body || [];
 
   try {
     const test = await Test.findById(testId);
@@ -142,26 +142,46 @@ export const syncQuestions = async (req, res, next) => {
       return res.status(404).json({ message: 'Associated test not found' });
     }
 
-    // Delete all existing questions for this test
-    await Question.deleteMany({ testId });
+    // Fetch existing questions sorted by order
+    const existingQuestions = await Question.find({ testId }).sort({ order: 1 });
 
-    if (questionsData && questionsData.length > 0) {
-      // Process and insert new ones
-      const processedQuestions = questionsData.map((q, index) => ({
-        testId,
-        questionText: q.questionText,
-        options: q.options,
-        correctAnswer: q.correctAnswer,
-        marks: q.marks || 1,
-        order: index + 1
-      }));
+    const finalQuestions = [];
 
-      const savedQuestions = await Question.insertMany(processedQuestions);
-      test.totalMarks = savedQuestions.reduce((sum, q) => sum + (q.marks || 1), 0);
-    } else {
-      test.totalMarks = 0;
+    // Update existing questions in-place to preserve ObjectId (_id) references
+    for (let i = 0; i < questionsData.length; i++) {
+      const qData = questionsData[i];
+      const qOrder = i + 1;
+
+      if (i < existingQuestions.length) {
+        const existingQ = existingQuestions[i];
+        existingQ.questionText = qData.questionText;
+        existingQ.options = qData.options;
+        existingQ.correctAnswer = qData.correctAnswer;
+        existingQ.marks = qData.marks || 1;
+        existingQ.order = qOrder;
+        const saved = await existingQ.save();
+        finalQuestions.push(saved);
+      } else {
+        const newQ = new Question({
+          testId,
+          questionText: qData.questionText,
+          options: qData.options,
+          correctAnswer: qData.correctAnswer,
+          marks: qData.marks || 1,
+          order: qOrder
+        });
+        const saved = await newQ.save();
+        finalQuestions.push(saved);
+      }
     }
 
+    // If new list has fewer questions than existing, clean up the extra ones
+    if (existingQuestions.length > questionsData.length) {
+      const extraIds = existingQuestions.slice(questionsData.length).map(q => q._id);
+      await Question.deleteMany({ _id: { $in: extraIds } });
+    }
+
+    test.totalMarks = finalQuestions.reduce((sum, q) => sum + (q.marks || 1), 0);
     await test.save();
 
     res.status(200).json({
@@ -172,3 +192,4 @@ export const syncQuestions = async (req, res, next) => {
     next(error);
   }
 };
+

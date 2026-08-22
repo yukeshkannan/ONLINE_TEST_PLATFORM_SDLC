@@ -175,6 +175,18 @@ const TestEngine = ({ test, onFinish }) => {
       
       onFinish(data.result._id);
     } catch (err) {
+      if (err.response?.status === 400 && err.response?.data?.message?.includes('already attempted')) {
+        toast.success('Assessment submission already recorded.', { id: 'submit-exam' });
+        localStorage.removeItem(`assessment_answers_${test._id}`);
+        localStorage.removeItem(`assessment_flagged_${test._id}`);
+        localStorage.removeItem(`assessment_order_${test._id}`);
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+        onFinish();
+        return;
+      }
+
       const isRetryable = retryCount < 2 && (
         !err.response || 
         err.code === 'ERR_NETWORK' || 
