@@ -190,7 +190,7 @@ const SdlcStudentDashboard = ({ onStartTest, onViewResult }) => {
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 uppercase block font-semibold">Questions</span>
-                        <strong>{test.questions?.length || 0}</strong>
+                        <strong>{test.questionsCount ?? test.totalMarks ?? test.questions?.length ?? 0}</strong>
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 uppercase block font-semibold">Pass Mark</span>

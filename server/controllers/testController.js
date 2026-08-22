@@ -21,9 +21,17 @@ export const getTests = async (req, res, next) => {
         .populate('createdBy', 'name email')
         .sort({ createdAt: -1 })
         .lean();
-      
+
+      const testIds = tests.map(t => t._id);
+      const questionCounts = await Question.aggregate([
+        { $match: { testId: { $in: testIds } } },
+        { $group: { _id: '$testId', count: { $sum: 1 } } }
+      ]);
+      const countMap = new Map(questionCounts.map(c => [c._id.toString(), c.count]));
+
       const updatedTests = tests.map(t => ({
         ...t,
+        questionsCount: countMap.get(t._id.toString()) ?? t.totalMarks ?? 0,
         status: computeTestStatus(t, now)
       }));
       return res.status(200).json(updatedTests);
@@ -85,9 +93,17 @@ export const getTests = async (req, res, next) => {
         .sort({ startTime: -1 })
         .lean();
 
+      const testIds = tests.map(t => t._id);
+      const questionCounts = await Question.aggregate([
+        { $match: { testId: { $in: testIds } } },
+        { $group: { _id: '$testId', count: { $sum: 1 } } }
+      ]);
+      const countMap = new Map(questionCounts.map(c => [c._id.toString(), c.count]));
+
       // For students, deliver all assigned tests (active, upcoming, or ended)
       const studentVisibleTests = tests.map(t => ({
         ...t,
+        questionsCount: countMap.get(t._id.toString()) ?? t.totalMarks ?? 0,
         status: computeTestStatus(t, now)
       }));
 
